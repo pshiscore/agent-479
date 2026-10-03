@@ -25,6 +25,8 @@ export interface SourceSeed {
 }
 
 const AWAITING = "Awaiting permission.";
+const FAYLIB_ICAL_30_DAYS =
+  "https://faylib.org/feeds?data=eyJmZWVkVHlwZSI6ImljYWwiLCJmaWx0ZXJzIjp7ImxvY2F0aW9uIjpbImFsbCJdLCJhZ2VzIjpbImFsbCJdLCJ0eXBlcyI6WyJhbGwiXSwidGFncyI6W10sInRlcm0iOiIiLCJkYXlzIjozMH19";
 const CIVICPLUS_ICS = "/common/modules/iCalendar/iCalendar.aspx";
 const CIVICPLUS_TERMS =
   'CivicPlus public ICS. Footer says "All rights reserved", no reuse terms. Facts and links only. ' +
@@ -112,11 +114,20 @@ export const SOURCE_SEEDS: SourceSeed[] = [
   {
     slug: "library-fayetteville",
     name: "Fayetteville Public Library",
-    // Feed format and URL come from the library's Subscribe button, confirmed in step 9.
-    kind: null,
-    fetcher: null,
+    kind: "ics",
+    fetcher: "ics",
     baseUrl: "https://www.faylib.org/",
-    config: { feedUrl: null },
+    config: {
+      // Communico feed: iCal, all locations, ages, and types, 30 days ahead
+      // (the data= parameter is base64 JSON with feedType "ical", days 30).
+      feedUrl: FAYLIB_ICAL_30_DAYS,
+      feedUrlSource: {
+        verifiedBy: "owner",
+        checkedAt: "2026-10-03",
+        confirmed: "Opening the link in the owner's browser downloads an .ics calendar file",
+        note: "Owner found the feed with days=1; days=30 is the same feed with only the window changed. The 30-day range is not yet confirmed: step 9's test fetch checks it before enabling.",
+      },
+    },
     defaultVenueSlug: "fayetteville-public-library",
     trustLevel: 4,
     fetchIntervalMinutes: 12 * 60,

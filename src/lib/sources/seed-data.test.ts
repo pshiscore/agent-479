@@ -44,6 +44,25 @@ describe("source seeds", () => {
   });
 });
 
+describe("library feeds", () => {
+  it("records the Fayetteville iCal feed as owner-verified, 30 days, all filters", () => {
+    const config = bySlug.get("library-fayetteville")!.config as {
+      feedUrl: string;
+      feedUrlSource: { verifiedBy: string };
+    };
+    const data = new URL(config.feedUrl).searchParams.get("data")!;
+    expect(JSON.parse(Buffer.from(data, "base64").toString("utf8"))).toEqual({
+      feedType: "ical",
+      filters: { location: ["all"], ages: ["all"], types: ["all"], tags: [], term: "", days: 30 },
+    });
+    expect(config.feedUrlSource.verifiedBy).toBe("owner");
+  });
+
+  it("still has no Rogers feed URL", () => {
+    expect(bySlug.get("library-rogers")!.config.feedUrl).toBeNull();
+  });
+});
+
 describe("link policy seeds", () => {
   it("limits Crystal Bridges and the Momentary to their homepages", () => {
     expect(LINK_POLICY_SEEDS.map((p) => [p.domain, p.mode, p.homepageUrl])).toEqual([
