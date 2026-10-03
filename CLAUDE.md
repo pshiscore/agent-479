@@ -26,6 +26,15 @@ to the app and pipeline.
   rendering, or it refused us), the owner checks it in their own browser. Record
   it as `verifiedBy: "owner"` with what they confirmed, the URL, and the date.
 
+## Sources
+
+- **Re-seeding never flips `enabled`.** Sources are seeded disabled. Each is
+  turned on in build step 9 only after its fetcher passes a test fetch and its
+  feed URL is confirmed, with a logged `enable` action.
+- **Link-policy domains are normalized** (`normalizeDomain` in
+  `src/lib/links.ts`: lowercase, no scheme, port, trailing dot, or "www.")
+  before they're stored and before lookups.
+
 ## Data
 
 - **Facts only; never copy source descriptions.** Store who, what, where, when,

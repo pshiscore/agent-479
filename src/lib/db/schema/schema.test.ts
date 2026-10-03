@@ -11,7 +11,16 @@ const tables = (Object.values(schema) as unknown[]).filter((v): v is PgTable =>
 describe("schema", () => {
   it("exports the tables built so far", () => {
     expect(tables.map((t) => getTableConfig(t).name).sort()).toEqual(
-      ["agent_actions", "llm_calls", "llm_models", "runs", "venue_external_ids", "venues"].sort(),
+      [
+        "agent_actions",
+        "link_policies",
+        "llm_calls",
+        "llm_models",
+        "runs",
+        "sources",
+        "venue_external_ids",
+        "venues",
+      ].sort(),
     );
   });
 

@@ -1,6 +1,16 @@
 import { sql } from "drizzle-orm";
-import { check, index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  type AnyPgColumn,
+  check,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { id, sqlList } from "./columns";
+import { sources } from "./sources";
 
 export const RUN_JOBS = [
   "fetch",
@@ -20,8 +30,7 @@ export const runs = pgTable(
   {
     id: id(),
     job: text("job", { enum: RUN_JOBS }).notNull(),
-    // FK to sources is added when the sources table exists (build step 7).
-    sourceId: uuid("source_id"),
+    sourceId: uuid("source_id").references((): AnyPgColumn => sources.id, { onDelete: "set null" }),
     status: text("status", { enum: RUN_STATUSES }).notNull().default("running"),
     startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
     finishedAt: timestamp("finished_at", { withTimezone: true }),

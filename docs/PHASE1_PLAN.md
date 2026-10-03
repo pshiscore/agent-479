@@ -139,7 +139,7 @@ agent-479/
   robots_checked_at
 
 **`link_policies`**
-- domain (primary key)
+- id, domain (unique)
 - mode: `deep | homepage_only`
 - homepage_url, reason, updated_at
 - Applied when links are rendered, never stored into events, so changing a
@@ -502,9 +502,16 @@ See `.env.example`. Model names are deliberately not env vars.
    rounds, and seeded with each insert logged. Report:
    `data/venues.report.md`. Standing data and fetching rules from the review
    are in `CLAUDE.md`.
-7. **`sources` and `link_policies` tables and seed:** 9 rows, 6 enabled.
-   WAC, Crystal Bridges, and the Momentary are disabled. Terms come from
-   `docs/sources-terms.md`.
+7. **`sources` and `link_policies` tables and seed** ✅: migrations 0004–0005,
+   `npm run db:seed:sources`. 9 sources, **all seeded disabled**: the 6 launch
+   sources are marked `launch` in `src/lib/sources/seed-data.ts`, and step 9
+   enables each with a logged `enable` action once its fetcher exists and its
+   feed URL is confirmed. Re-seeding never changes `enabled`. WAC, Crystal
+   Bridges, and the Momentary have no fetcher and are "awaiting permission".
+   `runs.source_id` and `venue_external_ids.source_id` now reference
+   `sources`. `link_policies` has a uuid key (with `domain` unique) so its
+   changes can be logged; `applyLinkPolicy()` in `src/lib/links.ts` rewrites
+   links when they're displayed. Terms come from `docs/sources-terms.md`.
 8. **`categories` and `tags` tables and seed.**
 9. **Fetch framework and ICS fetcher:** user agent, robots, rate limits, the
    enabled-flag guard. Enable the cities and libraries.

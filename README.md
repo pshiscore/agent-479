@@ -42,6 +42,7 @@ npm run dev                  # http://localhost:3000
 | `npm run llm:smoke` | One real LLM call to check key, model, and cost logging (needs `OPENAI_API_KEY`) |
 | `npm run venues:verify` | Check `data/venues.seed.json` and write `data/venues.report.md`; add `-- --geocode` to cross-check addresses (needs `BOT_CONTACT_EMAIL`) |
 | `npm run venues:seed` | Seed venues from the signed-off seed file (idempotent, logged) |
+| `npm run db:seed:sources` | Seed `sources` (all disabled) and `link_policies` (idempotent, logged; needs venues) |
 
 ## Cron jobs
 

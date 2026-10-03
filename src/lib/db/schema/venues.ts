@@ -12,6 +12,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { createdAt, id, sqlList, updatedAt } from "./columns";
+import { sources } from "./sources";
 
 export const VENUE_TYPES = [
   "arena",
@@ -103,8 +104,9 @@ export const venueExternalIds = pgTable(
     venueId: uuid("venue_id")
       .notNull()
       .references(() => venues.id, { onDelete: "cascade" }),
-    // FK to sources is added when the sources table exists (build step 7).
-    sourceId: uuid("source_id").notNull(),
+    sourceId: uuid("source_id")
+      .notNull()
+      .references((): AnyPgColumn => sources.id, { onDelete: "restrict" }),
     externalId: text("external_id").notNull(),
     createdAt: createdAt(),
   },

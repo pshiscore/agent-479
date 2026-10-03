@@ -3,7 +3,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { humanActor } from "@/lib/actions/record";
 import { type DbTx, getDb } from "@/lib/db/client";
-import { agentActions, venueExternalIds, venues } from "@/lib/db/schema";
+import { agentActions, sources, venueExternalIds, venues } from "@/lib/db/schema";
 import { startRun } from "@/lib/runs";
 import { SeedRefusedError, seedVenues } from "@/lib/venues/seed";
 import { type SeedFile, seedVenueSchema, venuesHash } from "@/lib/venues/seed-file";
@@ -93,7 +93,11 @@ describe("venues table", () => {
   it("keeps external IDs unique per source and cascades on venue delete", async () => {
     await inRollback(async (tx) => {
       const [v] = await tx.insert(venues).values({ ...baseVenue, slug: `x-${tag}` }).returning();
-      const sourceId = randomUUID();
+      const [source] = await tx
+        .insert(sources)
+        .values({ slug: `src-${tag}`, name: "Test", baseUrl: "https://example.org/", trustLevel: 3, fetchIntervalMinutes: 60, termsNotes: "t" })
+        .returning();
+      const sourceId = source.id;
       await tx.insert(venueExternalIds).values({ venueId: v.id, sourceId, externalId: "KovZpZA7AAEA" });
       expect(
         await pgError(tx, (sp) =>

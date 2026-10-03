@@ -1,0 +1,2 @@
+ALTER TABLE "link_policies" DROP CONSTRAINT "link_policies_homepage_check";--> statement-breakpoint
+ALTER TABLE "link_policies" ADD CONSTRAINT "link_policies_homepage_check" CHECK (mode = 'deep' or (homepage_url is not null and homepage_url ~ '^https://'));
