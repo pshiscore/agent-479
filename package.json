@@ -20,7 +20,8 @@
     "llm:smoke": "tsx scripts/llm-smoke.ts",
     "venues:verify": "tsx scripts/verify-venues.ts",
     "venues:seed": "tsx scripts/seed-venues.ts",
-    "db:seed:sources": "tsx scripts/seed-sources.ts"
+    "db:seed:sources": "tsx scripts/seed-sources.ts",
+    "db:seed:taxonomy": "tsx scripts/seed-taxonomy.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

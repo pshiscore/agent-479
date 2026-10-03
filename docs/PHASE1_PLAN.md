@@ -512,7 +512,11 @@ See `.env.example`. Model names are deliberately not env vars.
    `sources`. `link_policies` has a uuid key (with `domain` unique) so its
    changes can be logged; `applyLinkPolicy()` in `src/lib/links.ts` rewrites
    links when they're displayed. Terms come from `docs/sources-terms.md`.
-8. **`categories` and `tags` tables and seed.**
+8. **`categories` and `tags` tables and seed** ✅: migration 0006,
+   `npm run db:seed:taxonomy`. 12 categories and 6 tags, unique by slug and by
+   case-insensitive name. Rows are retired with `active = false`, never
+   deleted, and re-seeding never changes `active`. `loadActiveTaxonomy()` in
+   `src/lib/categories.ts` gives the classifier and filters the active lists.
 9. **Fetch framework and ICS fetcher:** user agent, robots, rate limits, the
    enabled-flag guard. Enable the cities and libraries.
 10. **Ticketmaster fetcher** with the facts-only whitelist and a venue

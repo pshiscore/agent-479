@@ -117,8 +117,9 @@ describe("seedSources", () => {
         .select({ action: agentActions.action, reason: agentActions.reason })
         .from(agentActions)
         .where(and(eq(agentActions.runId, run.id), eq(agentActions.entityType, "source")));
-      expect(logged.map((l) => l.action)).toEqual(["insert", "update"]);
-      expect(logged[1].reason).toMatch(/fetchIntervalMinutes/);
+      // One transaction shares one now(), so row order isn't guaranteed: compare as a set.
+      expect(logged.map((l) => l.action).sort()).toEqual(["insert", "update"]);
+      expect(logged.find((l) => l.action === "update")?.reason).toMatch(/fetchIntervalMinutes/);
     });
   });
 

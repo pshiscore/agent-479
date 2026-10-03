@@ -43,6 +43,7 @@ npm run dev                  # http://localhost:3000
 | `npm run venues:verify` | Check `data/venues.seed.json` and write `data/venues.report.md`; add `-- --geocode` to cross-check addresses (needs `BOT_CONTACT_EMAIL`) |
 | `npm run venues:seed` | Seed venues from the signed-off seed file (idempotent, logged) |
 | `npm run db:seed:sources` | Seed `sources` (all disabled) and `link_policies` (idempotent, logged; needs venues) |
+| `npm run db:seed:taxonomy` | Seed `categories` and `tags` (idempotent, logged; never changes `active`) |
 
 ## Cron jobs
 

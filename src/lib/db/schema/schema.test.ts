@@ -13,11 +13,13 @@ describe("schema", () => {
     expect(tables.map((t) => getTableConfig(t).name).sort()).toEqual(
       [
         "agent_actions",
+        "categories",
         "link_policies",
         "llm_calls",
         "llm_models",
         "runs",
         "sources",
+        "tags",
         "venue_external_ids",
         "venues",
       ].sort(),

@@ -17,6 +17,8 @@ const EXPECTED_TABLES = [
   "venue_external_ids",
   "sources",
   "link_policies",
+  "categories",
+  "tags",
 ];
 const EXPECTED_EXTENSIONS = ["pg_trgm", "unaccent"];
 

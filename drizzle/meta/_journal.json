@@ -43,6 +43,13 @@
       "when": 1791069231958,
       "tag": "0005_link_policies_homepage_not_null",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791070203156,
+      "tag": "0006_taxonomy",
+      "breakpoints": true
     }
   ]
 }
