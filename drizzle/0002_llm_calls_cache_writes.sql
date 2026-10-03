@@ -1,0 +1,1 @@
+ALTER TABLE "llm_calls" ADD COLUMN "cache_write_tokens" integer DEFAULT 0 NOT NULL;

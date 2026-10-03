@@ -1,0 +1,1820 @@
+{
+  "$comment": "Hand-verified venues with per-field provenance. Rules for editing this file are in CLAUDE.md. Check with npm run venues:verify -- --geocode; only the owner sets reviewed; then npm run venues:seed.",
+  "reviewed": {
+    "by": "Vlad",
+    "at": "2026-10-03",
+    "sha256": "9ad869cd27be205e3c100741030b26b387ad6a3ee0ab1e7df86f95ebfd01d963"
+  },
+  "venues": [
+    {
+      "slug": "walton-arts-center",
+      "name": "Walton Arts Center",
+      "aliases": [
+        "WAC"
+      ],
+      "venueType": "theater",
+      "address": "495 W Dickson St",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.065862,
+      "lng": -94.164794,
+      "website": "https://www.waltonartscenter.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.arkansas.com/experiences/discover/attraction-listings/walton-arts-center",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.arkansas.com/experiences/discover/attraction-listings/walton-arts-center",
+          "checkedAt": "2026-10-03",
+          "note": "Listing gives ZIP 72702, Fayetteville's PO box ZIP, so no ZIP is set"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/467812441",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.arkansas.com/experiences/discover/attraction-listings/walton-arts-center",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=495+W+Dickson+St%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 495 W DICKSON ST, FAYETTEVILLE, AR, 72701"
+        }
+      }
+    },
+    {
+      "slug": "georges-majestic-lounge",
+      "name": "George's Majestic Lounge",
+      "aliases": [
+        "George's"
+      ],
+      "venueType": "music_venue",
+      "address": "519 W Dickson St",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.066082,
+      "lng": -94.166438,
+      "website": "https://www.georgesmajesticlounge.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.georgesmajesticlounge.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.georgesmajesticlounge.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/468584522",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.georgesmajesticlounge.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=519+W+Dickson+St%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 519 W DICKSON ST, FAYETTEVILLE, AR, 72701"
+        }
+      }
+    },
+    {
+      "slug": "theatresquared",
+      "name": "TheatreSquared",
+      "aliases": [
+        "T2",
+        "Theatre Squared"
+      ],
+      "venueType": "theater",
+      "address": "477 W Spring St",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.064427,
+      "lng": -94.165219,
+      "website": "https://theatre2.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://theatre2.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://theatre2.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/724655400",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://theatre2.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "university-of-arkansas",
+      "name": "University of Arkansas",
+      "aliases": [
+        "U of A",
+        "UARK"
+      ],
+      "venueType": "campus",
+      "address": "1 University of Arkansas",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.068704,
+      "lng": -94.171609,
+      "website": "https://www.uark.edu/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.uark.edu/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.uark.edu/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/468186739",
+          "checkedAt": "2026-10-03",
+          "note": "Old Main, the campus landmark, as the campus point"
+        },
+        "website": {
+          "url": "https://www.uark.edu/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "bud-walton-arena",
+      "name": "Bud Walton Arena",
+      "aliases": [
+        "Bud Walton"
+      ],
+      "venueType": "arena",
+      "address": "1270 Nolan Richardson Dr",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.06157,
+      "lng": -94.178107,
+      "website": "https://arkansasrazorbacks.com/facilities/bud-walton-arena/",
+      "parent": "university-of-arkansas",
+      "verification": {
+        "name": {
+          "url": "https://arkansasrazorbacks.com/facilities/bud-walton-arena/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://en.wikipedia.org/wiki/Bud_Walton_Arena",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/469590531",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://arkansasrazorbacks.com/facilities/bud-walton-arena/",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "notes": "Athletics directions page still lists the pre-2021 street name (1240 Leroy Pond Drive); the street is now Nolan Richardson Drive.",
+      "handChecks": [
+        {
+          "finding": "OSM way 469590531 is Bud Walton Arena (leisure=stadium), tagged 1270 W Nolan Richardson Dr, the same address Wikipedia gives. The street was renamed in 2021, which may be why the geocoder finds no match.",
+          "url": "https://www.openstreetmap.org/way/469590531",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "razorback-stadium",
+      "name": "Donald W. Reynolds Razorback Stadium",
+      "aliases": [
+        "Razorback Stadium",
+        "Reynolds Razorback Stadium"
+      ],
+      "venueType": "arena",
+      "address": "350 N Razorback Rd",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.068073,
+      "lng": -94.178851,
+      "website": "https://arkansasrazorbacks.com/facilities/donald-w-reynolds-razorback-stadium/",
+      "parent": "university-of-arkansas",
+      "verification": {
+        "name": {
+          "url": "https://arkansasrazorbacks.com/facilities/donald-w-reynolds-razorback-stadium/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://arkansasrazorbacks.com/directions_to_razorback_athletic_facilities_1569684/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/187045673",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://arkansasrazorbacks.com/facilities/donald-w-reynolds-razorback-stadium/",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=350+N+Razorback+Rd%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 350 N RAZORBACK RD, FAYETTEVILLE, AR, 72701"
+        }
+      }
+    },
+    {
+      "slug": "baum-walker-stadium",
+      "name": "Baum-Walker Stadium at George Cole Field",
+      "aliases": [
+        "Baum-Walker Stadium",
+        "Baum Stadium"
+      ],
+      "venueType": "arena",
+      "address": "1255 S Razorback Rd",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.050156,
+      "lng": -94.18314,
+      "website": "https://arkansasrazorbacks.com/facilities/baum-walker-stadium/",
+      "parent": "university-of-arkansas",
+      "verification": {
+        "name": {
+          "url": "https://arkansasrazorbacks.com/facilities/baum-walker-stadium/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://arkansasrazorbacks.com/directions_to_razorback_athletic_facilities_1569684/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/477600085",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://arkansasrazorbacks.com/facilities/baum-walker-stadium/",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=1255+S+Razorback+Rd%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 1255 S RAZORBACK RD, FAYETTEVILLE, AR, 72701"
+        }
+      }
+    },
+    {
+      "slug": "faulkner-performing-arts-center",
+      "name": "Jim & Joyce Faulkner Performing Arts Center",
+      "aliases": [
+        "Faulkner Performing Arts Center",
+        "Faulkner Center"
+      ],
+      "venueType": "theater",
+      "address": "453 N Garland Ave",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.069514,
+      "lng": -94.176148,
+      "website": "https://faulkner.uark.edu/",
+      "parent": "university-of-arkansas",
+      "verification": {
+        "name": {
+          "url": "https://en.wikipedia.org/wiki/Faulkner_Performing_Arts_Center",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://en.wikipedia.org/wiki/Faulkner_Performing_Arts_Center",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/469231790",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://en.wikipedia.org/wiki/Faulkner_Performing_Arts_Center",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=453+N+Garland+Ave%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 453 N GARLAND AVE, FAYETTEVILLE, AR, 72701"
+        }
+      }
+    },
+    {
+      "slug": "fayetteville-public-library",
+      "name": "Fayetteville Public Library",
+      "aliases": [
+        "FPL"
+      ],
+      "venueType": "library",
+      "address": "401 W Mountain St",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.061501,
+      "lng": -94.165002,
+      "website": "https://www.faylib.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.faylib.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.faylib.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/468931335",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.faylib.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "fayetteville-town-center",
+      "name": "Fayetteville Town Center",
+      "aliases": [
+        "Town Center"
+      ],
+      "venueType": "other",
+      "address": "15 W Mountain St",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.061862,
+      "lng": -94.159965,
+      "website": "https://twncenter.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/3946/ORA-Participating-Businesses",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.fayetteville-ar.gov/3946/ORA-Participating-Businesses",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/1249580093",
+          "checkedAt": "2026-10-03",
+          "note": "Unnamed building tagged 15 W Mountain St; the Town Center Parking Deck is the separate structure to its south"
+        },
+        "website": {
+          "url": "https://twncenter.com/",
+          "checkedAt": "2026-10-03",
+          "note": "Shows Fayetteville Town Center, 15 West Mountain, Fayetteville, AR 72701"
+        },
+        "postalCode": {
+          "url": "https://twncenter.com/",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "notes": "Event venue on the downtown square, leased by the Advertising and Promotion Commission."
+    },
+    {
+      "slug": "fayetteville-downtown-square",
+      "name": "Fayetteville Downtown Square",
+      "aliases": [
+        "Historic Downtown Square",
+        "Downtown Square",
+        "Fayetteville Square"
+      ],
+      "venueType": "area",
+      "address": null,
+      "city": "Fayetteville",
+      "postalCode": null,
+      "lat": 36.062336,
+      "lng": -94.160146,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.experiencefayetteville.com/experience/dickson",
+          "checkedAt": "2026-10-03",
+          "note": "Called the Historic Downtown Square"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/314516088",
+          "checkedAt": "2026-10-03",
+          "note": "Old Post Office at the center of the square"
+        }
+      }
+    },
+    {
+      "slug": "dickson-street",
+      "name": "Dickson Street",
+      "aliases": [
+        "Dickson St",
+        "Dickson Street Entertainment District"
+      ],
+      "venueType": "area",
+      "address": null,
+      "city": "Fayetteville",
+      "postalCode": null,
+      "lat": 36.066368,
+      "lng": -94.162491,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.experiencefayetteville.com/experience/dickson",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/374644458",
+          "checkedAt": "2026-10-03",
+          "note": "W Dickson St, entertainment-district segment"
+        }
+      }
+    },
+    {
+      "slug": "gulley-park",
+      "name": "Gulley Park",
+      "aliases": [],
+      "venueType": "park",
+      "address": "1850 E Township St",
+      "city": "Fayetteville",
+      "postalCode": "72703",
+      "lat": 36.09753,
+      "lng": -94.133349,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Gulley-Park-17",
+          "checkedAt": "2026-10-03",
+          "note": "Listed as Gulley Park Trail"
+        },
+        "address": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Gulley-Park-17",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/500294619",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=1850+E+Township+St%2C+Fayetteville%2C+AR+72701&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "verifiedBy": "owner",
+          "confirmed": "Owner confirmed 72703; the city page's 72701 belongs to the office address, not the park",
+          "note": "US Census geocoder match: 1850 E TOWNSHIP ST, FAYETTEVILLE, AR, 72703"
+        }
+      },
+      "notes": "The city facility page lists 72701, which is the office's ZIP, not the park's (owner, 2026-10-03)."
+    },
+    {
+      "slug": "wilson-park",
+      "name": "Wilson Park",
+      "aliases": [],
+      "venueType": "park",
+      "address": "675 N Park Ave",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.07274,
+      "lng": -94.163214,
+      "website": "https://www.fayetteville-ar.gov/facilities/facility/details/Wilson-Park-61",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/facilities/facility/details/Wilson-Park-61",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.fayetteville-ar.gov/facilities/facility/details/Wilson-Park-61",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/241266579",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.fayetteville-ar.gov/facilities/facility/details/Wilson-Park-61",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "kessler-mountain-regional-park",
+      "name": "Kessler Mountain Regional Park",
+      "aliases": [
+        "Kessler Mountain"
+      ],
+      "venueType": "park",
+      "address": "2600 W Judge Cummings Rd",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.027506,
+      "lng": -94.2113,
+      "website": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Kessler-Mountain-Regional-Park-9",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Kessler-Mountain-Regional-Park-9",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Kessler-Mountain-Regional-Park-9",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/501095054",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Kessler-Mountain-Regional-Park-9",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 501095054 is the Kessler Mountain Regional Park boundary (leisure=park). The seed point is that outline's center, so its distance from the street address is expected.",
+          "url": "https://www.openstreetmap.org/way/501095054",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "lake-fayetteville-park",
+      "name": "Lake Fayetteville Park",
+      "aliases": [
+        "Lake Fayetteville"
+      ],
+      "venueType": "park",
+      "address": "1330 E Lake Fayetteville Rd",
+      "city": "Fayetteville",
+      "postalCode": "72764",
+      "lat": 36.140275,
+      "lng": -94.121505,
+      "website": "https://www.fayetteville-ar.gov/facilities/facility/details/Lake-Fayetteville-79",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/facilities/facility/details/Lake-Fayetteville-79",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.fayetteville-ar.gov/facilities/facility/details/Lake-Fayetteville-79",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/500301119",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.fayetteville-ar.gov/facilities/facility/details/Lake-Fayetteville-79",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 500301119 is the Lake Fayetteville Park boundary (leisure=park). The seed point is that outline's center, so its distance from the street address is expected.",
+          "url": "https://www.openstreetmap.org/way/500301119",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "botanical-garden-of-the-ozarks",
+      "name": "Botanical Garden of the Ozarks",
+      "aliases": [
+        "BGO"
+      ],
+      "venueType": "park",
+      "address": "4703 N Crossover Rd",
+      "city": "Fayetteville",
+      "postalCode": "72764",
+      "lat": 36.136362,
+      "lng": -94.119751,
+      "website": "https://www.bgozarks.org/",
+      "parent": "lake-fayetteville-park",
+      "verification": {
+        "name": {
+          "url": "https://www.bgozarks.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.bgozarks.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/551340974",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.bgozarks.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "clinton-house-museum",
+      "name": "Clinton House Museum",
+      "aliases": [],
+      "venueType": "museum",
+      "address": "930 W Clinton Dr",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.063234,
+      "lng": -94.173993,
+      "website": "https://www.clintonhousemuseum.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.clintonhousemuseum.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.clintonhousemuseum.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/468584518",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.clintonhousemuseum.org/",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 468584518 is the Clinton House Museum (tourism=museum), tagged 930 West Clinton Drive, the same address as the museum's site.",
+          "url": "https://www.openstreetmap.org/way/468584518",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "walmart-amp",
+      "name": "Walmart AMP",
+      "aliases": [
+        "Walmart Arkansas Music Pavilion",
+        "Arkansas Music Pavilion",
+        "The AMP"
+      ],
+      "venueType": "music_venue",
+      "address": "5079 W Northgate Rd",
+      "city": "Rogers",
+      "postalCode": "72758",
+      "lat": 36.302881,
+      "lng": -94.183763,
+      "website": "https://walmartamp.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.destinationrogers.com/listings/walmart-amp/218/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.destinationrogers.com/listings/walmart-amp/218/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/958729520",
+          "checkedAt": "2026-10-03",
+          "note": "Tagged Arkansas Music Pavilion"
+        },
+        "website": {
+          "url": "https://walmartamp.com/",
+          "checkedAt": "2026-10-03",
+          "note": "verified by owner in browser",
+          "verifiedBy": "owner",
+          "confirmed": "Owner confirmed https://walmartamp.com is the Walmart AMP website"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 958729520 is the Arkansas Music Pavilion (amenity=theatre), tagged 5079 W Northgate Rd. The seed point is that outline's center; the geocoder estimates a point along the road.",
+          "url": "https://www.openstreetmap.org/way/958729520",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "victory-theater",
+      "name": "Victory Theater",
+      "aliases": [
+        "Victory Theatre",
+        "APT at the Victory"
+      ],
+      "venueType": "theater",
+      "address": "116 S 2nd St",
+      "city": "Rogers",
+      "postalCode": "72756",
+      "lat": 36.332377,
+      "lng": -94.11639,
+      "website": "https://www.arkansaspublictheatre.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.arkansaspublictheatre.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.arkansaspublictheatre.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/node/1127450435",
+          "checkedAt": "2026-10-03",
+          "note": "Address point tagged 116 S 1st St; official site says 116 S Second St"
+        },
+        "website": {
+          "url": "https://www.arkansaspublictheatre.org/",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "notes": "Home of Arkansas Public Theatre; the website is the theatre company's. OSM and destinationrogers disagree on 1st vs 2nd St; the theatre's own site says 2nd."
+    },
+    {
+      "slug": "rogers-public-library",
+      "name": "Rogers Public Library",
+      "aliases": [],
+      "venueType": "library",
+      "address": "711 S Dixieland Rd",
+      "city": "Rogers",
+      "postalCode": "72758",
+      "lat": 36.32806,
+      "lng": -94.142704,
+      "website": "https://www.rogerspubliclibrary.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.rogerspubliclibrary.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.rogerspubliclibrary.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/1002476952",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.rogerspubliclibrary.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "rogers-historical-museum",
+      "name": "Rogers Historical Museum",
+      "aliases": [],
+      "venueType": "museum",
+      "address": "313 S 2nd St",
+      "city": "Rogers",
+      "postalCode": "72756",
+      "lat": 36.330422,
+      "lng": -94.117391,
+      "website": "https://www.rogershistoricalmuseum.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.rogershistoricalmuseum.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.rogershistoricalmuseum.org/",
+          "checkedAt": "2026-10-03",
+          "note": "Physical address: Hailey Building, exhibit galleries and museum store"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/1002951957",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.rogershistoricalmuseum.org/",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "notes": "322 S 2nd St is the mailing address and the Key Wing (Education Center & Historic Hawkins House)."
+    },
+    {
+      "slug": "railyard-bike-park",
+      "name": "The Railyard Bike Park",
+      "aliases": [
+        "Railyard Bike Park"
+      ],
+      "venueType": "park",
+      "address": "299 E Cherry St",
+      "city": "Rogers",
+      "postalCode": "72756",
+      "lat": 36.328803,
+      "lng": -94.113416,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.destinationrogers.com/listings/the-railyard-bike-park/206/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.destinationrogers.com/listings/the-railyard-bike-park/206/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/1450427153",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "notes": "Not the concert site: Railyard Live concerts are at Butterfield Stage (butterfield-stage)."
+    },
+    {
+      "slug": "butterfield-stage",
+      "name": "Butterfield Stage at Railyard Park",
+      "aliases": [
+        "Butterfield Stage",
+        "Railyard Park",
+        "Railyard Live"
+      ],
+      "venueType": "music_venue",
+      "address": "101 E Cherry St",
+      "city": "Rogers",
+      "postalCode": "72756",
+      "lat": 36.330479,
+      "lng": -94.115836,
+      "website": "https://railyardlive.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.rogersar.gov/calendar.aspx?EID=3280",
+          "checkedAt": "2026-10-03",
+          "note": "City calendar: Butterfield Stage at the Railyard Park in Downtown Rogers"
+        },
+        "address": {
+          "url": "https://www.rogersar.gov/calendar.aspx?EID=3280",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/877933805",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.destinationrogers.com/things-to-do/events/jason-aldean-at-the-walmart-amp/",
+          "checkedAt": "2026-10-03",
+          "note": "Lists railyardlive.com for Butterfield Stage"
+        }
+      },
+      "notes": "Home of the Railyard Live concert series. Not the Railyard Bike Park (railyard-bike-park), 299 E Cherry St."
+    },
+    {
+      "slug": "lake-atalanta-park",
+      "name": "Lake Atalanta Park",
+      "aliases": [
+        "Lake Atalanta"
+      ],
+      "venueType": "park",
+      "address": "500 E Walnut St",
+      "city": "Rogers",
+      "postalCode": "72758",
+      "lat": 36.331682,
+      "lng": -94.104667,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.destinationrogers.com/listings/lake-atalanta/198/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.destinationrogers.com/listings/lake-atalanta/198/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/493586528",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://www.destinationrogers.com/listings/lake-atalanta/198/",
+          "checkedAt": "2026-10-03",
+          "verifiedBy": "owner",
+          "confirmed": "Owner's screenshot of Destination Rogers' Lake Atalanta page shows 500 E. Walnut Street, Rogers, AR, 72758",
+          "note": "Earlier tool read of this listing reported 72757; the owner's screenshot shows 72758"
+        }
+      },
+      "notes": "ZIP 72758 per Destination Rogers (owner screenshot). The Census geocoder says 72756.",
+      "handChecks": [
+        {
+          "finding": "Owner checked Destination Rogers' Lake Atalanta page in the browser: it lists 500 E. Walnut Street, Rogers, AR, 72758, with the map pin at the park. The geocoder's 72756 differs; owner accepted 72758.",
+          "url": "https://www.destinationrogers.com/listings/lake-atalanta/198/",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "rogers-convention-center",
+      "name": "Rogers Convention Center",
+      "aliases": [
+        "John Q. Hammons Center"
+      ],
+      "venueType": "other",
+      "address": "3303 S Pinnacle Hills Pkwy",
+      "city": "Rogers",
+      "postalCode": "72758",
+      "lat": 36.307011,
+      "lng": -94.185922,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.destinationrogers.com/listings/embassy-suites-northwest-arkansas-hotel-spa-convention-center/75/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.destinationrogers.com/listings/embassy-suites-northwest-arkansas-hotel-spa-convention-center/75/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/node/1127235004",
+          "checkedAt": "2026-10-03",
+          "note": "OSM tags it 3201 S Pinnacle Hills Pkwy"
+        }
+      },
+      "notes": "Connected to Embassy Suites; 3303 is the hotel's address. Formerly the John Q. Hammons Center (renamed 2020)."
+    },
+    {
+      "slug": "pinnacle-hills-promenade",
+      "name": "Pinnacle Hills Promenade",
+      "aliases": [],
+      "venueType": "other",
+      "address": "2203 Promenade Blvd",
+      "city": "Rogers",
+      "postalCode": "72758",
+      "lat": 36.305118,
+      "lng": -94.175615,
+      "website": "https://www.pinnaclehillspromenade.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.pinnaclehillspromenade.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.pinnaclehillspromenade.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/223586701",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.pinnaclehillspromenade.com/",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 223586701 is Pinnacle Hills Promenade (shop=mall), tagged 2203 Promenade Boulevard. The seed point is the mall outline's center; the geocoder estimates a point along the road.",
+          "url": "https://www.openstreetmap.org/way/223586701",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "ozark-beer-company",
+      "name": "Ozark Beer Company",
+      "aliases": [
+        "Ozark Beer Co."
+      ],
+      "venueType": "bar",
+      "address": "109 N Arkansas St",
+      "city": "Rogers",
+      "postalCode": "72756",
+      "lat": 36.333533,
+      "lng": -94.114767,
+      "website": "https://www.ozarkbeercompany.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.ozarkbeercompany.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.destinationrogers.com/listings/ozark-beer-company/236/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/660570924",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.ozarkbeercompany.com/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "downtown-rogers",
+      "name": "Downtown Rogers",
+      "aliases": [],
+      "venueType": "area",
+      "address": null,
+      "city": "Rogers",
+      "postalCode": null,
+      "lat": 36.332659,
+      "lng": -94.11775,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.godowntownrogers.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/487490585",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "crystal-bridges",
+      "name": "Crystal Bridges Museum of American Art",
+      "aliases": [
+        "Crystal Bridges"
+      ],
+      "venueType": "museum",
+      "address": "600 Museum Way",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.382613,
+      "lng": -94.204063,
+      "website": "https://crystalbridges.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://en.wikipedia.org/wiki/Crystal_Bridges_Museum_of_American_Art",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://en.wikipedia.org/wiki/Crystal_Bridges_Museum_of_American_Art",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/relation/8240824",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://en.wikipedia.org/wiki/Crystal_Bridges_Museum_of_American_Art",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=600+Museum+Way%2C+Bentonville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 600 MUSEUM WAY, BENTONVILLE, AR, 72712"
+        }
+      },
+      "notes": "Not fetched from crystalbridges.org: its terms ban robots without consent."
+    },
+    {
+      "slug": "the-momentary",
+      "name": "The Momentary",
+      "aliases": [],
+      "venueType": "museum",
+      "address": "507 SE E St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.366643,
+      "lng": -94.202555,
+      "website": "https://themomentary.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://en.wikipedia.org/wiki/The_Momentary",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://en.wikipedia.org/wiki/The_Momentary",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/896842916",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://en.wikipedia.org/wiki/The_Momentary",
+          "checkedAt": "2026-10-03"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=507+SE+E+St%2C+Bentonville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 507 SE E ST, BENTONVILLE, AR, 72712"
+        }
+      },
+      "notes": "Satellite of Crystal Bridges but a separate site, so no parent. Not fetched from themomentary.org: its terms ban robots without consent."
+    },
+    {
+      "slug": "bentonville-square",
+      "name": "Bentonville Square",
+      "aliases": [
+        "The Bentonville Square",
+        "Downtown Bentonville Square",
+        "Bentonville City Square"
+      ],
+      "venueType": "area",
+      "address": "100 N Main St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.372653,
+      "lng": -94.208447,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://downtownbentonville.org/explore/parks",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://downtownbentonville.org/explore/parks",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/493572832",
+          "checkedAt": "2026-10-03",
+          "note": "Tagged Bentonville City Square"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=100+N+Main+St%2C+Bentonville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 100 N MAIN ST, BENTONVILLE, AR, 72712"
+        }
+      }
+    },
+    {
+      "slug": "bentonville-public-library",
+      "name": "Bentonville Public Library",
+      "aliases": [],
+      "venueType": "library",
+      "address": "405 S Main St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.367949,
+      "lng": -94.208262,
+      "website": "https://www.bentonvillelibrary.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.bentonvillelibrary.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.bentonvillelibrary.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/424950621",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.bentonvillelibrary.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "scott-family-amazeum",
+      "name": "Scott Family Amazeum",
+      "aliases": [
+        "Amazeum"
+      ],
+      "venueType": "museum",
+      "address": "1009 Museum Way",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.379109,
+      "lng": -94.197243,
+      "website": "https://www.amazeum.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.amazeum.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.amazeum.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/533182186",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.amazeum.org/",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 533182186 is the Scott Family Amazeum building (tourism=museum). The museum's site gives 1009 Museum Way; the geocoder estimates a point along that road.",
+          "url": "https://www.openstreetmap.org/way/533182186",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "museum-of-native-american-history",
+      "name": "Museum of Native American History",
+      "aliases": [
+        "MONAH"
+      ],
+      "venueType": "museum",
+      "address": "202 SW O St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.371479,
+      "lng": -94.231355,
+      "website": "https://monah.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://monah.org/getting-here",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://monah.org/getting-here",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/477498320",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://monah.org/getting-here",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "notes": "monah.us is no longer the museum's domain; the site is monah.org."
+    },
+    {
+      "slug": "walmart-museum",
+      "name": "Walmart Museum",
+      "aliases": [
+        "The Walmart Museum",
+        "Walton's 5&10"
+      ],
+      "venueType": "museum",
+      "address": "105 N Main St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.372552,
+      "lng": -94.209086,
+      "website": "https://corporate.walmart.com/about/walmart-museum/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://corporate.walmart.com/about/walmart-museum/plan-your-visit.html",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://corporate.walmart.com/about/walmart-museum/plan-your-visit.html",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/211198877",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://corporate.walmart.com/about/walmart-museum/",
+          "checkedAt": "2026-10-03",
+          "note": "walmartmuseum.com redirects here (301); no separate site"
+        }
+      }
+    },
+    {
+      "slug": "lawrence-plaza",
+      "name": "Lawrence Plaza",
+      "aliases": [
+        "The Rink at Lawrence Plaza"
+      ],
+      "venueType": "plaza",
+      "address": "214 NE A St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.374792,
+      "lng": -94.207679,
+      "website": "https://www.bentonville.ar.gov/facilities/facility/details/Lawrence-Plaza-29",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.bentonville.ar.gov/facilities/facility/details/Lawrence-Plaza-29",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.bentonville.ar.gov/facilities/facility/details/Lawrence-Plaza-29",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/1002833111",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.bentonville.ar.gov/facilities/facility/details/Lawrence-Plaza-29",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "compton-gardens",
+      "name": "Compton Gardens & Arboretum",
+      "aliases": [
+        "Compton Gardens"
+      ],
+      "venueType": "park",
+      "address": "312 N Main St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.376167,
+      "lng": -94.207743,
+      "website": "https://www.peelcompton.org/spaces/compton-gardens/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.peelcompton.org/spaces/compton-gardens/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.peelcompton.org/spaces/compton-gardens/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/493595671",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.peelcompton.org/spaces/compton-gardens/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "8th-street-market",
+      "name": "8th Street Market",
+      "aliases": [],
+      "venueType": "other",
+      "address": "801 SE 8th St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.365237,
+      "lng": -94.199888,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://downtownbentonville.org/go/8th-street-market",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://downtownbentonville.org/go/8th-street-market",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/896842909",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "record",
+      "name": "Record",
+      "aliases": [
+        "The Record",
+        "Record Downtown"
+      ],
+      "venueType": "other",
+      "address": "104 SW A St",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.371836,
+      "lng": -94.210543,
+      "website": "https://www.recorddowntown.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.recorddowntown.com/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://downtownbentonville.org/go/record",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/912541365",
+          "checkedAt": "2026-10-03",
+          "note": "Tagged The Record"
+        },
+        "website": {
+          "url": "https://downtownbentonville.org/go/record",
+          "checkedAt": "2026-10-03",
+          "note": "Lists recorddowntown.com"
+        }
+      },
+      "notes": "Event space in the former Benton County Daily Record building. Its own site shows no street address."
+    },
+    {
+      "slug": "orchards-park",
+      "name": "Orchards Park",
+      "aliases": [],
+      "venueType": "park",
+      "address": "1100 NE John DeShields Blvd",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.376247,
+      "lng": -94.195285,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://downtownbentonville.org/go/orchards-park",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://downtownbentonville.org/go/orchards-park",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/254750619",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 254750619 is the Orchards Park boundary (leisure=park). The seed point is that outline's center.",
+          "url": "https://www.openstreetmap.org/way/254750619",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "slaughter-pen-trail",
+      "name": "Slaughter Pen Trail",
+      "aliases": [
+        "Slaughter Pen",
+        "Slaughter Pen Mountain Bike Trail"
+      ],
+      "venueType": "park",
+      "address": "2400 N Walton Blvd",
+      "city": "Bentonville",
+      "postalCode": "72712",
+      "lat": 36.395394,
+      "lng": -94.202826,
+      "website": "https://www.bentonville.ar.gov/Facilities/Facility/Details/Slaughter-Pen-Mountain-Bike-Trail-13",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.bentonville.ar.gov/Facilities/Facility/Details/Slaughter-Pen-Mountain-Bike-Trail-13",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.bentonville.ar.gov/Facilities/Facility/Details/Slaughter-Pen-Mountain-Bike-Trail-13",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/relation/20042336",
+          "checkedAt": "2026-10-03",
+          "note": "Tagged Slaughter Pen MTB Park"
+        },
+        "website": {
+          "url": "https://www.bentonville.ar.gov/Facilities/Facility/Details/Slaughter-Pen-Mountain-Bike-Trail-13",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM relation 20042336 is the Slaughter Pen MTB Park area. The seed point is the area's center; 2400 N Walton Blvd is the city's listed address for the trail system.",
+          "url": "https://www.openstreetmap.org/relation/20042336",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "arvest-ballpark",
+      "name": "Arvest Ballpark",
+      "aliases": [],
+      "venueType": "arena",
+      "address": "3000 Gene George Blvd",
+      "city": "Springdale",
+      "postalCode": "72762",
+      "lat": 36.159952,
+      "lng": -94.194279,
+      "website": "https://www.milb.com/northwest-arkansas/ballpark/ballpark-guide",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.springdalear.gov/page/arvest-ballpark/",
+          "checkedAt": "2026-10-03",
+          "verifiedBy": "owner",
+          "confirmed": "Owner's screenshot of the city page titled Arvest Ballpark (City of Springdale // Live // Community)",
+          "note": "verified by owner in browser; springdalear.gov renders client-side"
+        },
+        "address": {
+          "url": "https://www.springdalear.gov/page/arvest-ballpark/",
+          "checkedAt": "2026-10-03",
+          "verifiedBy": "owner",
+          "confirmed": "City page lists Physical Address: 3000 Gene George Blvd., Springdale, AR 72762",
+          "note": "verified by owner in browser; springdalear.gov renders client-side"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/133643965",
+          "checkedAt": "2026-10-03",
+          "note": "Playing field"
+        },
+        "website": {
+          "url": "https://en.wikipedia.org/wiki/Arvest_Ballpark",
+          "checkedAt": "2026-10-03",
+          "note": "External links point to the Naturals' MiLB ballpark page; displayed as a link only"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=3000+Gene+George+Blvd%2C+Springdale%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 3000 S GENE GEORGE BLVD, SPRINGDALE, AR, 72762"
+        }
+      },
+      "notes": "Address owner-verified on the City of Springdale's Arvest Ballpark page (city-owned ballpark). MiLB's terms (MLB Terms of Use, updated 2025-03-11) bar automated collection, so milb.com is not cited; it stays only as the displayed website link."
+    },
+    {
+      "slug": "jones-center",
+      "name": "The Jones Center",
+      "aliases": [
+        "Jones Center",
+        "Harvey and Bernice Jones Center for Families"
+      ],
+      "venueType": "other",
+      "address": "922 E Emma Ave",
+      "city": "Springdale",
+      "postalCode": "72764",
+      "lat": 36.186259,
+      "lng": -94.118305,
+      "website": "https://thejonescenter.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://encyclopediaofarkansas.net/entries/jones-center-13985/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://thejonescenter.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/507074133",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://thejonescenter.org/",
+          "checkedAt": "2026-10-03",
+          "note": "thejonescenter.net redirects here (301)"
+        }
+      },
+      "notes": "thejonescenter.net now redirects to thejonescenter.org."
+    },
+    {
+      "slug": "shiloh-museum",
+      "name": "Shiloh Museum of Ozark History",
+      "aliases": [
+        "Shiloh Museum"
+      ],
+      "venueType": "museum",
+      "address": "118 W Johnson Ave",
+      "city": "Springdale",
+      "postalCode": "72764",
+      "lat": 36.186701,
+      "lng": -94.131849,
+      "website": "https://shilohmuseum.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://shilohmuseum.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://shilohmuseum.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/775582707",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://shilohmuseum.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "springdale-public-library",
+      "name": "Springdale Public Library",
+      "aliases": [],
+      "venueType": "library",
+      "address": "405 S Pleasant St",
+      "city": "Springdale",
+      "postalCode": "72764",
+      "lat": 36.180908,
+      "lng": -94.14241,
+      "website": "https://www.springdalelibrary.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.springdalelibrary.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.springdalelibrary.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/796282852",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.springdalelibrary.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "luther-george-park",
+      "name": "Luther George Park",
+      "aliases": [],
+      "venueType": "park",
+      "address": "300 Park St",
+      "city": "Springdale",
+      "postalCode": "72764",
+      "lat": 36.182743,
+      "lng": -94.126296,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.downtownspringdale.org/luther-george-park",
+          "checkedAt": "2026-10-03",
+          "note": "Downtown Springdale Alliance, which commissioned the park's redesign"
+        },
+        "address": {
+          "url": "https://www.downtownspringdale.org/luther-george-park",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/506568507",
+          "checkedAt": "2026-10-03",
+          "note": "Park boundary, tagged 300 Park Street, 72764: agrees with the Alliance page and the Census geocoder"
+        }
+      },
+      "notes": "Has a Performance Pavilion on the park's central axis, fronting the great lawn, designed to host performances of up to 3,000 people (Downtown Springdale Alliance design announcement: downtownspringdale.org/news-stories/spackman-mossop-michaels-and-trahan-architects-reveal-design-for-luther-george-park-masterplan-and-performance-pavilion). The design announcement doesn't say whether it is built yet."
+    },
+    {
+      "slug": "bella-vista-public-library",
+      "name": "Bella Vista Public Library",
+      "aliases": [],
+      "venueType": "library",
+      "address": "11 Dickens Pl",
+      "city": "Bella Vista",
+      "postalCode": "72714",
+      "lat": 36.473498,
+      "lng": -94.242864,
+      "website": "https://www.bvpl.org/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.bvpl.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.bvpl.org/",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/246406845",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.bvpl.org/",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    },
+    {
+      "slug": "eureka-springs-auditorium",
+      "name": "The Auditorium",
+      "aliases": [
+        "Eureka Springs City Auditorium",
+        "The Aud"
+      ],
+      "venueType": "theater",
+      "address": "36 S Main St",
+      "city": "Eureka Springs",
+      "postalCode": "72632",
+      "lat": 36.401061,
+      "lng": -93.738206,
+      "website": null,
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.eurekaspringschamber.com/events/details/eureka-springs-music-awards-ceremony-10278",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.eurekaspringschamber.com/events/details/eureka-springs-music-awards-ceremony-10278",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/160171808",
+          "checkedAt": "2026-10-03",
+          "note": "Tagged City Auditorium"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=36+S+Main+St%2C+Eureka+Springs%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-03",
+          "note": "US Census geocoder match: 36 S MAIN ST, EUREKA SPRINGS, AR, 72632"
+        }
+      },
+      "notes": "theaud.org showed a maintenance page on 2026-10-03, so no website is set."
+    },
+    {
+      "slug": "pea-ridge-national-military-park",
+      "name": "Pea Ridge National Military Park",
+      "aliases": [
+        "Pea Ridge Battlefield"
+      ],
+      "venueType": "park",
+      "address": "15930 National Park Dr",
+      "city": "Garfield",
+      "postalCode": "72732",
+      "lat": 36.443852,
+      "lng": -94.025467,
+      "website": "https://www.nps.gov/peri/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.nps.gov/peri/planyourvisit/directions.htm",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.nps.gov/peri/planyourvisit/directions.htm",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/541689611",
+          "checkedAt": "2026-10-03",
+          "note": "Visitor center"
+        },
+        "website": {
+          "url": "https://www.nps.gov/peri/planyourvisit/directions.htm",
+          "checkedAt": "2026-10-03"
+        }
+      },
+      "handChecks": [
+        {
+          "finding": "OSM way 541689611 is the park's visitor center (tourism information=visitor_centre). OSM tags it 15930 Military Park Road while NPS lists 15930 National Park Dr; same building, and NPS is used.",
+          "url": "https://www.openstreetmap.org/way/541689611",
+          "checkedAt": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "slug": "prairie-grove-battlefield-state-park",
+      "name": "Prairie Grove Battlefield State Park",
+      "aliases": [
+        "Prairie Grove Battlefield"
+      ],
+      "venueType": "park",
+      "address": "506 E Douglas St",
+      "city": "Prairie Grove",
+      "postalCode": "72753",
+      "lat": 35.986167,
+      "lng": -94.304103,
+      "website": "https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park",
+          "checkedAt": "2026-10-03"
+        },
+        "address": {
+          "url": "https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park",
+          "checkedAt": "2026-10-03"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/302181096",
+          "checkedAt": "2026-10-03"
+        },
+        "website": {
+          "url": "https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park",
+          "checkedAt": "2026-10-03"
+        }
+      }
+    }
+  ]
+}
