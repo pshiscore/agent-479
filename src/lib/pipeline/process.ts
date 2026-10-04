@@ -13,6 +13,8 @@ import { MapError, mapRecord, SkipRecord } from "./map";
 import { locationKey } from "./map/location";
 import { type LlmVenuePick, llmVenuePick, resolveVenue } from "./venue-resolve";
 import { proposeVenues } from "./venue-proposals";
+import { checkVagueLocation, vagueRecordsDue } from "./location-detail";
+import { PoliteClient } from "@/lib/sources/http";
 
 /**
  * The process stage (build step 12): map each pending raw record to facts,
@@ -67,12 +69,21 @@ export async function processRecord(
 
 export async function runProcessJob(
   db: DbExecutor,
-  opts: { now?: Date; batchSize?: number; llmPick?: LlmVenuePick | null; enrichBatchSize?: number; generate?: Generate } = {},
+  opts: {
+    now?: Date;
+    batchSize?: number;
+    llmPick?: LlmVenuePick | null;
+    enrichBatchSize?: number;
+    generate?: Generate;
+    detailBatchSize?: number;
+    http?: PoliteClient;
+  } = {},
 ) {
   const now = opts.now ?? new Date();
   const claim = await claimJob(db, "process", { now });
   if (!claim) return null;
   const llmPick = opts.llmPick === null ? undefined : (opts.llmPick ?? llmVenuePick);
+  const generate = opts.generate ?? (((req) => generateStructured(req, { db })) as Generate);
   const counts: Record<string, number> = {};
   const bump = (k: string) => (counts[k] = (counts[k] ?? 0) + 1);
   try {
@@ -117,7 +128,6 @@ export async function runProcessJob(
         .limit(enrichLimit);
       if (toEnrich.length) {
         const taxonomy = await loadActiveTaxonomy(db);
-        const generate = opts.generate ?? (((req) => generateStructured(req, { db })) as Generate);
         for (const record of toEnrich) {
           try {
             const r = await enrichRecord(db, record, { generate, taxonomy, runId: claim.id });
@@ -136,6 +146,29 @@ export async function runProcessJob(
               .set({ lastError: `enrich: ${(err instanceof Error ? err.message : String(err)).slice(0, 1900)}` })
               .where(eq(rawRecords.id, record.id));
           }
+        }
+      }
+    }
+    // Vague locations (a bare city or ZIP, or prose): look on the event's own
+    // detail page for a specific place, and propose what's found to the owner.
+    const detailLimit = opts.detailBatchSize ?? 10;
+    if (!stoppedForBudget && detailLimit > 0) {
+      const http = opts.http ?? new PoliteClient();
+      const blockedSources = new Set<string>();
+      for (const { record, source } of await vagueRecordsDue(db, now, detailLimit)) {
+        if (blockedSources.has(source.id)) continue;
+        try {
+          const r = await checkVagueLocation(db, record, source, { http, generate, llmPick, actor: ACTOR, runId: claim.id, now });
+          bump(`detail_${r.outcome}`);
+          if (r.outcome === "blocked") blockedSources.add(source.id);
+        } catch (err) {
+          if (err instanceof LlmError && err.code === "budget_exceeded") {
+            stoppedForBudget = true;
+            break;
+          }
+          // Timeouts, 5xx, and bad pages wait for the next weekly check.
+          bump("detail_failed");
+          await db.update(rawRecords).set({ locationCheckedAt: now }).where(eq(rawRecords.id, record.id));
         }
       }
     }

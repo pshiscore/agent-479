@@ -99,6 +99,13 @@
       "when": 1791127382958,
       "tag": "0013_prices_ages_registration",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791132219582,
+      "tag": "0014_vague_locations",
+      "breakpoints": true
     }
   ]
 }

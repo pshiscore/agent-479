@@ -7,12 +7,13 @@ import type { Generate } from "./types";
 
 /**
  * Exactly one category and any tags, from the active rows only: both enums
- * are built at run time (plan section 5, rule 6). "Free", "21+", and
- * "Registration required" are set in code from the facts, so the model never
- * chooses them. Picking Community requires a closest-missing-category hint.
+ * are built at run time (plan section 5, rule 6). "Free", "21+",
+ * "Registration required", "Ticketed", and "En español" are set in code from
+ * the facts, so the model never chooses them. Picking Community requires a
+ * closest-missing-category hint.
  */
 
-export const CODE_SET_TAGS = new Set(["free", "21-plus", "registration-required"]);
+export const CODE_SET_TAGS = new Set(["free", "21-plus", "registration-required", "ticketed", "en-espanol"]);
 export const CLASSIFY_PROMPT_VERSION = "classify@2";
 
 // What a tag means, where the name alone isn't enough.

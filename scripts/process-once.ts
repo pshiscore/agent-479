@@ -6,15 +6,18 @@
  * first (after a mapper or resolver fix); the reset is its own run in runs.
  *
  * --enrich N enriches up to N mapped records per batch (default 20);
- * --no-enrich maps and resolves only.
+ * --no-enrich maps and resolves only. With --reenrich, records already turned
+ * into events go back to mapped first (after a prompt or tag change), so each
+ * event is rewritten by the enrich stage, logged row by row; the reset is its
+ * own run in runs.
  *
- * Usage: npm run process:once [-- --all] [-- --no-llm] [-- --reprocess] [-- --enrich N | --no-enrich]
+ * Usage: npm run process:once [-- --all] [-- --no-llm] [-- --reprocess] [-- --reenrich] [-- --enrich N | --no-enrich]
  */
 import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local", quiet: true });
 
 import { parseArgs } from "node:util";
-import { and, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { rawRecords } from "@/lib/db/schema";
 import { runProcessJob } from "@/lib/pipeline/process";
@@ -25,6 +28,7 @@ const { values: args } = parseArgs({
     all: { type: "boolean", default: false },
     "no-llm": { type: "boolean", default: false },
     reprocess: { type: "boolean", default: false },
+    reenrich: { type: "boolean", default: false },
     enrich: { type: "string" },
     "no-enrich": { type: "boolean", default: false },
   },
@@ -41,6 +45,17 @@ async function main() {
           .where(and(inArray(rawRecords.status, ["mapped", "needs_venue", "skipped", "failed"]), isNull(rawRecords.eventId)))
           .returning({ id: rawRecords.id });
         return { reprocessReset: rows.length };
+      });
+      console.log(reset);
+    }
+    if (args.reenrich) {
+      const reset = await withRun(db, "manual", async () => {
+        const rows = await db
+          .update(rawRecords)
+          .set({ status: "mapped" })
+          .where(and(eq(rawRecords.status, "extracted"), isNotNull(rawRecords.eventId), isNotNull(rawRecords.venueId)))
+          .returning({ id: rawRecords.id });
+        return { reenrichReset: rows.length };
       });
       console.log(reset);
     }

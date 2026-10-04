@@ -145,9 +145,19 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   Census geocoder, then tourism listings, then Wikipedia. An owner-verified
   record confirms what a page says, not that the page is right, so it carries
   the rank of the page it came from.
-- **Code owns the "Free", "21+", and "Registration required" tags.** They come
-  from the facts; the classifier never chooses them, so a tag can't contradict
-  `events.is_free` or `events.registration_required`.
+- **Code owns the "Free", "21+", "Registration required", "Ticketed", and "En
+  español" tags.** They come from the facts; the classifier never chooses
+  them, so a tag can't contradict `events.is_free` or
+  `events.registration_required`. "Ticketed" means the event has a ticket link
+  on a ticketing provider's domain (`src/lib/ticketing.ts`), a stated fact, not
+  a price. "En español" means extraction found the event is conducted in
+  Spanish.
+- **Descriptions add a fact or don't exist.** A description must add at least
+  one fact not in the title or category: a performer, an age or grade range,
+  what attendees do, or that registration is required. Code decides which
+  exist (none means no model call and no description) and checks each claimed
+  fact appears in the text. Descriptions are in English; titles stay as
+  published.
 - **"Free" only when stated**, by the event's own listing or by the source's
   published default (`sources.default_price_note`, set only from a page the
   owner verified in the browser). A source default never applies when the
@@ -159,6 +169,12 @@ These apply to research and one-off scripts as well as to the app and pipeline.
 - **Source-level exclusions** (`sources.config.excludeLocations`) skip
   locations that aren't public events, like the library bookmobile's stop
   schedule (`service_schedule`). Changing one is a logged seed update.
+- **Vague locations get one look at the event's own page.** When a
+  needs_venue location is only a city or ZIP (or prose), the process job
+  checks the location text, then the event's detail page on the same permitted
+  source (normal rate limits and block rules; at most weekly). A place found
+  there is only proposed (`propose_venue_match`, or `propose_venue` if it's
+  not ours), never applied. Nothing from the page is stored.
 - **needs_venue records are archived after their event ends**
   (`needs_venue_expired`); the admin page shows the current needs_venue count.
 - **Events are written only by the enrich stage**, from a mapped record with a
@@ -176,6 +192,10 @@ These apply to research and one-off scripts as well as to the app and pipeline.
 
 ## Venue verification
 
+- **Qualifier words separate places.** Names that differ only by a qualifier
+  (Upper/Lower, North/South, East/West, Old/New) never match at any resolver
+  stage: "Lower Ramble" is neither Upper Ramble nor The Ramble
+  (`differsOnlyByQualifier`).
 - **A geocoder match on a different street is a warning**, even when it's
   close: a different street name or type, or opposite directions (the Arvest
   pattern). It needs a hand check like any other warning.

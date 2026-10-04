@@ -65,6 +65,9 @@ export const rawRecords = pgTable(
     // How the venue was found (external_id, default_venue, alias, address, trigram, llm).
     venueMatchedBy: text("venue_matched_by"),
     processedAt: timestamp("processed_at", { withTimezone: true }),
+    // When a vague needs_venue location (a bare city or ZIP, or prose) was last
+    // looked up on the event's own detail page; re-checked weekly at most.
+    locationCheckedAt: timestamp("location_checked_at", { withTimezone: true }),
   },
   (t) => [
     uniqueIndex("raw_records_source_external_uniq").on(t.sourceId, t.externalId),

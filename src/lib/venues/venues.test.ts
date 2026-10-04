@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { botUserAgent } from "@/lib/bot-identity";
 import { FetchBlockedError } from "@/lib/http/fetch";
 import { censusGeocode } from "./geocode";
-import { normalizeVenueName, venueNameKeys } from "./normalize";
+import { differsOnlyByQualifier, normalizeVenueName, qualifierConflict, venueNameKeys } from "./normalize";
 import { type SeedVenue, seedFileSchema, seedVenueSchema, venuesHash } from "./seed-file";
 import { checkGeocode, checkVenues, distanceMeters } from "./verify";
 
@@ -43,6 +43,29 @@ describe("normalizeVenueName", () => {
     expect(venueNameKeys({ name: "The Momentary", aliases: ["Momentary", "the momentary"] })).toEqual([
       "momentary",
     ]);
+  });
+});
+
+describe("differsOnlyByQualifier", () => {
+  it("flags names that differ only by Upper/Lower, North/South, East/West, Old/New", () => {
+    expect(differsOnlyByQualifier("Lower Ramble", "Upper Ramble")).toBe(true);
+    expect(differsOnlyByQualifier("Lower Ramble", "The Ramble")).toBe(true);
+    expect(differsOnlyByQualifier("North Park", "South Park")).toBe(true);
+    expect(differsOnlyByQualifier("Old Main", "Main")).toBe(true);
+    expect(differsOnlyByQualifier("East Lawn", "west lawn")).toBe(true);
+  });
+  it("doesn't flag equal names, unrelated names, or other extra words", () => {
+    expect(differsOnlyByQualifier("The Ramble", "Ramble")).toBe(false);
+    expect(differsOnlyByQualifier("Upper", "Lower")).toBe(false); // nothing shared
+    expect(differsOnlyByQualifier("Ramble Stage", "Upper Ramble")).toBe(false);
+    expect(differsOnlyByQualifier("Walton Arts Center", "Walton Arts Center Lobby")).toBe(false);
+  });
+  it("qualifierConflict checks the venue's name and aliases, but an exact alias wins", () => {
+    const upper = { name: "Upper Ramble", aliases: [] };
+    expect(qualifierConflict("Lower Ramble", upper)).toBe(true);
+    expect(qualifierConflict("Upper Ramble", upper)).toBe(false);
+    expect(qualifierConflict("Lower Ramble", { name: "Ramble Park", aliases: ["Lower Ramble", "Upper Ramble"] })).toBe(false);
+    expect(qualifierConflict(null, upper)).toBe(false);
   });
 });
 

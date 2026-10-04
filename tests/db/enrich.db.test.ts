@@ -61,14 +61,14 @@ describe("enrichRecord", () => {
     await inRollback(async (tx) => {
       const { rec, run } = await mappedRecord(tx, SOURCE_TEXT);
       const generate = fakeModel(tx, {
-        extract: [{ isFree: true, priceMin: null, priceMax: null, ageRestriction: "all_ages", familyFriendly: true, registrationRequired: false, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null }],
+        extract: [{ isFree: true, priceMin: null, priceMax: null, ageRestriction: "all_ages", familyFriendly: true, registrationRequired: false, ageMin: 3, ageMax: 5, gradeMin: null, gradeMax: null, spanish: true, activity: "sing songs and share stories" }],
         classify: [{ category: "community", tags: [], closestMissingCategory: "Library programs" }],
-        describe: [{ description: "A short morning of stories and songs for preschoolers at the library." }],
+        describe: [{ description: "A short morning of stories and songs for kids ages 3 to 5.", usedFacts: ["ages", "activity"] }],
       });
       const taxonomy = await loadActiveTaxonomy(tx);
       const r = await enrichRecord(tx, rec, { generate, taxonomy, runId: run.id });
       expect(r).toMatchObject({ created: true, category: "community", held: false });
-      expect(r.tags.sort()).toEqual(["family-friendly", "free"]);
+      expect(r.tags.sort()).toEqual(["en-espanol", "family-friendly", "free"]);
 
       const [ev] = await tx.select().from(events).where(eq(events.id, r.event.id));
       expect(ev).toMatchObject({
@@ -78,12 +78,14 @@ describe("enrichRecord", () => {
         subSpace: "Walmart Story Time Room (1st Floor)",
         isFree: true,
         primarySourceUrl: "https://faylib.org/event/990001",
-        shortDescription: "A short morning of stories and songs for preschoolers at the library.",
+        shortDescription: "A short morning of stories and songs for kids ages 3 to 5.",
+        ageMin: 3,
+        ageMax: 5,
         status: "scheduled",
       });
       expect(ev.slug).toBe("preschool-story-time-2026-10-13");
       const evTags = await tx.select({ slug: tags.slug }).from(eventTags).innerJoin(tags, eq(tags.id, eventTags.tagId)).where(eq(eventTags.eventId, ev.id));
-      expect(evTags.map((t) => t.slug).sort()).toEqual(["family-friendly", "free"]);
+      expect(evTags.map((t) => t.slug).sort()).toEqual(["en-espanol", "family-friendly", "free"]);
       const [src] = await tx.select().from(eventSources).where(eq(eventSources.eventId, ev.id));
       expect(src).toMatchObject({ isPrimary: true, rawRecordId: rec.id, externalId: rec.externalId });
       const [after] = await tx.select().from(rawRecords).where(eq(rawRecords.id, rec.id));
@@ -92,7 +94,8 @@ describe("enrichRecord", () => {
       const [action] = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, ev.id), eq(agentActions.action, "insert")));
       expect(action).toMatchObject({ actor: "agent:process", model: "fake-model", entityType: "event" });
       expect((action.after as { _meta: { closestMissingCategory: string } })._meta.closestMissingCategory).toBe("Library programs");
-      expect((action.after as { tagIds: string[] }).tagIds).toHaveLength(2);
+      expect((action.after as { tagIds: string[] }).tagIds).toHaveLength(3);
+      expect((action.after as { _meta: { descriptionFacts: string[] } })._meta.descriptionFacts).toEqual(["ages", "activity"]);
     });
   });
 
@@ -108,6 +111,9 @@ describe("enrichRecord", () => {
       const b = await enrichRecord(tx, again, { generate: second, taxonomy, runId: run.id });
       expect(b).toMatchObject({ created: false });
       expect(b.event.id).toBe(a.event.id);
+      // No description to read and nothing beyond the title: no describe call, no description.
+      expect(first).not.toHaveBeenCalledWith(expect.objectContaining({ task: "describe" }));
+      expect(b.event.shortDescription).toBeNull();
       expect(await tx.select().from(events).where(eq(events.id, a.event.id))).toHaveLength(1);
       const [upd] = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, a.event.id), eq(agentActions.action, "update")));
       expect((upd.before as { tagIds: string[] }).tagIds).toEqual([]);
@@ -121,9 +127,9 @@ describe("enrichRecord", () => {
       const { rec, run } = await mappedRecord(tx, SOURCE_TEXT);
       const copied = "Songs rhymes and picture books for children ages three to five with our friendly librarians.";
       const generate = fakeModel(tx, {
-        extract: [{ isFree: null, priceMin: null, priceMax: null, ageRestriction: null, familyFriendly: null, registrationRequired: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null }],
+        extract: [{ isFree: null, priceMin: null, priceMax: null, ageRestriction: null, familyFriendly: null, registrationRequired: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null, spanish: null, activity: "sing songs and read picture books" }],
         classify: [{ category: "family-kids", tags: [], closestMissingCategory: null }],
-        describe: [{ description: copied }],
+        describe: [{ description: copied, usedFacts: ["activity"] }],
       });
       const r = await enrichRecord(tx, rec, { generate, taxonomy: await loadActiveTaxonomy(tx), runId: run.id });
       expect(r.held).toBe(true);

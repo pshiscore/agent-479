@@ -571,6 +571,11 @@ See `.env.example`. Model names are deliberately not env vars.
     eval:extract`: 22/22 on the labeled set, 4/4 injection fixtures resisted.
     First full run: 545 events, 0 held, 0 failed, about $0.13.
 14. **Series detection and labels.**
+    *Owner decisions (2026-10-04), built on top of step 13 before step 14:
+    descriptions must add a fact (describe@3) or are left empty; extract@3
+    adds `spanish` and `activity`; code-set "Ticketed" and "En español" tags;
+    the qualifier-word resolver rule; vague-location detail checks with
+    `propose_venue_match` (migration 0014).*
 15. **Dedup engine in shadow mode,** with `dedup_candidates` and `dedup_labels`.
 16. **Admin:** Basic Auth in `src/proxy.ts`, then `/admin/agent-log` with
     diffs, rollback, venue proposal approve and reject, and Community stats.
@@ -579,6 +584,11 @@ See `.env.example`. Model names are deliberately not env vars.
 18. **Homepage:** filters, series rows, recurring hidden by default.
     *Owner, 2026-10-04: add a venue-type filter (e.g. "At the library").
     Categories stay about what an event is, not where.*
+    *Owner, 2026-10-04: library events get their own shelf on the homepage
+    (e.g. "This week at the library"), separate from the main feed, so
+    classes don't bury concerts and festivals. Series grouping covers only
+    ~50 of 467 library events, so hiding recurring programs alone won't
+    rebalance the page. Planned only; built in this step.*
     *Design direction (owner, 2026-10-04): the owner likes The Verge's
     design. Take inspiration from the principles that make it work, but don't
     copy its layout, logo, typefaces, or assets: our design must be our own.*

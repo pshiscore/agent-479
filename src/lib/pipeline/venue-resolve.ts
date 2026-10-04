@@ -4,7 +4,7 @@ import type { DbExecutor } from "@/lib/db/client";
 import { venueExternalIds, venues } from "@/lib/db/schema";
 import { generateStructured, wrapUntrusted } from "@/lib/llm";
 import type { SourceRow } from "@/lib/sources/types";
-import { namesMatchClosely, normalizeVenueName, subSpaceName, venueNameKeys } from "@/lib/venues/normalize";
+import { namesMatchClosely, normalizeVenueName, qualifierConflict, subSpaceName, venueNameKeys } from "@/lib/venues/normalize";
 import { sameStreetAddress } from "@/lib/venues/street";
 import type { Facts } from "./map";
 
@@ -18,6 +18,10 @@ import type { Facts } from "./map";
  *   5. trigram similarity on the name, same city, when one venue clearly wins
  *   6. an LLM pick among the top 5 trigram candidates, or "none"
  * No match means needs_venue. Venue coordinates always come from our own row.
+ *
+ * At every stage, a venue whose name differs from the location's name only by
+ * a qualifier word (Upper/Lower, North/South, East/West, Old/New) is never a
+ * match: "Lower Ramble" is not the Upper Ramble, and not The Ramble either.
  */
 
 export type MatchedBy = "external_id" | "default_venue" | "alias" | "address" | "trigram" | "llm";
@@ -81,7 +85,8 @@ export async function resolveVenue(
       venueType: venues.venueType,
     })
     .from(venues)
-    .where(eq(venues.active, true));
+    .where(eq(venues.active, true))
+    .then((rows) => rows.filter((v) => !qualifierConflict(loc.name, v)));
 
   // 2. The source's default venue, when the location doesn't point elsewhere.
   if (source.defaultVenueId) {
@@ -116,7 +121,8 @@ export async function resolveVenue(
 
   // 5. Trigram on the name, same city.
   if (!loc.name) return null;
-  const candidates = await trigramCandidates(db, loc.name, loc.city);
+  const allowed = new Set(all.map((v) => v.id));
+  const candidates = (await trigramCandidates(db, loc.name, loc.city)).filter((c) => allowed.has(c.id));
   const [top, second] = candidates;
   if (top && top.score >= TRIGRAM_ACCEPT && (!second || top.score - second.score >= TRIGRAM_MARGIN)) {
     return { venueId: top.id, subSpace: loc.room, matchedBy: "trigram" };

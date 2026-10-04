@@ -17,7 +17,7 @@ import { getDb } from "@/lib/db/client";
 import { llmCalls } from "@/lib/db/schema";
 import { generateStructured } from "@/lib/llm";
 import { classifyEvent } from "@/lib/pipeline/enrich/classify";
-import { describeEvent } from "@/lib/pipeline/enrich/describe";
+import { describeEvent, newAges } from "@/lib/pipeline/enrich/describe";
 import { extractFacts } from "@/lib/pipeline/enrich/extract";
 import type { Generate } from "@/lib/pipeline/enrich/types";
 import type { Facts } from "@/lib/pipeline/map";
@@ -63,7 +63,7 @@ async function main() {
       const f = facts(c.title);
       const extraction = (await extractFacts(generate, f, c.description, run.id)).data;
       const cls = (await classifyEvent(generate, { facts: f, venueName: c.venueName, venueType: c.venueType, extraction, description: c.description }, taxonomy, run.id)).data;
-      const desc = await describeEvent(generate, { title: c.title, when: "Tuesday, October 20, 7:00 PM", venue: c.venueName, city: "Fayetteville", category: cls.category, price: null, performers: [], tags: [], registrationRequired: null }, c.description, run.id);
+      const desc = await describeEvent(generate, { title: c.title, when: "Tuesday, October 20, 7:00 PM", venue: c.venueName, city: "Fayetteville", category: cls.category, price: null, tags: [], performers: [], ages: newAges(c.title, extraction), activity: extraction.activity, registrationRequired: extraction.registrationRequired }, c.description, run.id);
       const text = desc.status === "ok" ? desc.description : "";
       const fails: string[] = [];
       const e = c.expect;

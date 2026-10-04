@@ -36,8 +36,8 @@ describe("category seeds", () => {
 });
 
 describe("tag seeds", () => {
-  it("are the 6 plan tags plus Volunteer and Registration required, with unique valid slugs and names", () => {
-    expect(TAG_SEEDS.map((t) => t.name)).toEqual(["Free", "Outdoor", "Family-friendly", "21+", "Dog-friendly", "Biking", "Volunteer", "Registration required"]);
+  it("are the 6 plan tags plus the owner-added ones, with unique valid slugs and names", () => {
+    expect(TAG_SEEDS.map((t) => t.name)).toEqual(["Free", "Outdoor", "Family-friendly", "21+", "Dog-friendly", "Biking", "Volunteer", "Registration required", "Ticketed", "En español"]);
     for (const t of TAG_SEEDS) expect(t.slug).toMatch(SLUG);
     expect(new Set(TAG_SEEDS.map((t) => t.slug)).size).toBe(TAG_SEEDS.length);
     expect(new Set(TAG_SEEDS.map((t) => t.name.toLowerCase())).size).toBe(TAG_SEEDS.length);

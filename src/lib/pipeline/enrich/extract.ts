@@ -5,8 +5,10 @@ import type { Generate } from "./types";
 
 /**
  * Facts the source states only in its description: price, free, age limit,
- * family-friendly, registration. Never URLs or IDs (code sets those), never
- * wording: these are values, not text. Only runs when there's a description.
+ * family-friendly, registration, language, and what attendees do. Never URLs
+ * or IDs (code sets those), never wording: these are values, and `activity` is
+ * a short phrase in plain words of our own. Only runs when there's a
+ * description.
  */
 export const extractionSchema = z.object({
   isFree: z.boolean().nullable(),
@@ -19,10 +21,12 @@ export const extractionSchema = z.object({
   ageMax: z.number().int().min(0).max(120).nullable(),
   gradeMin: z.number().int().min(0).max(12).nullable(),
   gradeMax: z.number().int().min(0).max(12).nullable(),
+  spanish: z.boolean().nullable(),
+  activity: z.string().trim().min(3).max(80).nullable(),
 });
 export type Extraction = z.infer<typeof extractionSchema>;
 
-export const EXTRACT_PROMPT_VERSION = "extract@2";
+export const EXTRACT_PROMPT_VERSION = "extract@3";
 
 export async function extractFacts(
   generate: Generate,
@@ -43,6 +47,8 @@ export async function extractFacts(
       "- registrationRequired: true if it says registration, sign-up, or tickets are required in advance; false if it says no registration is needed; otherwise null.",
       '- ageMin/ageMax: the age range in years if the title or listing states one ("Ages 3–5" → 3 and 5; "18+" → 18 and null); otherwise null.',
       '- gradeMin/gradeMax: the school grade range if stated ("Grades 5–12" → 5 and 12; kindergarten is 0); otherwise null.',
+      "- spanish: true if the event itself is conducted in Spanish (fully or bilingual), judged from the title and listing; false if it's conducted in another language; otherwise null.",
+      '- activity: what attendees will actually do, as a short plain phrase of at most 10 words in English and in your own words ("bake and decorate cookies", "practice conversation with a tutor"); null if the listing doesn\'t say or it would only restate the title.',
     ].join("\n"),
     input: `Event title: ${facts.title}\n\n${wrapUntrusted("event listing", description, 4_000)}`,
     promptVersion: EXTRACT_PROMPT_VERSION,

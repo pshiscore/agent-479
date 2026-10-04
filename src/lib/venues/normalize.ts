@@ -75,3 +75,25 @@ export function subSpaceName(tmName: string | null, venue: { name: string; alias
   return rest && !STATE_SUFFIX.test(rest) && !keys.includes(normalizeVenueName(rest)) ? rest : null;
 }
 
+
+const QUALIFIERS = new Set(["upper", "lower", "north", "south", "east", "west", "old", "new"]);
+
+/**
+ * Whether two names differ only by qualifier words: "Lower Ramble" and
+ * "Upper Ramble", or "Lower Ramble" and "The Ramble". Such names are never a
+ * match, at any resolver stage: they're different places that share a name.
+ */
+export function differsOnlyByQualifier(a: string, b: string): boolean {
+  const x = words(normalizeVenueName(a));
+  const y = words(normalizeVenueName(b));
+  const diff = [...[...x].filter((w) => !y.has(w)), ...[...y].filter((w) => !x.has(w))];
+  return diff.length > 0 && diff.length < x.size + y.size && diff.every((w) => QUALIFIERS.has(w));
+}
+
+/** True when a location name points at a qualified sibling of this venue rather than the venue itself. */
+export function qualifierConflict(locName: string | null, venue: { name: string; aliases: readonly string[] }): boolean {
+  if (!locName) return false;
+  const key = normalizeVenueName(locName);
+  const keys = venueNameKeys(venue);
+  return !keys.includes(key) && keys.some((k) => differsOnlyByQualifier(key, k));
+}

@@ -44,4 +44,10 @@ export const TAG_SEEDS: TagSeed[] = [
   { slug: "volunteer", name: "Volunteer" },
   // Set in code from extraction, never by the classifier.
   { slug: "registration-required", name: "Registration required" },
+  // Owner, 2026-10-04. Set in code: a ticket link on a ticketing provider's
+  // domain (src/lib/ticketing.ts), a stated fact rather than a price guess.
+  { slug: "ticketed", name: "Ticketed" },
+  // Owner, 2026-10-04. Set in code when extraction says the event is
+  // conducted in Spanish. Titles stay as published; descriptions are English.
+  { slug: "en-espanol", name: "En español" },
 ];

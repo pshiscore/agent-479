@@ -115,6 +115,32 @@ describe("resolveVenue (against the seeded venues)", () => {
     });
   });
 
+  it("never matches names that differ only by a qualifier word (Upper/Lower Ramble)", async () => {
+    await inRollback(async (tx) => {
+      const [parent] = await tx
+        .insert(venues)
+        .values({ slug: `ramble-${tag}`, name: `The Ramble ${tag}`, address: null, city: "Fayetteville", lat: 36.0658, lng: -94.1659, venueType: "area" })
+        .returning();
+      const [upper] = await tx
+        .insert(venues)
+        .values({ slug: `upper-ramble-${tag}`, name: `Upper Ramble ${tag}`, address: "251 N West Ave", city: "Fayetteville", lat: 36.0656, lng: -94.1656, venueType: "park", parentVenueId: parent.id })
+        .returning();
+      const src = { id: randomUUID(), defaultVenueId: null };
+      const at = (loc: string) => factsFor({ location: loc });
+      const llm = vi.fn(async ({ candidates }: { candidates: { slug: string }[] }) => candidates[0]?.slug ?? null);
+
+      // Upper and the parent resolve by name.
+      expect(await resolveVenue(tx, at(`Upper Ramble ${tag} - 251 N West Ave  Fayetteville AR 72701`), src)).toMatchObject({ venueId: upper.id, matchedBy: "alias" });
+      expect(await resolveVenue(tx, at(`The Ramble ${tag} - Fayetteville AR 72701`), src)).toMatchObject({ venueId: parent.id, matchedBy: "alias" });
+      // Lower never lands on Upper or the parent: not by trigram, not by the LLM, not by address.
+      expect(await resolveVenue(tx, at(`Lower Ramble ${tag} - 255 S West Ave  Fayetteville AR 72701`), src, { llmPick: llm })).toBeNull();
+      expect(await resolveVenue(tx, at(`Lower Ramble ${tag} - 251 N West Ave  Fayetteville AR 72701`), src, { llmPick: llm })).toBeNull();
+      for (const call of llm.mock.calls) expect(call[0].candidates.map((c) => c.slug)).not.toContain(`upper-ramble-${tag}`);
+      // Nor as a source's default venue.
+      expect(await resolveVenue(tx, at(`Lower Ramble ${tag}`), { id: randomUUID(), defaultVenueId: upper.id })).toBeNull();
+    });
+  });
+
   it("asks the LLM only among plausible candidates, and accepts only a candidate", async () => {
     await inRollback(async (tx) => {
       await tx.insert(venues).values({ slug: `glimmer-${tag}`, name: "Glimmer Hall", address: "1 A St", city: "Rogers", lat: 36.3, lng: -94.1, venueType: "other" });

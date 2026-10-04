@@ -25,6 +25,8 @@ export const AGENT_ACTIONS = [
   "propose_venue",
   "propose_link",
   "propose_category",
+  // A needs_venue record whose detail page or text names a place we know.
+  "propose_venue_match",
   "publish",
   "hold",
   "veto",

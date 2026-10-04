@@ -125,7 +125,14 @@ export async function storeItems(db: DbExecutor, source: SourceRow, runId: strin
 }
 
 /** Turns a source off after a block or refusal, logged so the owner sees why. */
-async function disableForBlock(db: DbExecutor, sourceId: string, runId: string | null, err: Error, now: Date) {
+export async function disableForBlock(
+  db: DbExecutor,
+  sourceId: string,
+  runId: string | null,
+  err: Error,
+  now: Date,
+  by: { actor: string; job: string } = { actor: ACTOR, job: "fetch" },
+) {
   await db.transaction(async (tx) => {
     const [before] = await tx.select().from(sources).where(eq(sources.id, sourceId));
     if (!before?.enabled) return;
@@ -142,8 +149,8 @@ async function disableForBlock(db: DbExecutor, sourceId: string, runId: string |
       .returning();
     await recordAction(tx, {
       runId,
-      actor: ACTOR,
-      job: "fetch",
+      actor: by.actor,
+      job: by.job,
       action: "disable",
       entityType: "source",
       entityId: sourceId,

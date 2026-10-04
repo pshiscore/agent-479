@@ -3,12 +3,13 @@ import { agentActor, recordAction } from "@/lib/actions/record";
 import type { TaxonomyEntry } from "@/lib/categories";
 import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources, venues } from "@/lib/db/schema";
+import { isTicketingUrl } from "@/lib/ticketing";
 import { formatInChicago } from "@/lib/time";
 import { venueDisplayName } from "@/lib/venues/display";
 import type { Facts } from "../map";
 import { writeEvent } from "../write-event";
 import { classifyEvent } from "./classify";
-import { describeEvent } from "./describe";
+import { describeEvent, newAges, newPerformers } from "./describe";
 import { type Extraction, extractFacts } from "./extract";
 import { decideFree } from "./free";
 import type { Generate } from "./types";
@@ -16,7 +17,8 @@ import type { Generate } from "./types";
 /**
  * Turns a mapped record into an event (build step 13): extract facts from the
  * source's description (if any), classify, set the code-owned tags, describe
- * from the facts only, then write the event, logged. A description that reuses
+ * from the facts only (or leave the description empty when there's no fact to
+ * add beyond the title and category), then write the event, logged. A description that reuses
  * source wording after one retry is held: the event goes live without one, and
  * a "hold" action records why.
  */
@@ -77,6 +79,8 @@ export async function enrichRecord(
   if (extraction?.familyFriendly) tagSlugs.add("family-friendly");
   if (adultsOnly) tagSlugs.delete("family-friendly");
   if (extraction?.registrationRequired) tagSlugs.add("registration-required");
+  if (isTicketingUrl(facts.ticketUrl)) tagSlugs.add("ticketed");
+  if (extraction?.spanish) tagSlugs.add("en-espanol");
   const tagIds = deps.taxonomy.tags.filter((t) => tagSlugs.has(t.slug)).map((t) => t.id);
   const category = deps.taxonomy.categories.find((c) => c.slug === classified.data.category)!;
 
@@ -96,8 +100,10 @@ export async function enrichRecord(
       city: venue.city,
       category: category.name,
       price: priceText(priceMin, priceMax, isFree),
-      performers: facts.performers,
       tags: deps.taxonomy.tags.filter((t) => tagSlugs.has(t.slug)).map((t) => t.name),
+      performers: newPerformers(facts.title, facts.performers),
+      ages: extraction ? newAges(facts.title, extraction) : null,
+      activity: extraction?.activity ?? null,
       registrationRequired: extraction?.registrationRequired ?? null,
     },
     description,
@@ -113,6 +119,9 @@ export async function enrichRecord(
     freeBasis: free.basis,
     extraction,
     descriptionHeld: described.status === "held",
+    descriptionStatus: described.status,
+    descriptionFacts: described.status === "ok" ? described.usedFacts : null,
+    descriptionNoneReason: described.status === "none" ? described.reason : null,
   };
   const { event, created } = await writeEvent(
     db,
