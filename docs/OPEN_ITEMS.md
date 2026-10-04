@@ -7,6 +7,11 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 
 | # | Item | Raised | Blocks |
 |---|---|---|---|
+| 8 | **Production database.** Create a second Supabase project (recommended, us-east-2) or say if you want Neon. Put its two connection strings in `.env.production.local`; then I run the migrations (`MIGRATE_PRODUCTION=yes`). | 2026-10-04 | Production data; launch |
+| 9 | **Vercel env vars.** Run `npx vercel login` and `npx vercel link` once, then approve the list in the 479 Guide report. Until `SITE_PREVIEW_USER`/`SITE_PREVIEW_PASSWORD` are set, the locked site returns 503 to everyone. | 2026-10-04 | Previewing the site |
+| 10 | **`.env.local`:** set `SITE_URL=https://479.guide` and `BOT_CONTACT_EMAIL=bot@479.guide`. Local fetches refuse to run until then. | 2026-10-04 | Local fetches, test fetches |
+| 11 | **Step 14 approval** (series detection), on branch `step-14-series`, plus the step 13 follow-up decisions on the same branch. | 2026-10-04 | Merging to main |
+| 12 | **Spot check:** "Paper Flower Crafting" got the En español tag; confirm on the library's page whether it's conducted in Spanish. | 2026-10-04 | Nothing |
 | 1 | **Lower Ramble map pin.** The decisions message still had the placeholder "[south of the library / next to Walton Arts Center]". Check the city's Lower Ramble facility page in your browser and say where the pin sits. The Census geocoder puts 255 S West Ave at 36.06008, -94.16567, about 160 m south of the library; 255 N West Ave lands next to Upper Ramble. | 2026-10-04 | Adding Lower Ramble; the 3-venue Ramble report and its sign-off; seeding Upper Ramble (3 needs_venue events) |
 | 2 | **Sign the Ramble venue report** once item 1 is in. A new report covers The Ramble (area), Upper Ramble, and Lower Ramble. Not b5d30569. | 2026-10-04 | Seeding the Ramble venues |
 | 3 | **Blind eval labels.** Fill in `category` and `tags` in `tests/fixtures/eval/blind.csv` (40 events). Then compare owner, Claude, and model labels, and make the owner's labels the answer key in `events.json`. | 2026-10-04 | The eval comparison |
