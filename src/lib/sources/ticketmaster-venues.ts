@@ -3,7 +3,7 @@ import { proposeOnce, recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { agentActions, rawRecords, sources, venueExternalIds, venues } from "@/lib/db/schema";
 import { normalizeVenueName, venueNameKeys } from "@/lib/venues/normalize";
-import { normalizeStreetAddress } from "@/lib/venues/street";
+import { normalizeStreetAddress, sameStreetAddress } from "@/lib/venues/street";
 
 export { normalizeStreetAddress };
 import { distanceMeters, NWA_BOUNDS } from "@/lib/venues/verify";
@@ -64,9 +64,14 @@ const inNwa = (lat: number, lng: number) =>
  */
 export const PLACEHOLDER_SHARED_BY = 2;
 
-/** A venue's current and former street addresses, normalized. */
+/** A venue's current and former street addresses. */
 export function addressesOf(v: Pick<OurVenue, "address" | "formerAddresses">): string[] {
-  return [v.address, ...v.formerAddresses].filter((a): a is string => !!a).map(normalizeStreetAddress);
+  return [v.address, ...v.formerAddresses].filter((a): a is string => !!a);
+}
+
+/** Whether a Ticketmaster address names one of the venue's addresses (see sameStreetAddress). */
+export function addressMatches(tmAddress: string | null, v: Pick<OurVenue, "address" | "formerAddresses">): boolean {
+  return !!tmAddress && addressesOf(v).some((a) => sameStreetAddress(tmAddress, a));
 }
 
 export function placeholderPoints(tmVenues: readonly TmVenue[]): Set<string> {
@@ -103,9 +108,8 @@ export function matchTicketmasterVenue(
   const city = (tm.city ?? "").toLowerCase();
   const sameCity = ours.filter((v) => v.city.toLowerCase() === city);
   const key = tm.name ? normalizeVenueName(tm.name) : "";
-  const street = tm.address ? normalizeStreetAddress(tm.address) : "";
   const byName = sameCity.filter((v) => key && venueNameKeys(v).includes(key));
-  const byAddress = sameCity.filter((v) => street && addressesOf(v).includes(street));
+  const byAddress = sameCity.filter((v) => addressMatches(tm.address, v));
 
   const both = byName.find((v) => byAddress.includes(v));
   if (both) return result("name", both);
@@ -311,7 +315,8 @@ export interface LinkProposal {
  * link it). Names must match closely, plus EITHER:
  *   a) Ticketmaster's point is real (not a placeholder) and within 150 m, OR
  *   b) its street address matches the venue's address or a former address,
- *      in the same city.
+ *      in the same city (sameStreetAddress: a directional on one side only
+ *      matches; different directionals never do).
  */
 export function linkProposalFor(
   tm: TmVenue,
@@ -328,9 +333,8 @@ export function linkProposalFor(
       .sort((a, b) => a.d - b.d)[0];
     if (near) return { venue: near.v, path: "location", distanceM: near.d };
   }
-  const street = tm.address ? normalizeStreetAddress(tm.address) : "";
   const city = (tm.city ?? "").toLowerCase();
-  const byAddress = named.find((v) => street && v.city.toLowerCase() === city && addressesOf(v).includes(street));
+  const byAddress = named.find((v) => v.city.toLowerCase() === city && addressMatches(tm.address, v));
   return byAddress ? { venue: byAddress, path: "address", distanceM: null } : null;
 }
 

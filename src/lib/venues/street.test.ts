@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { streetDifference, streetParts } from "./street";
+import { sameStreetAddress, streetDifference, streetParts } from "./street";
 
 describe("streetParts", () => {
   it("splits number, direction, name, and type", () => {
@@ -26,5 +26,23 @@ describe("streetDifference", () => {
     expect(streetDifference("5079 W Northgate Rd", "5079 WEST NORTHGATE ROAD")).toBeNull();
     expect(streetDifference("2203 Promenade Blvd", "2203 S PROMENADE BLVD")).toBeNull();
     expect(streetDifference("100 N Main", "100 N MAIN ST")).toBeNull();
+  });
+});
+
+describe("sameStreetAddress", () => {
+  it("matches when only one side has a directional (Ozark Music Hall)", () => {
+    expect(sameStreetAddress("3615 Steele Blvd", "3615 N Steele Blvd")).toBe(true);
+  });
+
+  it("never matches different directionals (the Arvest case)", () => {
+    expect(sameStreetAddress("3000 N 56th St", "3000 S 56th St")).toBe(false);
+  });
+
+  it("needs the same house number and street name, and compatible types", () => {
+    expect(sameStreetAddress("3615 Steele Blvd", "3617 N Steele Blvd")).toBe(false);
+    expect(sameStreetAddress("3615 Steele Blvd", "3615 N Stone Blvd")).toBe(false);
+    expect(sameStreetAddress("449 Garland Ave", "449 Garland St")).toBe(false);
+    expect(sameStreetAddress("285 N. Stadium Drive", "285 N Stadium Dr")).toBe(true);
+    expect(sameStreetAddress("Steele Blvd", "Steele Blvd")).toBe(false);
   });
 });

@@ -185,6 +185,38 @@ describe("linkProposalFor", () => {
     expect(linkProposalFor(bud, [BUD], new Set(["35.9902,-94.083"]))).toEqual({ venue: BUD, path: "address", distanceM: null });
   });
 
+  it("path b: proposes Ozark Music Hall, where Ticketmaster omits the N directional", () => {
+    const OZARK: OurVenue = {
+      id: "v-oz",
+      slug: "ozark-music-hall",
+      name: "Ozark Music Hall",
+      aliases: ["JJ's Live"],
+      address: "3615 N Steele Blvd",
+      formerAddresses: [],
+      city: "Fayetteville",
+      lat: 36.117211,
+      lng: -94.157155,
+    };
+    const tmOzark = tm({ id: "Z7r9jZa7fx", name: "Ozark Music Hall", address: "3615 Steele Blvd", city: "Fayetteville", lat: 36.106499, lng: -94.2715 });
+    expect(linkProposalFor(tmOzark, [OZARK], none)).toEqual({ venue: OZARK, path: "address", distanceM: null });
+  });
+
+  it("path b: never proposes across opposite directionals (the Arvest case)", () => {
+    const ARVEST: OurVenue = {
+      id: "v-arv",
+      slug: "arvest-ballpark",
+      name: "Arvest Ballpark",
+      aliases: [],
+      address: "3000 S 56th St",
+      formerAddresses: [],
+      city: "Springdale",
+      lat: 36.159952,
+      lng: -94.194279,
+    };
+    const tmArvest = tm({ id: "A1", name: "Arvest Ballpark", address: "3000 N 56th St", city: "Springdale", lat: 35.9902, lng: -94.083 });
+    expect(linkProposalFor(tmArvest, [ARVEST], new Set(["35.9902,-94.083"]))).toBeNull();
+  });
+
   it("never proposes without a close name, whatever the address or distance", () => {
     expect(linkProposalFor(tm({ name: "Some Other Hall" }), [AMP], none)).toBeNull();
   });

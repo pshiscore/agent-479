@@ -116,7 +116,11 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   proposed for the owner's approval when names match closely AND EITHER
   Ticketmaster's point is real and within 150 m, OR its street address
   matches the venue's address or a former address (`venues.former_addresses`,
-  sourced like any other field). Everything else stays in `needs_venue`.
+  sourced like any other field) in the same city. Addresses match when the
+  house number and street name match; a directional on one side only is fine
+  ("3615 Steele Blvd" = "3615 N Steele Blvd"), but different directionals
+  never match ("N 56th St" ≠ "S 56th St"). Everything else stays in
+  `needs_venue`.
   Every link and decision is logged.
 - **Ticketmaster coordinates are never used** for display, distance, maps, or
   tagging; always use our venue's coordinates. Their only uses are proposing

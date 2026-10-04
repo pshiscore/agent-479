@@ -51,3 +51,20 @@ export function streetDifference(ours: string, theirs: string): string | null {
   if (a.direction && b.direction && a.direction !== b.direction) diffs.push(`direction "${a.direction}" vs "${b.direction}"`);
   return diffs.length ? diffs.join(", ") : null;
 }
+
+/**
+ * Whether two addresses name the same street address, for proposing links
+ * (never for linking by itself). House number and street name must match.
+ * A directional on one side only is fine ("3615 Steele Blvd" = "3615 N Steele
+ * Blvd"); different directionals never match ("3000 N 56th St" ≠ "3000 S 56th
+ * St"). A street type on one side only is fine; different types don't match.
+ * The caller checks the city.
+ */
+export function sameStreetAddress(a: string, b: string): boolean {
+  const x = streetParts(a);
+  const y = streetParts(b);
+  if (!x.number || x.number !== y.number || x.name !== y.name) return false;
+  if (x.direction && y.direction && x.direction !== y.direction) return false;
+  if (x.type && y.type && x.type !== y.type) return false;
+  return true;
+}

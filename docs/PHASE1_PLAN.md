@@ -534,9 +534,9 @@ See `.env.example`. Model names are deliberately not env vars.
    are in AGENTS.md.
 10. **Ticketmaster fetcher** with the facts-only whitelist and a venue
     coverage report ✅. Enabled after a passing test fetch (60 events).
-    The 7 approved venue links are written (41 events). **Open:** owner
-    sign-off on Ozark Music Hall, Barnhill Arena, and Razorback Field (19
-    events), then seeding and their link table. Link proposals, the
+    All 10 Ticketmaster venues are linked with the owner's approval, so all
+    60 events resolve to a venue. The venue seed is signed off at 0879d721
+    (54 venues) and seeded. Link proposals, the
     Ticketmaster coordinate rule, former addresses, and sub-spaces are in
     AGENTS.md. Discovery API v2, 40 miles around
     NWA, 180 days, 200 per page up to the API's 1,000-result limit. The
