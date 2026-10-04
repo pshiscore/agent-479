@@ -8,7 +8,9 @@ consent, so we need **both** permissions in writing.
 **To:** media@themomentary.org (the Momentary contact page lists this for media
 inquiries)
 **CC:** info@crystalbridges.org
-**From:** your personal email
+**From:** your personal email, with **Reply-To: bot@479.guide** (that address
+forwards to you; Cloudflare routing only receives, so send from your own
+account)
 **Fill in before sending:** `[Your name]`, `[phone, optional]`
 
 ---
@@ -17,9 +19,10 @@ inquiries)
 
 Hello,
 
-I'm [Your name], a Northwest Arkansas resident building **Agent 479**, a
-free local events calendar and weekly "weekend picks" digest for Bentonville,
-Rogers, Springdale, Fayetteville, and Bella Vista.
+I'm [Your name], a Northwest Arkansas resident building **479 Guide**
+(<https://479.guide>), a free local events calendar and weekly "weekend
+picks" digest for Bentonville, Rogers, Springdale, Fayetteville, and Bella
+Vista.
 
 Crystal Bridges and the Momentary host some of the best events in the region,
 and I'd like to include them. Your website's terms of use ask for prior
@@ -35,7 +38,8 @@ written consent for two things this would involve, so I'm asking first.
 1. **Linking directly to individual event pages** on crystalbridges.org and
    themomentary.org, rather than only to your homepages.
 2. **Reading your public event listings automatically**, once a day, at a
-   very low rate. Our reader identifies itself by name and contact address.
+   very low rate. Our reader, Agent479Bot, identifies itself with a contact address;
+   what it reads and how to stop it are at <https://479.guide/bot>.
    If you have a feed (iCal/ICS, RSS, or a partner export), we'd much rather use that.
 
 Is there any attribution or wording you'd like, or any type of event you'd
@@ -46,11 +50,13 @@ clearly labeled local sponsor to cover hosting costs. Sponsored content would
 always be kept separate from event listings. If that would change your answer,
 please tell me.
 
-If you ever want a listing corrected or removed, one email to me will do it.
-I'm glad to send a preview link before anything goes live.
+If you ever want a listing corrected or removed, one email to bot@479.guide
+will do it. The site isn't public yet; I'm glad to send you a preview login
+before anything goes live.
 
 Thank you,
 [Your name]
+479 Guide · <https://479.guide> · bot@479.guide
 [phone, optional]
 
 ---

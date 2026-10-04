@@ -11,7 +11,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Agent 479
 
 Local events platform for Northwest Arkansas, run as a pipeline of scheduled
-jobs. The full Phase 1 design is in `docs/PHASE1_PLAN.md`. Read it before
+jobs. The site is **479 Guide** at https://479.guide; "Agent 479" is the name
+of the agent and the bot (Agent479Bot). The full Phase 1 design is in `docs/PHASE1_PLAN.md`. Read it before
 changing schema, the pipeline, or crons.
 
 ## Commands
@@ -55,7 +56,8 @@ imports it.
    times in `America/Chicago`. Vercel cron runs in UTC, so local-time jobs use
    two cron entries plus a local-hour guard (see the plan).
 6. **Respect sources.** Honest user agent
-   (`Agent479Bot (contact: $BOT_CONTACT_EMAIL)`), obey robots.txt and each
+   (`Agent479Bot/1.0 (+https://479.guide/bot; bot@479.guide)`, built from
+   `SITE_URL` and `BOT_CONTACT_EMAIL`), obey robots.txt and each
    site's terms (where they disagree, the stricter one wins), never get around
    bot challenges, and never fetch a source whose `enabled` is false. The one
    exception is the test fetch (`npm run sources -- test-fetch <slug>`): a dry
@@ -70,6 +72,12 @@ imports it.
    service key in client code.
 9. **Next 16:** request interception lives in `src/proxy.ts` (the `middleware`
    convention is deprecated).
+10. **Production stays locked and quiet until launch.** `SITE_LOCKED`
+    (production is locked unless it's exactly "false"): every page needs the
+    preview login except `/bot` and `/robots.txt`, `/admin` always needs the
+    admin login, and responses are noindex. `CRON_ENABLED` must be exactly
+    "true" for any scheduled job to run. Development and production databases
+    never cross (`src/lib/db/target.ts`).
 
 ## Fetching
 
@@ -105,6 +113,10 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   (`sources -- enable <slug> --reason`). An `awaiting_permission` source first
   needs the permission recorded (`sources -- permission`), which makes it
   `untested`. Every change is logged.
+- **Opt-outs:** a site owner who asks us to stop (via `/bot` or
+  bot@479.guide) gets `npm run sources -- opt-out <slug> --reason "..."`: a
+  logged disable. Re-enabling needs a reason starting "Permission" (their
+  written permission).
 - **A block disables the source** (`disabled_reason = blocked`) with a logged
   `disable` action, shown on the admin page, so no later run retries it.
 - **Repeated failures:** after 3 consecutive failures the admin page flags the

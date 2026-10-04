@@ -36,7 +36,7 @@ Source findings came from live checks on 2026-10-02.
 | Time | `timestamptz`, DB session set to UTC. Parse with an explicit zone and display in `America/Chicago`. Local-time cron jobs get two UTC entries plus a local-hour guard. |
 | Extraction | Deterministic mappers first (ICS, Ticketmaster, JSON-LD). The LLM is used for HTML pages, classification, and our own descriptions. |
 | Concurrency | One Postgres advisory lock per job. |
-| Fetch identity | `Agent479Bot (contact: <BOT_CONTACT_EMAIL>)`. The fetch layer throws if the address is unset. No browser spoofing, no getting around bot challenges. |
+| Fetch identity | `Agent479Bot/1.0 (+https://479.guide/bot; bot@479.guide)` (owner, 2026-10-04; was `Agent479Bot (contact: …)`). The fetch layer throws if the address is unset. No browser spoofing, no getting around bot challenges. |
 | LLM | `src/lib/llm` is the only entry point. Each task looks up its active `llm_models` row and dispatches to the adapter named in `provider`. Switching between providers that have adapters is a row change. A never-used provider needs one adapter file. |
 
 ### LLM model choice: `gpt-6-luna`

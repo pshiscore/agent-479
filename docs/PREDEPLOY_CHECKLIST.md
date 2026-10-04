@@ -5,13 +5,34 @@ marked (every deploy) each time.
 
 ## Identity
 
-- [ ] A real domain is registered and attached to the Vercel project.
-- [ ] `SITE_URL` in Vercel Production env is that domain (not localhost).
-- [ ] `BOT_CONTACT_EMAIL` in Vercel Production env is a real, monitored
-      address (not a personal address you don't want published in other
-      sites' logs).
-- [ ] A `/bot` page on the site explains what Agent479Bot fetches and how to
-      opt out.
+- [x] A real domain is registered: **479.guide** (site name "479 Guide";
+      "Agent 479" stays the agent's and bot's name). Owner, 2026-10-04.
+- [ ] 479.guide is attached to the Vercel project (Cloudflare DNS).
+- [ ] `SITE_URL=https://479.guide` in Vercel Production env and `.env.local`.
+- [x] Contact address: **bot@479.guide**, forwarding to the owner's inbox.
+      Owner, 2026-10-04.
+- [ ] `BOT_CONTACT_EMAIL=bot@479.guide` in Vercel Production env and
+      `.env.local`; a test email to it arrives.
+- [x] `/bot` explains what Agent479Bot fetches, how often, and how to opt
+      out; it's public even while the site is locked. The fetch user agent is
+      `Agent479Bot/1.0 (+https://479.guide/bot; bot@479.guide)`.
+- [ ] Opt-out requests are handled with `npm run sources -- opt-out <slug>
+      --reason "..."` (a logged disable; re-enabling needs a reason starting
+      "Permission").
+
+## Site lock (until launch)
+
+- [ ] `SITE_LOCKED=true` in Production. (Production is locked unless it's
+      exactly `false`, so a missing value stays locked.)
+- [ ] `SITE_PREVIEW_USER` and `SITE_PREVIEW_PASSWORD` set in Production,
+      different from the admin credentials. Without them the locked site
+      returns 503 for everyone, never opens.
+- [ ] Checked by hand on https://479.guide: `/` asks for the preview password;
+      `/admin` asks for the admin password and refuses the preview one;
+      `/bot` and `/robots.txt` load without a password; every response has
+      `X-Robots-Tag: noindex`; `/robots.txt` is `Disallow: /`.
+- [ ] At launch: set `SITE_LOCKED=false`, redeploy, and re-check that
+      `/robots.txt` allows the site and `X-Robots-Tag` is gone.
 
 ## Secrets (every deploy)
 
@@ -34,9 +55,16 @@ marked (every deploy) each time.
 
 ## Data
 
-- [ ] Decide whether development keeps sharing the production database
-      (Supabase project `agent-479`). If not, set up a dev branch or a
-      separate dev project, and point `.env.local` at it.
+- [ ] **Separate production database.** Production uses its own database;
+      the current Supabase project (`sjpzfskwhkvcqqhbxrbd`) is development
+      only. Enforced in code (`src/lib/db/target.ts`): production refuses the
+      dev database, and local code, scripts, tests, and previews refuse any
+      other. Production is migrated deliberately with
+      `MIGRATE_PRODUCTION=yes npm run db:migrate` reading
+      `.env.production.local`.
+- [ ] Production `DATABASE_URL` and `DATABASE_URL_UNPOOLED` point at the
+      production database, never the dev one (the app refuses to start
+      otherwise).
 - [ ] `npm run db:verify` passes against production.
 - [ ] All Drizzle migrations are applied to the production Supabase project
       (`drizzle-kit migrate`, never `push`).
@@ -51,7 +79,9 @@ marked (every deploy) each time.
 
 ## Jobs
 
-- [ ] `vercel.json` crons match plan section 7.
+- [ ] `CRON_ENABLED=false` in Production until launch. Every cron route
+      answers "disabled" and runs nothing unless it's exactly `true`.
+- [ ] `vercel.json` crons match plan section 7 (today: none defined).
 - [ ] `/api/cron/maintenance` is scheduled daily. It is the only thing that
       purges stored source descriptions (AGENTS.md rule 4).
 - [ ] Each cron route rejects requests without the bearer secret (checked

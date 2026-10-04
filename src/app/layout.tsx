@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agent 479",
+  title: "479 Guide",
   description: "Local events in Northwest Arkansas: Bentonville, Rogers, Springdale, Fayetteville, and Bella Vista.",
 };
 
