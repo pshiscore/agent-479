@@ -1,0 +1,2 @@
+ALTER TABLE "sources" DROP CONSTRAINT "sources_disabled_reason_check";--> statement-breakpoint
+ALTER TABLE "sources" ADD CONSTRAINT "sources_disabled_reason_check" CHECK ((enabled and disabled_reason is null) or (not enabled and disabled_reason is not null and disabled_reason in ('untested', 'awaiting_permission', 'blocked', 'manual')));

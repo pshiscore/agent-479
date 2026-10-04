@@ -49,15 +49,22 @@ describe("sources table", () => {
   it("can't enable a source with no fetcher", async () => {
     await inRollback(async (tx) => {
       const base = { slug: `s-${tag}`, name: "S", baseUrl: "https://example.org/", trustLevel: 3, fetchIntervalMinutes: 60, termsNotes: "t" };
-      expect(await pgError(tx, (sp) => sp.insert(sources).values({ ...base, enabled: true }))).toBe(
-        "sources_enabled_check",
+      expect(
+        await pgError(tx, (sp) => sp.insert(sources).values({ ...base, enabled: true, disabledReason: null })),
+      ).toBe("sources_enabled_check");
+      // enabled and disabled_reason must agree.
+      expect(await pgError(tx, (sp) => sp.insert(sources).values({ ...base, kind: "ics", fetcher: "ics", enabled: true }))).toBe(
+        "sources_disabled_reason_check",
+      );
+      expect(await pgError(tx, (sp) => sp.insert(sources).values({ ...base, disabledReason: null }))).toBe(
+        "sources_disabled_reason_check",
       );
       expect(await pgError(tx, (sp) => sp.insert(sources).values({ ...base, trustLevel: 6 }))).toBe("sources_trust_check");
       expect(await pgError(tx, (sp) => sp.insert(sources).values({ ...base, baseUrl: "http://example.org/" }))).toBe(
         "sources_base_url_check",
       );
       const [s] = await tx.insert(sources).values(base).returning();
-      expect(s).toMatchObject({ enabled: false, dedupMode: "shadow", commercialUseOk: "unknown" });
+      expect(s).toMatchObject({ enabled: false, disabledReason: "untested", dedupMode: "shadow", commercialUseOk: "unknown" });
     });
   });
 
@@ -99,12 +106,19 @@ describe("seedSources", () => {
       const opts = { runId: run.id, actor };
       expect(await seedSources(tx, [seed()], opts)).toEqual({ inserted: 1, updated: 0, unchanged: 0 });
       const [s] = await tx.select().from(sources).where(eq(sources.slug, `test-source-${tag}`));
-      expect(s.enabled).toBe(false);
+      expect(s).toMatchObject({ enabled: false, disabledReason: "untested" });
+      await seedSources(tx, [seed({ slug: `perm-${tag}`, launch: false })], opts);
+      const [p] = await tx.select().from(sources).where(eq(sources.slug, `perm-${tag}`));
+      expect(p.disabledReason).toBe("awaiting_permission");
 
-      expect(await seedSources(tx, [seed()], opts)).toEqual({ inserted: 0, updated: 0, unchanged: 1 });
+      expect(await seedSources(tx, [seed(), seed({ slug: `perm-${tag}`, launch: false })], opts)).toEqual({
+        inserted: 0,
+        updated: 0,
+        unchanged: 2,
+      });
 
       // Turned on elsewhere (step 9), then re-seeded with a changed interval.
-      await tx.update(sources).set({ enabled: true }).where(eq(sources.id, s.id));
+      await tx.update(sources).set({ enabled: true, disabledReason: null }).where(eq(sources.id, s.id));
       expect(await seedSources(tx, [seed({ fetchIntervalMinutes: 120 })], opts)).toEqual({
         inserted: 0,
         updated: 1,
@@ -118,7 +132,7 @@ describe("seedSources", () => {
         .from(agentActions)
         .where(and(eq(agentActions.runId, run.id), eq(agentActions.entityType, "source")));
       // One transaction shares one now(), so row order isn't guaranteed: compare as a set.
-      expect(logged.map((l) => l.action).sort()).toEqual(["insert", "update"]);
+      expect(logged.map((l) => l.action).sort()).toEqual(["insert", "insert", "update"]);
       expect(logged.find((l) => l.action === "update")?.reason).toMatch(/fetchIntervalMinutes/);
     });
   });

@@ -44,6 +44,9 @@ npm run dev                  # http://localhost:3000
 | `npm run venues:seed` | Seed venues from the signed-off seed file (idempotent, logged) |
 | `npm run db:seed:sources` | Seed `sources` (all disabled) and `link_policies` (idempotent, logged; needs venues) |
 | `npm run db:seed:taxonomy` | Seed `categories` and `tags` (idempotent, logged; never changes `active`) |
+| `npm run sources -- <command>` | `test-fetch <slug> [--enable]` (untested sources only), `enable`/`disable`/`permission <slug> --reason "..."`, `status` (all logged) |
+| `npm run fetch:once` | Run the fetch job once, as the cron route does |
+| `npm run maintenance:once` | Run the maintenance job once (purges expired source descriptions) |
 
 ## Cron jobs
 

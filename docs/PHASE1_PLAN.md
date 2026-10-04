@@ -517,8 +517,21 @@ See `.env.example`. Model names are deliberately not env vars.
    case-insensitive name. Rows are retired with `active = false`, never
    deleted, and re-seeding never changes `active`. `loadActiveTaxonomy()` in
    `src/lib/categories.ts` gives the classifier and filters the active lists.
-9. **Fetch framework and ICS fetcher:** user agent, robots, rate limits, the
-   enabled-flag guard. Enable the cities and libraries.
+9. **Fetch framework and ICS fetcher** ✅: migrations 0007–0009
+   (`raw_records`; `sources.disabled_reason`; description columns).
+   `PoliteClient` (`src/lib/sources/http.ts`) does robots.txt (RFC 9309, plus
+   Crawl-delay), a per-host gap, timeouts, a size cap, and re-checks every
+   redirect hop; `botFetch` refuses the unpermitted domains outright. The ICS
+   fetcher stores facts in the payload and the source description separately
+   in `description_text` (internal only, purged 30 days after the event by the
+   maintenance job), and repairs Windows-1252 text. `fetchSource` holds the
+   enabled guard; a block disables the source (`disabled_reason = blocked`)
+   with a logged action. `/api/cron/fetch` and `/api/cron/maintenance`
+   (CRON_SECRET, job lease) are built but not scheduled until step 23. Enabled
+   after passing test fetches: the three cities and Fayetteville Public
+   Library. Rogers Public Library waits for its feed URL; Ticketmaster for
+   step 10. Owner decisions on descriptions, logging, blocks, and test fetches
+   are in AGENTS.md.
 10. **Ticketmaster fetcher** with the facts-only whitelist and a venue
     coverage report.
 11. **Momentary and Crystal Bridges fetchers:** gated on written permission.

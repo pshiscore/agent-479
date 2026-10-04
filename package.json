@@ -21,7 +21,10 @@
     "venues:verify": "tsx scripts/verify-venues.ts",
     "venues:seed": "tsx scripts/seed-venues.ts",
     "db:seed:sources": "tsx scripts/seed-sources.ts",
-    "db:seed:taxonomy": "tsx scripts/seed-taxonomy.ts"
+    "db:seed:taxonomy": "tsx scripts/seed-taxonomy.ts",
+    "fetch:once": "tsx scripts/fetch-once.ts",
+    "sources": "tsx scripts/sources.ts",
+    "maintenance:once": "tsx scripts/maintenance-once.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

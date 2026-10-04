@@ -52,6 +52,8 @@ marked (every deploy) each time.
 ## Jobs
 
 - [ ] `vercel.json` crons match plan section 7.
+- [ ] `/api/cron/maintenance` is scheduled daily. It is the only thing that
+      purges stored source descriptions (AGENTS.md rule 4).
 - [ ] Each cron route rejects requests without the bearer secret (checked
       manually).
 - [ ] `/admin/*` returns 401 without credentials (checked manually).

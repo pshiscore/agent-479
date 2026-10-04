@@ -17,6 +17,13 @@ export const SOURCE_KINDS = ["api", "ics", "rss", "jsonld_sitemap", "html"] as c
 export const COMMERCIAL_USE = ["yes", "no", "unknown"] as const;
 export const DEDUP_MODES = ["shadow", "live"] as const;
 export const LINK_MODES = ["deep", "homepage_only"] as const;
+/**
+ * Why a source is off. untested: never fetched yet; only these may be test
+ * fetched. awaiting_permission: never fetched, not even a test, until the
+ * owner records permission. blocked: the site refused us; manual re-enable
+ * only. manual: the owner turned it off.
+ */
+export const DISABLED_REASONS = ["untested", "awaiting_permission", "blocked", "manual"] as const;
 
 /**
  * Where events come from. A source with enabled = false is never fetched;
@@ -37,6 +44,7 @@ export const sources = pgTable(
     defaultVenueId: uuid("default_venue_id").references(() => venues.id, { onDelete: "set null" }),
     trustLevel: integer("trust_level").notNull(),
     enabled: boolean("enabled").notNull().default(false),
+    disabledReason: text("disabled_reason", { enum: DISABLED_REASONS }).default("untested"),
     fetchIntervalMinutes: integer("fetch_interval_minutes").notNull(),
     commercialUseOk: text("commercial_use_ok", { enum: COMMERCIAL_USE }).notNull().default("unknown"),
     termsNotes: text("terms_notes").notNull(),
@@ -55,6 +63,14 @@ export const sources = pgTable(
     check("sources_kind_check", sql.raw(`kind is null or kind in ${sqlList(SOURCE_KINDS)}`)),
     // Nothing can be switched on until we know how to read it.
     check("sources_enabled_check", sql.raw(`not enabled or (kind is not null and fetcher is not null)`)),
+    // "is not null" matters: NULL in (...) is NULL, which a CHECK lets through.
+    check(
+      "sources_disabled_reason_check",
+      sql.raw(
+        `(enabled and disabled_reason is null) or ` +
+          `(not enabled and disabled_reason is not null and disabled_reason in ${sqlList(DISABLED_REASONS)})`,
+      ),
+    ),
     check("sources_trust_check", sql.raw(`trust_level between 1 and 5`)),
     check("sources_interval_check", sql.raw(`fetch_interval_minutes >= 15`)),
     check("sources_commercial_check", sql.raw(`commercial_use_ok in ${sqlList(COMMERCIAL_USE)}`)),

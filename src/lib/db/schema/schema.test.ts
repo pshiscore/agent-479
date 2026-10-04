@@ -17,6 +17,7 @@ describe("schema", () => {
         "link_policies",
         "llm_calls",
         "llm_models",
+        "raw_records",
         "runs",
         "sources",
         "tags",

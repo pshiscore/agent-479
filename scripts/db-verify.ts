@@ -19,6 +19,7 @@ const EXPECTED_TABLES = [
   "link_policies",
   "categories",
   "tags",
+  "raw_records",
 ];
 const EXPECTED_EXTENSIONS = ["pg_trgm", "unaccent"];
 

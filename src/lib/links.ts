@@ -1,5 +1,8 @@
 import type { DbExecutor } from "@/lib/db/client";
 import { linkPolicies } from "@/lib/db/schema";
+import { normalizeDomain } from "@/lib/http/domain";
+
+export { normalizeDomain };
 
 /**
  * Outbound links go through link_policies (AGENTS.md rule 6). Call this when a
@@ -8,30 +11,6 @@ import { linkPolicies } from "@/lib/db/schema";
  */
 
 export type LinkPolicy = Pick<typeof linkPolicies.$inferSelect, "domain" | "mode" | "homepageUrl">;
-
-/**
- * The one form a domain is stored and compared in, so the unique constraint
- * really prevents duplicates: lowercase, no scheme, path, port, trailing dot,
- * or leading "www.". "HTTPS://WWW.CrystalBridges.org.:443/x" → "crystalbridges.org".
- * Returns null if nothing domain-like is left.
- */
-export function normalizeDomain(input: string): string | null {
-  let host = input.trim().toLowerCase();
-  if (host.includes("://")) {
-    try {
-      host = new URL(host).hostname;
-    } catch {
-      return null;
-    }
-  }
-  host = host
-    .replace(/[/?#].*$/, "")
-    .replace(/:\d+$/, "")
-    .replace(/\.+$/, "");
-  // Strip "www." only when a real domain remains ("www.org" stays as is).
-  if (/^www\.[^.]+\.[^.]+/.test(host)) host = host.slice(4);
-  return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(host) ? host : null;
-}
 
 /** The policy covering a host: its own domain or any parent ("tickets.x.org" → "x.org"). */
 export function policyFor(host: string, policies: readonly LinkPolicy[]): LinkPolicy | undefined {

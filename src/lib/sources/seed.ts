@@ -9,7 +9,7 @@ import type { LinkPolicySeed, SourceSeed } from "./seed-data";
 type NewSource = typeof sources.$inferInsert;
 type NewLinkPolicy = typeof linkPolicies.$inferInsert;
 
-/** Fields the seed owns. enabled and the fetch-health columns belong to the pipeline. */
+/** Fields the seed owns. enabled, disabled_reason, and the fetch-health columns belong to the pipeline. */
 const SOURCE_FIELDS = [
   "name",
   "kind",
@@ -33,9 +33,10 @@ const differs = <T extends object>(a: T, b: Partial<T>, keys: readonly (keyof T)
   keys.filter((k) => canonicalJson(a[k] ?? null) !== canonicalJson(b[k] ?? null));
 
 /**
- * Upserts sources by slug, logging every change. New sources start disabled;
- * an existing source's `enabled` is never changed here, because switching a
- * source on or off is its own explicit, logged action.
+ * Upserts sources by slug, logging every change. New sources start disabled
+ * (untested, or awaiting_permission); an existing source's `enabled` and
+ * `disabled_reason` are never changed here, because switching a source on or
+ * off is its own explicit, logged action.
  */
 export async function seedSources(tx: DbTx, seeds: readonly SourceSeed[], opts: SeedOpts) {
   const venueSlugs = [...new Set(seeds.map((s) => s.defaultVenueSlug).filter((s): s is string => !!s))];
@@ -65,7 +66,11 @@ export async function seedSources(tx: DbTx, seeds: readonly SourceSeed[], opts: 
     };
     const [existing] = await tx.select().from(sources).where(eq(sources.slug, s.slug));
     if (!existing) {
-      const [created] = await tx.insert(sources).values({ ...row, enabled: false }).returning();
+      // New sources start off: launch sources untested, the rest awaiting permission.
+      const [created] = await tx
+        .insert(sources)
+        .values({ ...row, enabled: false, disabledReason: s.launch ? "untested" : "awaiting_permission" })
+        .returning();
       await recordAction(tx, {
         runId: opts.runId,
         actor: opts.actor,
