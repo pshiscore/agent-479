@@ -533,8 +533,10 @@ See `.env.example`. Model names are deliberately not env vars.
    step 10. Owner decisions on descriptions, logging, blocks, and test fetches
    are in AGENTS.md.
 10. **Ticketmaster fetcher** with the facts-only whitelist and a venue
-    coverage report. *Built; waiting on `TICKETMASTER_API_KEY` for the live
-    test fetch and the coverage report.* Discovery API v2, 40 miles around
+    coverage report ✅. Enabled after a passing test fetch (60 events).
+    **Open:** owner approval of 7 proposed venue links (41 events), and
+    whether to add Ozark Music Hall, Barnhill Arena, and Razorback Field
+    (19 events) through the venue sign-off process. Discovery API v2, 40 miles around
     NWA, 180 days, 200 per page up to the API's 1,000-result limit. The
     payload is built from a whitelist (no images, info, pleaseNote, promoter
     text, or descriptions). API keys are redacted from every stored URL and
@@ -542,7 +544,10 @@ See `.env.example`. Model names are deliberately not env vars.
     `npm run tm:venues` writes the coverage report; links are written only
     after the owner approves them.
 11. **Momentary and Crystal Bridges fetchers:** gated on written permission.
-    Skipped until it arrives, and not built speculatively.
+    Skipped until it arrives, and not built speculatively. *Skipped
+    2026-10-04: all three (and WAC) are still `awaiting_permission`. When
+    permission arrives: `npm run sources -- permission <slug> --reason`, build
+    the fetcher, then test fetch and enable as usual.*
 12. **Events tables:** `events`, `event_sources`, `event_tags`. Mappers and
     the venue resolver, `needs_venue`, and venue proposals.
 13. **LLM extract, classify, and describe,** including the Community hint,
@@ -554,6 +559,9 @@ See `.env.example`. Model names are deliberately not env vars.
 17. **`/admin/dedup-review`:** you label about 30 pairs. Export the regression
     fixtures and test, set thresholds, go `live`.
 18. **Homepage:** filters, series rows, recurring hidden by default.
+    *Design direction (owner, 2026-10-04): the owner likes The Verge's
+    design. Take inspiration from the principles that make it work, but don't
+    copy its layout, logo, typefaces, or assets: our design must be our own.*
 19. **Event detail page and JSON-LD.**
 20. **Digest draft:** selection rules, generation, validator, the Thursday
     cron, and `/admin/digest-preview`.
