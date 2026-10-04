@@ -629,6 +629,20 @@ See `.env.example`. Model names are deliberately not env vars.
     or the taxonomy seed).
 17. **`/admin/dedup-review`:** you label about 30 pairs. Export the regression
     fixtures and test, set thresholds, go `live`.
+    *Built, awaiting owner approval and labels.* `/admin/dedup-review` queues
+    the 30 unlabeled pairs nearest a threshold, one per pair of titles (18
+    weekly "Math Olympiads" pairs take one label), side by side with scores
+    and the engine's decision; Same/Different with an optional note, logged;
+    labels freeze both events' facts. Thresholds live in
+    `src/config/dedup.ts` (placeholders until set from labels);
+    `computeThresholds` suggests them by the plan's rule, shown on the page.
+    `npm run dedup:export-labels` writes `tests/fixtures/dedup/labels.json`;
+    `tests/dedup-regression.test.ts` runs every labeled pair through
+    score-and-decide; `npm run eval:dedup` checks the model's band against
+    the labels with real calls. `sources -- dedup-mode <slug> live` is logged
+    and refused until about 10 of the source's pairs are labeled. Today's
+    sources barely overlap, so expect mostly "different" labels; real
+    cross-source duplicates arrive with overlapping sources.
 18. **Homepage:** filters, series rows, recurring hidden by default.
     *Owner, 2026-10-04: add a venue-type filter (e.g. "At the library").
     Categories stay about what an event is, not where.*

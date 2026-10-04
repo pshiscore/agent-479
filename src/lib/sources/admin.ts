@@ -1,4 +1,4 @@
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { agentActions, sources } from "@/lib/db/schema";
@@ -127,6 +127,39 @@ export async function optOut(db: DbExecutor, slug: string, reason: string, actor
     throw new SourceStateError(`${slug} has already opted out`);
   }
   return change(db, source, { enabled: false, disabledReason: "manual" }, { actor, action: "disable", reason: `${OPT_OUT_PREFIX}: ${r}` });
+}
+
+/** Pairs to label before a source's dedup goes live (plan section 6, rule 7). */
+export const LIVE_DEDUP_MIN_LABELS = 10;
+
+/**
+ * Switches a source's dedup between shadow (decisions logged, nothing merges)
+ * and live (merges). Going live needs the owner's labels on about 10 pairs
+ * involving the source, or on every pair it has if it has fewer. Logged.
+ */
+export async function setDedupMode(db: DbExecutor, slug: string, mode: "shadow" | "live", reason: string, actor: string) {
+  const r = requireReason(reason);
+  if (!actor.startsWith("human:")) throw new SourceStateError("only a person changes dedup mode");
+  const source = await loadBySlug(db, slug);
+  if (source.dedupMode === mode) throw new SourceStateError(`${slug} is already ${mode}`);
+  if (mode === "live") {
+    const [counts] = (await db.execute(sql`
+      select count(*)::int pairs, count(l.id)::int labeled
+      from dedup_candidates c
+      join event_sources ea on ea.event_id = c.event_a_id and ea.is_primary
+      join event_sources eb on eb.event_id = c.event_b_id and eb.is_primary
+      left join dedup_labels l on l.candidate_id = c.id
+      where ea.source_id = ${source.id} or eb.source_id = ${source.id}`)) as unknown as { pairs: number; labeled: number }[];
+    const need = Math.min(LIVE_DEDUP_MIN_LABELS, counts.pairs);
+    if (counts.labeled < need) {
+      throw new SourceStateError(`${slug}: label at least ${need} of its pairs first (${counts.labeled} labeled of ${counts.pairs})`);
+    }
+  }
+  return db.transaction(async (tx) => {
+    const [after] = await tx.update(sources).set({ dedupMode: mode }).where(eq(sources.id, source.id)).returning();
+    await recordAction(tx, { actor, action: "update", entityType: "source", entityId: source.id, before: source, after, reason: `Dedup ${mode}: ${r}` });
+    return after;
+  });
 }
 
 /** The owner turns a source off. */

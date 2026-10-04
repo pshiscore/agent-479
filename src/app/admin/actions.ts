@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { rollbackAction } from "@/lib/actions/rollback";
 import { requireAdmin } from "@/lib/admin/auth";
+import { labelPair } from "@/lib/admin/dedup-review";
 import { decideProposal } from "@/lib/admin/proposals";
 import { getDb } from "@/lib/db/client";
 
@@ -47,6 +48,22 @@ export async function decide(formData: FormData) {
     target = back("/admin/proposals", { msg: `${decision === "approved" ? "Approved" : "Rejected"}: ${r.effect}.` });
   } catch (err) {
     target = back("/admin/proposals", { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function labelDedupPair(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("candidateId"));
+  const label = formData.get("label") === "same" ? "same" : formData.get("label") === "different" ? "different" : null;
+  const note = String(formData.get("note") ?? "");
+  let target: string;
+  try {
+    if (!id.success || !label) throw new Error("bad request");
+    await labelPair(getDb(), id.data, label, { actor, note });
+    target = back("/admin/dedup-review", { msg: `Labeled ${label}.` });
+  } catch (err) {
+    target = back("/admin/dedup-review", { error: `Not saved: ${message(err)}` });
   }
   redirect(target);
 }

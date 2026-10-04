@@ -1,4 +1,5 @@
 import type { DedupScores } from "@/lib/db/schema";
+import { DEDUP_THRESHOLDS } from "@/config/dedup";
 import { normalizeVenueName } from "@/lib/venues/normalize";
 
 /**
@@ -11,8 +12,8 @@ import { normalizeVenueName } from "@/lib/venues/normalize";
  * placeholders and are set from the owner's labels in step 17.
  */
 
-export const T_MERGE = 0.85;
-export const T_LLM = 0.5;
+export const T_MERGE = DEDUP_THRESHOLDS.tMerge;
+export const T_LLM = DEDUP_THRESHOLDS.tLlm;
 export const MERGE_MAX_START_DIFF_MIN = 30;
 export const LLM_SAME_MIN_CONFIDENCE = 0.8;
 

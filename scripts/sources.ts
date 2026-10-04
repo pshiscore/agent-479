@@ -5,6 +5,7 @@
  *   npm run sources -- enable <slug> --reason "..."        re-enable a blocked or manual source (owner only)
  *   npm run sources -- disable <slug> --reason "..."       turn a source off
  *   npm run sources -- opt-out <slug> --reason "..."       a site owner asked us to stop (who, when, how)
+ *   npm run sources -- dedup-mode <slug> <shadow|live> --reason "..."   live needs ~10 labeled pairs
  *   npm run sources -- permission <slug> --reason "..."    written permission arrived: awaiting → untested
  *   npm run sources -- status                              every source, its state, and recent failures
  *
@@ -25,6 +26,7 @@ import {
   enableManually,
   NEEDS_ATTENTION_FAILURES,
   optOut,
+  setDedupMode,
   recordPermission,
 } from "@/lib/sources/admin";
 import { PoliteClient } from "@/lib/sources/http";
@@ -73,6 +75,13 @@ async function main() {
         await disableManually(db, slug ?? "", args.reason ?? "", OWNER);
         console.log(`${slug} disabled (logged)`);
         return;
+      case "dedup-mode": {
+        const mode = positionals[2];
+        if (mode !== "shadow" && mode !== "live") throw new Error('dedup-mode needs "shadow" or "live"');
+        await setDedupMode(db, slug ?? "", mode, args.reason ?? "", OWNER);
+        console.log(`${slug} dedup is now ${mode} (logged)`);
+        return;
+      }
       case "opt-out":
         await optOut(db, slug ?? "", args.reason ?? "", OWNER);
         console.log(`${slug} disabled as an opt-out (logged); re-enable only with written permission`);
