@@ -631,6 +631,55 @@
       "notes": "Downtown park completed in 2024, made up of the Upper Ramble and the Lower Ramble. Typed as an area: the city gives no single street address for it."
     },
     {
+      "slug": "lower-ramble",
+      "name": "Lower Ramble",
+      "aliases": [],
+      "venueType": "park",
+      "address": "255 S West Ave",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.060076,
+      "lng": -94.165672,
+      "website": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143",
+      "parent": "the-ramble",
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143",
+          "checkedAt": "2026-10-04"
+        },
+        "address": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143",
+          "checkedAt": "2026-10-04",
+          "verifiedBy": "owner",
+          "confirmed": "The city's Ramble map and description (owner supplied them on 2026-10-04) place the Lower Ramble south of Center Street along West Avenue, between Gregg Avenue and West Avenue, so the facility page's \"255 West Avenue\" is S West Ave",
+          "note": "the facility page gives \"255 West Avenue\" with no direction"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=255+S+West+Ave%2C+Fayetteville%2C+AR+72701&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-04",
+          "note": "Census geocoder match for 255 S West Ave"
+        },
+        "location": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=255+S+West+Ave%2C+Fayetteville%2C+AR+72701&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-04",
+          "note": "Census geocoder point for 255 S West Ave, on the West Ave side of Fay Jones Woods"
+        },
+        "website": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143",
+          "checkedAt": "2026-10-04"
+        },
+        "notes": [
+          {
+            "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143",
+            "checkedAt": "2026-10-04",
+            "verifiedBy": "owner",
+            "confirmed": "The city's Ramble map and description (owner supplied them on 2026-10-04) place the Lower Ramble south of Center Street along West Avenue, between Gregg Avenue and West Avenue, so the facility page's \"255 West Avenue\" is S West Ave"
+          }
+        ]
+      },
+      "notes": "The southern part of The Ramble: south of Center Street between Gregg Avenue and West Avenue, including Fay Jones Woods, along the Razorback Greenway."
+    },
+    {
       "slug": "upper-ramble",
       "name": "Upper Ramble",
       "aliases": [],

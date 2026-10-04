@@ -1,11 +1,11 @@
 # Venue verification report
 
-Generated 2026-10-04T16:30:50.248Z from `data/venues.seed.json`.
+Generated 2026-10-04T20:36:12.723Z from `data/venues.seed.json`.
 
-- Venues: 56
+- Venues: 57
 - Errors: 0, warnings: 1
 - Geocoder cross-check: **not run** (use --geocode)
-- Contents sha256: `b5d305690175db1602ac9ee6827d84b32ab4d9689c7c6b5f7e1fe9bc1ce27fb9`
+- Contents sha256: `5c3393a3f2407e78432d8daa6b33696b981d88b16bcec03fcedb67a064da7346`
 - **Changed since sign-off** by Vlad on 2026-10-04. Review again.
 
 ## Issues
@@ -33,6 +33,7 @@ Generated 2026-10-04T16:30:50.248Z from `data/venues.seed.json`.
 | fayetteville-downtown-square | Fayetteville Downtown Square | area | Fayetteville, AR | [36.062336, -94.160146](https://www.openstreetmap.org/?mlat=36.062336&mlon=-94.160146#map=18/36.062336/-94.160146) | – |  | Historic Downtown Square, Downtown Square, Fayetteville Square | [name](https://www.experiencefayetteville.com/experience/dickson) 2026-10-03<br>[location](https://www.openstreetmap.org/way/314516088) 2026-10-03 |
 | dickson-street | Dickson Street | area | Fayetteville, AR | [36.066368, -94.162491](https://www.openstreetmap.org/?mlat=36.066368&mlon=-94.162491#map=18/36.066368/-94.162491) | – |  | Dickson St, Dickson Street Entertainment District | [name](https://www.experiencefayetteville.com/experience/dickson) 2026-10-03<br>[location](https://www.openstreetmap.org/way/374644458) 2026-10-03 |
 | the-ramble | The Ramble | area | Fayetteville, AR | [36.065773, -94.165912](https://www.openstreetmap.org/?mlat=36.065773&mlon=-94.165912#map=18/36.065773/-94.165912) | – |  |  | [name](https://www.fayetteville-ar.gov/4424/The-Ramble) 2026-10-04<br>[location](https://www.openstreetmap.org/way/1391832980) 2026-10-04<br>[website](https://www.fayetteville-ar.gov/4424/The-Ramble) 2026-10-04<br>[notes](https://www.fayetteville-ar.gov/4424/The-Ramble) 2026-10-04 |
+| lower-ramble | Lower Ramble | park | 255 S West Ave, Fayetteville, AR 72701 | [36.060076, -94.165672](https://www.openstreetmap.org/?mlat=36.060076&mlon=-94.165672#map=18/36.060076/-94.165672) | – | the-ramble |  | [name](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143) 2026-10-04<br>[address](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143) owner-verified 2026-10-04: The city's Ramble map and description (owner supplied them on 2026-10-04) place the Lower Ramble south of Center Street along West Avenue, between Gregg Avenue and West Avenue, so the facility page's "255 West Avenue" is S West Ave<br>[postalCode](https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=255+S+West+Ave%2C+Fayetteville%2C+AR+72701&benchmark=Public_AR_Current&format=json) 2026-10-04<br>[location](https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=255+S+West+Ave%2C+Fayetteville%2C+AR+72701&benchmark=Public_AR_Current&format=json) 2026-10-04<br>[website](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143) 2026-10-04<br>[notes](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Lower-Ramble-143) owner-verified 2026-10-04: The city's Ramble map and description (owner supplied them on 2026-10-04) place the Lower Ramble south of Center Street along West Avenue, between Gregg Avenue and West Avenue, so the facility page's "255 West Avenue" is S West Ave |
 | upper-ramble | Upper Ramble | park | 251 N West Ave, Fayetteville, AR 72701 | [36.065635, -94.165561](https://www.openstreetmap.org/?mlat=36.065635&mlon=-94.165561#map=18/36.065635/-94.165561) | – | the-ramble |  | [name](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Upper-Ramble-146) 2026-10-04<br>[address](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Upper-Ramble-146) 2026-10-04<br>[location](https://www.openstreetmap.org/way/374646783) 2026-10-04<br>[website](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Upper-Ramble-146) 2026-10-04<br>[notes](https://www.fayetteville-ar.gov/4424/The-Ramble) 2026-10-04 |
 | gulley-park | Gulley Park | park | 1850 E Township St, Fayetteville, AR 72703 | [36.09753, -94.133349](https://www.openstreetmap.org/?mlat=36.09753&mlon=-94.133349#map=18/36.09753/-94.133349) | – |  |  | [name](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Gulley-Park-17) 2026-10-03<br>[address](https://www.fayetteville-ar.gov/Facilities/Facility/Details/Gulley-Park-17) 2026-10-03<br>[postalCode](https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=1850+E+Township+St%2C+Fayetteville%2C+AR+72701&benchmark=Public_AR_Current&format=json) owner-verified 2026-10-03: Owner confirmed 72703; the city page's 72701 belongs to the office address, not the park<br>[location](https://www.openstreetmap.org/way/500294619) 2026-10-03 |
 | wilson-park | Wilson Park | park | 675 N Park Ave, Fayetteville, AR 72701 | [36.07274, -94.163214](https://www.openstreetmap.org/?mlat=36.07274&mlon=-94.163214#map=18/36.07274/-94.163214) | – |  |  | [name](https://www.fayetteville-ar.gov/facilities/facility/details/Wilson-Park-61) 2026-10-03<br>[address](https://www.fayetteville-ar.gov/facilities/facility/details/Wilson-Park-61) 2026-10-03<br>[location](https://www.openstreetmap.org/way/241266579) 2026-10-03<br>[website](https://www.fayetteville-ar.gov/facilities/facility/details/Wilson-Park-61) 2026-10-03 |
@@ -79,5 +80,5 @@ Generated 2026-10-04T16:30:50.248Z from `data/venues.seed.json`.
 After reviewing, set this in the seed file, then run `npm run venues:seed`:
 
 ```json
-"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "b5d305690175db1602ac9ee6827d84b32ab4d9689c7c6b5f7e1fe9bc1ce27fb9" }
+"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "5c3393a3f2407e78432d8daa6b33696b981d88b16bcec03fcedb67a064da7346" }
 ```
