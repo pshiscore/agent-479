@@ -18,6 +18,27 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
 - **Type carries the design.** Bold type must work on its own, because many
   events will have no usable image.
 
+## A2. Chosen layout (owner, 2026-10-04: option 2 of the mockups)
+
+- **Header:** the 479 Guide wordmark; This weekend, Upcoming, Venues, Lists;
+  a search box; a "Get the Friday digest" button.
+- **Filter bar** under the header: City, Category, Free, Family-friendly,
+  21+, En español, and "Show recurring".
+- **Main column:** "This weekend" as a day-by-day timeline (a dot and line
+  per day; time, title, venue and city links, category and up to 3 tags,
+  "More info", and an interested star).
+- **Right column:** the Feature card (date, title, venue and city, tags,
+  "More info", "Get tickets"); Lists (name and count); the Friday digest
+  sign-up.
+- **Full width below:** What's new (section H), "At the library this week",
+  "Further out" (date, title, time, venue, and a "See all upcoming" link to
+  the full Upcoming view), then the footer ("479 Guide lists events from
+  public sources across Northwest Arkansas. Summaries are generated from
+  those listings and link to the original." with About Agent 479, Report an
+  issue, and For site owners).
+- Warm brown and green palette with bold sans headings; light and dark
+  themes still required (section A).
+
 ## B. Front page sections, top to bottom
 
 1. **Feature:** the single most noteworthy upcoming event. What counts as
@@ -34,7 +55,9 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
    "Family-friendly this week", and "New venues". No taste-based rankings.
 5. **At the library this week:** a collapsed shelf, so library programs don't
    crowd out everything else.
-6. **Upcoming:** all events by day, filterable by city, category, tag, and
+6. **What's new:** factual cards for places that just opened (section H),
+   with a link to the longer "What's new" view.
+7. **Upcoming:** all events by day, filterable by city, category, tag, and
    venue type.
    - Recurring events are hidden by default and shown as series rows
      ("Storytime, Tuesdays, next: Oct 6"), with a "Show recurring" toggle.
@@ -137,8 +160,38 @@ These rules are also standing rules in `AGENTS.md`.
   assistants. Design URLs and filters with this in mind now.
 - **Search** covers events, venues, and stories, with tag and entity filters.
 
+## H. What's new (openings)
+
+Owner, 2026-10-04: whenever something new opens, such as a restaurant or an
+attraction, it gets a factual card, and a longer "What's new" view lists
+openings over a longer period.
+
+- **Openings are places, not events.** They need their own records: name,
+  kind (restaurant, bar or brewery, attraction, shop, park, venue), address
+  and city, the date it opened, and the link to the source that says so.
+- **Facts only** (section E): "Opened October 2" is a fact; "a must-try new
+  spot" is not. No descriptions copied from the business, no reviews, no
+  ratings, and images only under the image rule.
+- **Every opening needs the owner's approval** before it appears: the agent
+  finds a candidate in a permitted source and logs a proposal; the owner
+  approves or rejects it in /admin/proposals.
+- **Sources need a terms review first,** like any source. Candidates:
+  chamber of commerce ribbon-cutting calendars, city and downtown
+  association announcements, and tourism sites' "new" listings. News sites
+  are out unless their terms allow it.
+- **Homepage card:** openings from the last 30 days (newest first, a few at
+  most). **"What's new" view** (`/new`): openings from the last 90 days,
+  filterable by city and kind. The section hides when there's nothing new.
+- **A new venue that hosts events** also appears in the "New venues" list
+  (section B4) once it's in our venues.
+
 ## G. Open questions for later
 
+- **What's new windows:** 30 days on the homepage and 90 in the full view
+  are starting values; confirm them, and whether "opening soon"
+  announcements belong too.
+- **Friday digest sign-up** (in the chosen layout): which email provider, and
+  where subscriber addresses are stored. Nothing collects emails yet.
 - **Embedded map** on the event page: which provider, and is it worth the
   cost and the third-party requests? For now the page has a "Directions" link
   only.
