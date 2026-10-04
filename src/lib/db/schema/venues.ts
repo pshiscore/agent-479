@@ -48,6 +48,7 @@ export interface VenueVerification {
   postalCode?: FieldProvenance;
   location?: FieldProvenance;
   website?: FieldProvenance;
+  notes?: FieldProvenance[];
   reviewed?: { by: string; at: string; sha256: string };
 }
 

@@ -132,12 +132,22 @@ These apply to research and one-off scripts as well as to the app and pipeline.
 ## Data
 
 - **Physical address over mailing address** when a venue lists both.
+- **Source priority for address fields** (street, ZIP, and so on), when
+  sources disagree: first the venue's own site and government pages, then the
+  Census geocoder, then tourism listings, then Wikipedia. An owner-verified
+  record confirms what a page says, not that the page is right, so it carries
+  the rank of the page it came from.
+- **Notes are facts in our own words.** No phrasing copied from sources; a
+  fact stated in a note cites its source (`verification.notes`).
 - **ZIP codes:** fill a missing ZIP from the Census geocoder's match and cite
   it. Leave it empty only when the geocoder has no match. Don't overwrite a
   sourced ZIP; a disagreement is flagged as a warning in the report.
 
 ## Venue verification
 
+- **A geocoder match on a different street is a warning**, even when it's
+  close: a different street name or type, or opposite directions (the Arvest
+  pattern). It needs a hand check like any other warning.
 - **A geocoder mismatch over 1 km is an error** that blocks sign-off, except for
   parks (trails are typed as parks) and campuses. Never add logic that
   downgrades it. Enforced in `src/lib/venues/verify.ts`.

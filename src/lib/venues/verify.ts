@@ -1,5 +1,6 @@
 import type { SeedVenue } from "./seed-file";
 import { venueNameKeys } from "./normalize";
+import { streetDifference } from "./street";
 
 /**
  * Offline checks on the venue seed file. Errors block seeding; warnings go in
@@ -125,8 +126,10 @@ export function checkVenues(venues: readonly SeedVenue[], today: Date): VenueIss
       }
     }
 
-    for (const [field, prov] of Object.entries(v.verification)) {
-      if (!prov) continue;
+    const provenances = Object.entries(v.verification).flatMap(([field, p]) =>
+      (Array.isArray(p) ? p : p ? [p] : []).map((prov) => [field, prov] as const),
+    );
+    for (const [field, prov] of provenances) {
       const age = (today.getTime() - new Date(`${prov.checkedAt}T00:00:00Z`).getTime()) / DAY_MS;
       if (age < -1) add(v.slug, "error", `${field} provenance is dated in the future (${prov.checkedAt})`);
       else if (age > STALE_PROVENANCE_DAYS) {
@@ -182,6 +185,16 @@ export function checkGeocode(v: SeedVenue, match: GeocodeMatch | null): VenueIss
     return [{ slug: v.slug, level: "warning", message: "geocoder found no match for the address" }];
   }
   const issues: VenueIssue[] = [];
+  // The Arvest pattern: a close match on a different street can hide a wrong address.
+  const matchedStreet = match.matchedAddress.split(",")[0];
+  const streetDiff = v.address ? streetDifference(v.address, matchedStreet) : null;
+  if (streetDiff) {
+    issues.push({
+      slug: v.slug,
+      level: "warning",
+      message: `geocoder matched a different street (${streetDiff}): "${matchedStreet}" for "${v.address}"`,
+    });
+  }
   if (v.postalCode && match.zip && v.postalCode !== match.zip) {
     issues.push({
       slug: v.slug,

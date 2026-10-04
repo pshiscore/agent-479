@@ -119,6 +119,7 @@ async function main() {
       const d = geocodeDistance.get(v.slug);
       const delta = !args.geocode || !v.address ? "–" : d == null ? "no match" : `${d} m`;
       const sources = Object.entries(v.verification)
+        .flatMap(([field, p]) => (Array.isArray(p) ? p.map((x) => [field, x] as const) : [[field, p] as const]))
         .filter(([, p]) => p)
         .map(([field, p]) =>
           p!.verifiedBy === "owner"

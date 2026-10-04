@@ -210,6 +210,17 @@ describe("checkGeocode", () => {
     expect(checkGeocode(venue(), { ...at(0), zip: "72701" })).toEqual([]);
   });
 
+  it("warns when the geocoder matched a different street, even close by", () => {
+    // Razorback Field: "449 GARLAND ST" for "449 S Garland Ave", 95 m from the field.
+    const field = venue({ slug: "razorback-field", venueType: "arena", address: "449 S Garland Ave", lat: 36.05842, lng: -94.176716 });
+    const match = { lat: 36.05903, lng: -94.17598, matchedAddress: "449 GARLAND ST, FAYETTEVILLE, AR, 72701", zip: "72701" };
+    expect(checkGeocode(field, match)).toEqual([
+      expect.objectContaining({ level: "warning", message: expect.stringMatching(/different street \(street type "ave" vs "st"\)/) }),
+    ]);
+    // A matching street raises nothing.
+    expect(checkGeocode(venue(), { ...at(0), matchedAddress: "495 W DICKSON ST, FAYETTEVILLE, AR, 72701" })).toEqual([]);
+  });
+
   it("gives parks and campuses more room", () => {
     const park = venue({ venueType: "park" });
     expect(checkGeocode(park, at(0.005))).toEqual([]);
@@ -221,7 +232,9 @@ describe("checkGeocode", () => {
     // The real Arvest Ballpark case: a stale address matched the far end of the street.
     const ballpark = venue({ venueType: "arena", address: "3000 S 56th St", lat: 36.159952, lng: -94.194279 });
     const far = { lat: 36.2126, lng: -94.1953, matchedAddress: "3000 N 56TH ST, SPRINGDALE, AR, 72762" };
-    expect(checkGeocode(ballpark, far)[0]?.level).toBe("error");
+    const issues = checkGeocode(ballpark, far);
+    expect(issues.map((i) => i.level).sort()).toEqual(["error", "warning"]);
+    expect(issues.find((i) => i.level === "warning")?.message).toMatch(/direction "s" vs "n"/);
   });
 });
 

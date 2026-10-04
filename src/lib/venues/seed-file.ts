@@ -76,6 +76,8 @@ export const seedVenueSchema = z
       postalCode: provenanceSchema.optional(),
       location: provenanceSchema,
       website: provenanceSchema.optional(),
+      // Sources for facts stated in notes.
+      notes: z.array(provenanceSchema).optional(),
     }),
     notes: z.string().optional(),
     // What a person checked to accept a warning, shown next to it in the report.

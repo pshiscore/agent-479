@@ -3,6 +3,9 @@ import { proposeOnce, recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { agentActions, rawRecords, sources, venueExternalIds, venues } from "@/lib/db/schema";
 import { normalizeVenueName, venueNameKeys } from "@/lib/venues/normalize";
+import { normalizeStreetAddress } from "@/lib/venues/street";
+
+export { normalizeStreetAddress };
 import { distanceMeters, NWA_BOUNDS } from "@/lib/venues/verify";
 
 /**
@@ -53,23 +56,6 @@ const NEARBY_MAX_M = 150;
 
 const inNwa = (lat: number, lng: number) =>
   lat >= NWA_BOUNDS.minLat && lat <= NWA_BOUNDS.maxLat && lng >= NWA_BOUNDS.minLng && lng <= NWA_BOUNDS.maxLng;
-
-const STREET_WORDS: Record<string, string> = {
-  street: "st", drive: "dr", road: "rd", avenue: "ave", boulevard: "blvd", lane: "ln", place: "pl",
-  parkway: "pkwy", court: "ct", circle: "cir", highway: "hwy", way: "way",
-  north: "n", south: "s", east: "e", west: "w", northeast: "ne", northwest: "nw", southeast: "se", southwest: "sw",
-};
-
-/** "5079 West Northgate Road," → "5079 w northgate rd", for comparing street addresses. */
-export function normalizeStreetAddress(address: string): string {
-  return address
-    .toLowerCase()
-    .replace(/[.,#]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => STREET_WORDS[w] ?? w)
-    .join(" ");
-}
 
 /**
  * Ticketmaster gives some venues a placeholder point (seen: one point shared

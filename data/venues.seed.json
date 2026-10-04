@@ -118,7 +118,7 @@
           "note": "Experience Fayetteville lists ozarkmusichall.com"
         }
       },
-      "notes": "Formerly JJ's Live (and JBGB before that), per Experience Fayetteville.",
+      "notes": "Previously named JJ's Live, and JBGB earlier (Experience Fayetteville).",
       "handChecks": [
         {
           "finding": "OSM way 498930842 is the building at 3615 North Steele Boulevard (still tagged JJ's Live); Ozark Music Hall's own site gives the same address and says it was formerly JJ's Live.",
@@ -447,6 +447,13 @@
       "notes": "Soccer (Arkansas Razorbacks). Ticketmaster lists 449 Stadium Dr and OSM tags 1175 W Carlson Dr; neither geocodes. The athletics department's 449 S Garland Ave geocodes 95 m from the field.",
       "formerAddresses": [
         "449 Stadium Dr"
+      ],
+      "handChecks": [
+        {
+          "finding": "The geocoder matched 449 GARLAND ST, 95 m from the field (OSM way 469590536). The athletics directions page lists 449 S. Garland Ave., at the corner of 6th Street and Garland Avenue; the field sits there.",
+          "url": "https://arkansasrazorbacks.com/directions_to_razorback_athletic_facilities_1569684/",
+          "checkedAt": "2026-10-04"
+        }
       ]
     },
     {
@@ -512,15 +519,17 @@
         },
         "website": {
           "url": "https://twncenter.com/",
-          "checkedAt": "2026-10-03",
-          "note": "Shows Fayetteville Town Center, 15 West Mountain, Fayetteville, AR 72701"
+          "checkedAt": "2026-10-04",
+          "verifiedBy": "owner",
+          "confirmed": "Owner checked twncenter.com in the browser: it is the venue's real site",
+          "note": "verified by owner in browser"
         },
         "postalCode": {
           "url": "https://twncenter.com/",
           "checkedAt": "2026-10-03"
         }
       },
-      "notes": "Event venue on the downtown square, leased by the Advertising and Promotion Commission."
+      "notes": "Event venue on the downtown square. The Fayetteville Advertising and Promotion Commission holds the lease."
     },
     {
       "slug": "fayetteville-downtown-square",
@@ -1019,7 +1028,7 @@
       "venueType": "park",
       "address": "500 E Walnut St",
       "city": "Rogers",
-      "postalCode": "72758",
+      "postalCode": "72756",
       "lat": 36.331682,
       "lng": -94.104667,
       "website": null,
@@ -1038,21 +1047,14 @@
           "checkedAt": "2026-10-03"
         },
         "postalCode": {
-          "url": "https://www.destinationrogers.com/listings/lake-atalanta/198/",
-          "checkedAt": "2026-10-03",
+          "url": "https://ar-rogers.civicplus.com/Facilities/Facility/Details/Lake-Atalanta-Park-15",
+          "checkedAt": "2026-10-04",
           "verifiedBy": "owner",
-          "confirmed": "Owner's screenshot of Destination Rogers' Lake Atalanta page shows 500 E. Walnut Street, Rogers, AR, 72758",
-          "note": "Earlier tool read of this listing reported 72757; the owner's screenshot shows 72758"
+          "confirmed": "City of Rogers facility page lists 500 E. Walnut, Rogers, AR 72756",
+          "note": "The Census geocoder agrees (500 E WALNUT ST, ROGERS, AR, 72756). The page returned 404 to our fetch tool."
         }
       },
-      "notes": "ZIP 72758 per Destination Rogers (owner screenshot). The Census geocoder says 72756.",
-      "handChecks": [
-        {
-          "finding": "Owner checked Destination Rogers' Lake Atalanta page in the browser: it lists 500 E. Walnut Street, Rogers, AR, 72758, with the map pin at the park. The geocoder's 72756 differs; owner accepted 72758.",
-          "url": "https://www.destinationrogers.com/listings/lake-atalanta/198/",
-          "checkedAt": "2026-10-03"
-        }
-      ]
+      "notes": "History: an owner screenshot of Destination Rogers showed 72758, but Destination Rogers disagrees with itself (72757 on the listing, 72758 on the trailhead page), so it no longer decides the ZIP."
     },
     {
       "slug": "rogers-convention-center",
@@ -1560,7 +1562,7 @@
           "note": "Lists recorddowntown.com"
         }
       },
-      "notes": "Event space in the former Benton County Daily Record building. Its own site shows no street address."
+      "notes": "The building was the Benton County Daily Record's newspaper office before it became an event venue. Its own site shows no street address."
     },
     {
       "slug": "orchards-park",
@@ -1809,9 +1811,21 @@
           "url": "https://www.openstreetmap.org/way/506568507",
           "checkedAt": "2026-10-03",
           "note": "Park boundary, tagged 300 Park Street, 72764: agrees with the Alliance page and the Census geocoder"
-        }
+        },
+        "notes": [
+          {
+            "url": "https://www.waltonfamilyfoundation.org/our-work/home-region/downtown-springdale-alliance",
+            "checkedAt": "2026-10-04",
+            "note": "Reopening in 2024, and the performance pavilion"
+          },
+          {
+            "url": "https://www.downtownspringdale.org/news-stories/spackman-mossop-michaels-and-trahan-architects-reveal-design-for-luther-george-park-masterplan-and-performance-pavilion",
+            "checkedAt": "2026-10-04",
+            "note": "Pavilion capacity, about 3,000"
+          }
+        ]
       },
-      "notes": "Has a Performance Pavilion on the park's central axis, fronting the great lawn, designed to host performances of up to 3,000 people (Downtown Springdale Alliance design announcement: downtownspringdale.org/news-stories/spackman-mossop-michaels-and-trahan-architects-reveal-design-for-luther-george-park-masterplan-and-performance-pavilion). The design announcement doesn't say whether it is built yet."
+      "notes": "Performance pavilion, capacity about 3,000. Park reopened in 2024 after renovation."
     },
     {
       "slug": "bella-vista-public-library",
