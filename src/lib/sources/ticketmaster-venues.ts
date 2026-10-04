@@ -2,10 +2,10 @@ import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { proposeOnce, recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { agentActions, rawRecords, sources, venueExternalIds, venues } from "@/lib/db/schema";
-import { normalizeVenueName, venueNameKeys } from "@/lib/venues/normalize";
+import { namesMatchClosely, normalizeVenueName, subSpaceName, venueNameKeys } from "@/lib/venues/normalize";
 import { normalizeStreetAddress, sameStreetAddress } from "@/lib/venues/street";
 
-export { normalizeStreetAddress };
+export { namesMatchClosely, normalizeStreetAddress, subSpaceName };
 import { distanceMeters, NWA_BOUNDS } from "@/lib/venues/verify";
 
 /**
@@ -182,24 +182,6 @@ async function ticketmasterCoverageData(db: DbExecutor) {
   };
 }
 
-const STATE_SUFFIX = /^(ar|ark|arkansas)$/i;
-
-/**
- * The room or hall a Ticketmaster venue name points to inside our venue:
- * "Walton Arts Center - Baum Walker Hall" → "Baum Walker Hall". Null when the
- * name is just the venue (or the venue plus a state, like "The Momentary - AR").
- */
-export function subSpaceName(tmName: string | null, venue: Pick<OurVenue, "name" | "aliases">): string | null {
-  if (!tmName) return null;
-  // "Venue - Hall", "Venue – Hall", "Venue | Hall", or "Venue: Hall".
-  const parts = tmName.split(/\s+[-–—|]\s+|\s*:\s+/);
-  if (parts.length < 2) return null;
-  const keys = venueNameKeys(venue);
-  if (!keys.includes(normalizeVenueName(parts[0]))) return null;
-  const rest = parts.slice(1).join(" - ").trim();
-  return rest && !STATE_SUFFIX.test(rest) && !keys.includes(normalizeVenueName(rest)) ? rest : null;
-}
-
 /** Writes an approved link from a Ticketmaster venue ID to one of our venues, logged. */
 export async function linkTicketmasterVenue(
   db: DbExecutor,
@@ -272,26 +254,6 @@ export function coverageReport(matches: VenueMatch[], generatedAt: Date): string
   ].join("\n");
 }
 
-
-const words = (s: string) => new Set(s.split(" ").filter(Boolean));
-
-/**
- * Names "match closely" when, after normalization, they're equal, one's words
- * appear whole inside the other ("The Momentary - AR" ⊃ "Momentary"), or their
- * words overlap by at least 60%. Checked against the venue's name and aliases.
- */
-export function namesMatchClosely(tmName: string | null, venue: Pick<OurVenue, "name" | "aliases">): boolean {
-  if (!tmName) return false;
-  const t = normalizeVenueName(tmName);
-  if (!t) return false;
-  return venueNameKeys(venue).some((k) => {
-    if (t === k || ` ${t} `.includes(` ${k} `) || ` ${k} `.includes(` ${t} `)) return true;
-    const a = words(t);
-    const b = words(k);
-    const shared = [...a].filter((w) => b.has(w)).length;
-    return shared / new Set([...a, ...b]).size >= 0.6;
-  });
-}
 
 const LINK_PROPOSAL_MAX_M = 150;
 const dedupeKeyFor = (tmVenueId: string, venueSlug: string) => `ticketmaster:${tmVenueId}:${venueSlug}`;

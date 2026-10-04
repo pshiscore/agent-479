@@ -551,7 +551,17 @@ See `.env.example`. Model names are deliberately not env vars.
     permission arrives: `npm run sources -- permission <slug> --reason`, build
     the fetcher, then test fetch and enable as usual.*
 12. **Events tables:** `events`, `event_sources`, `event_tags`. Mappers and
-    the venue resolver, `needs_venue`, and venue proposals.
+    the venue resolver, `needs_venue`, and venue proposals. *Built (migration
+    0012), awaiting owner approval.* The tables exist but stay empty until
+    step 13: `events.category_id` is NOT NULL, so events are written after
+    classification. The process job (`/api/cron/process`, `npm run
+    process:once`) maps ICS and Ticketmaster records to validated facts (UTC
+    times, `time_tba`, sub-spaces, verified event links), skips government
+    meetings, office closures, past and far-future events, and resolves the
+    venue: external ID, default venue (only when the location names it),
+    alias (a building at the address beats an area alias), street address,
+    trigram, then an LLM pick among candidates. First full run: 545 mapped,
+    40 needs_venue, 4 skipped, 0 failed, 0 LLM calls.
 13. **LLM extract, classify, and describe,** including the Community hint,
     injection fixtures, and the eval script.
 14. **Series detection and labels.**

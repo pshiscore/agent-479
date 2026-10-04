@@ -85,6 +85,13 @@
       "when": 1791075784943,
       "tag": "0011_former_addresses_sub_space",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791077244504,
+      "tag": "0012_events",
+      "breakpoints": true
     }
   ]
 }

@@ -20,6 +20,9 @@ const EXPECTED_TABLES = [
   "categories",
   "tags",
   "raw_records",
+  "events",
+  "event_sources",
+  "event_tags",
 ];
 const EXPECTED_EXTENSIONS = ["pg_trgm", "unaccent"];
 

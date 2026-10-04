@@ -28,6 +28,9 @@ const AWAITING = "Awaiting permission.";
 const FAYLIB_ICAL_30_DAYS =
   "https://faylib.org/feeds?data=eyJmZWVkVHlwZSI6ImljYWwiLCJmaWx0ZXJzIjp7ImxvY2F0aW9uIjpbImFsbCJdLCJhZ2VzIjpbImFsbCJdLCJ0eXBlcyI6WyJhbGwiXSwidGFncyI6W10sInRlcm0iOiIiLCJkYXlzIjozMH19";
 const CIVICPLUS_ICS = "/common/modules/iCalendar/iCalendar.aspx";
+// Event page for a numeric UID. Checked 2026-10-04 against one real event on
+// each city's site (Bentonville EID 3241, Rogers 4397, Fayetteville 11868).
+const CIVICPLUS_EVENT_URL = "Calendar.aspx?EID={uid}";
 const CIVICPLUS_TERMS =
   'CivicPlus public ICS. Footer says "All rights reserved", no reuse terms. Facts and links only. ' +
   "robots.txt allows the ICS endpoint. Public-meeting categories are never used.";
@@ -59,7 +62,7 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     fetcher: "ics",
     baseUrl: "https://www.bentonville.ar.gov/",
     // 32: Holidays and Community Events.
-    config: { icsPath: CIVICPLUS_ICS, catIds: [32] },
+    config: { icsPath: CIVICPLUS_ICS, catIds: [32], eventUrl: CIVICPLUS_EVENT_URL },
     defaultVenueSlug: null,
     trustLevel: 4,
     fetchIntervalMinutes: 24 * 60,
@@ -74,7 +77,7 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     fetcher: "ics",
     baseUrl: "https://www.rogersar.gov/",
     // 28: City Events.
-    config: { icsPath: CIVICPLUS_ICS, catIds: [28] },
+    config: { icsPath: CIVICPLUS_ICS, catIds: [28], eventUrl: CIVICPLUS_EVENT_URL },
     defaultVenueSlug: null,
     trustLevel: 4,
     fetchIntervalMinutes: 24 * 60,
@@ -89,7 +92,7 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     fetcher: "ics",
     baseUrl: "https://www.fayetteville-ar.gov/",
     // 30: City-Sponsored Events. 33: Parks and Recreation.
-    config: { icsPath: CIVICPLUS_ICS, catIds: [30, 33] },
+    config: { icsPath: CIVICPLUS_ICS, catIds: [30, 33], eventUrl: CIVICPLUS_EVENT_URL },
     defaultVenueSlug: null,
     trustLevel: 4,
     fetchIntervalMinutes: 24 * 60,
@@ -124,6 +127,8 @@ export const SOURCE_SEEDS: SourceSeed[] = [
       // Communico feed: iCal, all locations, ages, and types, 30 days ahead
       // (the data= parameter is base64 JSON with feedType "ical", days 30).
       feedUrl: FAYLIB_ICAL_30_DAYS,
+      // Event page for a numeric UID; checked 2026-10-04 against event 17128407.
+      eventUrl: "https://faylib.org/event/{uid}",
       feedUrlSource: {
         verifiedBy: "owner",
         checkedAt: "2026-10-03",

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   check,
   index,
   integer,
@@ -12,7 +13,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { id, sqlList } from "./columns";
 import { runs } from "./runs";
+import { events } from "./events";
 import { sources } from "./sources";
+import { venues } from "./venues";
 
 export const RAW_RECORD_STATUSES = ["pending", "mapped", "extracted", "needs_venue", "skipped", "failed"] as const;
 
@@ -53,8 +56,15 @@ export const rawRecords = pgTable(
     locationKey: text("location_key"),
     attempts: integer("attempts").notNull().default(0),
     lastError: text("last_error"),
-    // FK to events is added when the events table exists (build step 12).
-    eventId: uuid("event_id"),
+    eventId: uuid("event_id").references((): AnyPgColumn => events.id, { onDelete: "set null" }),
+    // Set by the process stage (build step 12): the facts the mapper produced,
+    // validated, with times in UTC; and the venue the resolver chose.
+    facts: jsonb("facts").$type<Record<string, unknown>>(),
+    venueId: uuid("venue_id").references((): AnyPgColumn => venues.id, { onDelete: "set null" }),
+    subSpace: text("sub_space"),
+    // How the venue was found (external_id, default_venue, alias, address, trigram, llm).
+    venueMatchedBy: text("venue_matched_by"),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
   },
   (t) => [
     uniqueIndex("raw_records_source_external_uniq").on(t.sourceId, t.externalId),
@@ -63,6 +73,8 @@ export const rawRecords = pgTable(
     check("raw_records_status_check", sql.raw(`status in ${sqlList(RAW_RECORD_STATUSES)}`)),
     check("raw_records_skip_check", sql.raw(`status <> 'skipped' or skip_reason is not null`)),
     check("raw_records_attempts_check", sql.raw(`attempts >= 0`)),
+    check("raw_records_needs_venue_check", sql.raw(`status <> 'needs_venue' or location_key is not null`)),
+    check("raw_records_mapped_check", sql.raw(`status not in ('mapped', 'extracted') or (facts is not null and venue_id is not null)`)),
     index("raw_records_description_purge_idx")
       .on(t.descriptionPurgeAfter)
       .where(sql`${t.descriptionText} is not null`),

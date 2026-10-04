@@ -25,7 +25,8 @@
     "fetch:once": "tsx scripts/fetch-once.ts",
     "sources": "tsx scripts/sources.ts",
     "maintenance:once": "tsx scripts/maintenance-once.ts",
-    "tm:venues": "tsx scripts/ticketmaster-venues.ts"
+    "tm:venues": "tsx scripts/ticketmaster-venues.ts",
+    "process:once": "tsx scripts/process-once.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

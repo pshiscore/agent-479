@@ -151,6 +151,9 @@ describe("namesMatchClosely", () => {
 
   it("rejects different buildings that share a word", () => {
     expect(namesMatchClosely("Barnhill Arena", bud)).toBe(false);
+    // A one-word alias doesn't swallow a longer name: the bookmobile isn't the library.
+    expect(namesMatchClosely("FPL on Wheels Bookmobile", { name: "Fayetteville Public Library", aliases: ["FPL"] })).toBe(false);
+    expect(namesMatchClosely("FPL - Arkansas", { name: "Fayetteville Public Library", aliases: ["FPL"] })).toBe(true);
     expect(namesMatchClosely("Momentary Coffee", { name: "Moment Bar", aliases: [] })).toBe(false);
     expect(namesMatchClosely(null, bud)).toBe(false);
   });

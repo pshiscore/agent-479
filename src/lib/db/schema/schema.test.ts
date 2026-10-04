@@ -14,6 +14,9 @@ describe("schema", () => {
       [
         "agent_actions",
         "categories",
+        "event_sources",
+        "event_tags",
+        "events",
         "link_policies",
         "llm_calls",
         "llm_models",
