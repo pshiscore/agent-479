@@ -82,15 +82,15 @@ describe("fetchSource", () => {
       const [run] = await tx.select().from(runs).where(eq(runs.sourceId, s.id));
       expect(rows.every((r) => r.runId === run.id)).toBe(true);
 
-      // Mark one processed; then the source changes the other.
-      await tx.update(rawRecords).set({ status: "mapped" }).where(eq(rawRecords.sourceId, s.id));
+      // Mark both processed (a valid processed state); then the source changes one.
+      await tx.update(rawRecords).set({ status: "skipped", skipReason: "test" }).where(eq(rawRecords.sourceId, s.id));
       body = ics(["a@x", "Concert"], ["b@x", "Movie (moved)"]);
       const later = new Date(NOW.getTime() + 3_600_000);
       const second = await fetchSource(tx, s.id, { http, now: later });
       expect(second).toMatchObject({ ok: true, stats: { inserted: 0, changed: 1, unchanged: 1 } });
       const after = await tx.select().from(rawRecords).where(eq(rawRecords.sourceId, s.id));
       const byId = Object.fromEntries(after.map((r) => [r.externalId, r]));
-      expect(byId["a@x"]).toMatchObject({ status: "mapped", fetchedAt: later });
+      expect(byId["a@x"]).toMatchObject({ status: "skipped", fetchedAt: later });
       expect(byId["b@x"].status).toBe("pending");
 
       const [src] = await tx.select().from(sources).where(eq(sources.id, s.id));
