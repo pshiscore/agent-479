@@ -51,6 +51,10 @@ marked (every deploy) each time.
       recorded in `terms_notes`.
 - [ ] `crystalbridges.org` and `themomentary.org` are `homepage_only` in
       `link_policies` unless deep-link permission has been received.
+- [ ] **Ticketmaster display terms** (blocks Ticketmaster events on any
+      public page): re-read their display, attribution, and image terms,
+      record the findings in `docs/sources-terms.md`, and build any required
+      attribution or link-back. Owner, 2026-10-04.
 - [ ] If the site carries any sponsorship or paid placement: Ticketmaster
       written approval is on file, or Ticketmaster-sourced listings are
       disabled (their API terms forbid API-derived revenue).

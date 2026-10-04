@@ -30,7 +30,7 @@ export interface Taxonomy {
   tags: TaxonomyEntry[];
 }
 
-function priceText(min: number | null, max: number | null, isFree: boolean | null): string | null {
+export function priceText(min: number | null, max: number | null, isFree: boolean | null): string | null {
   if (isFree) return "Free";
   if (min === null && max === null) return null;
   const f = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
@@ -160,7 +160,7 @@ export async function enrichRecord(
       action: "hold",
       entityType: "event_description",
       entityId: event.id,
-      reason: `Generated description shared "${described.sharedRun}" with the source after ${described.attempts} attempts; held for review.`,
+      reason: `Generated description failed its checks after ${described.attempts} attempts (${described.problem}); held for review.`,
       model: described.model,
       llmCallId: described.callId,
     });

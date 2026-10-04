@@ -65,6 +65,7 @@ export async function writeEvent(
     title: f.title,
     normalizedTitle: normalizeVenueName(f.title),
     shortDescription: draft.shortDescription,
+    descriptionGeneratedAt: draft.shortDescription ? new Date() : null,
     startAt: new Date(f.startAt),
     endAt: f.endAt ? new Date(f.endAt) : null,
     allDay: f.allDay,

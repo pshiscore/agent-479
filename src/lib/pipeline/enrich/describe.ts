@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { contentIssues, describeIssues } from "@/lib/text/checks";
 import { checkOriginalWording } from "@/lib/text/overlap";
 import type { Generate } from "./types";
 
@@ -15,9 +16,13 @@ import type { Generate } from "./types";
  * those exist before calling the model (none means no call and no
  * description), the model names the ones it used, and code checks each one
  * actually appears in the text.
+ *
+ * Content checks (AGENTS.md, "Content rules"): no evaluative words, and every
+ * proper name and number must come from the facts given (src/lib/text/checks).
+ * Like the wording check, a failure is regenerated once, then held.
  */
 
-export const DESCRIBE_PROMPT_VERSION = "describe@3";
+export const DESCRIBE_PROMPT_VERSION = "describe@4";
 
 export const ADDED_FACTS = ["performers", "ages", "activity", "registration"] as const;
 export type AddedFact = (typeof ADDED_FACTS)[number];
@@ -39,7 +44,7 @@ export interface DescribeFacts {
 
 export type DescribeResult =
   | { status: "ok"; description: string; usedFacts: AddedFact[]; callId: string; model: string; attempts: number }
-  | { status: "held"; sharedRun: string; callId: string; model: string; attempts: number }
+  | { status: "held"; problem: string; callId: string; model: string; attempts: number }
   | { status: "none"; reason: string; callId: string | null; model: string | null; attempts: number };
 
 const norm = (s: string) =>
@@ -93,6 +98,16 @@ export function newActivityStems(activity: string | null, title: string, categor
   return [...new Set(contentStems(activity).filter((w) => !known.has(w)))];
 }
 
+/** Everything the model was given, as one text, and the event's own names (exempt from the evaluative check). */
+export function factsForChecks(f: DescribeFacts): { text: string; ownNames: string[] } {
+  return {
+    text: [f.title, f.when, f.venue, f.city, f.category, f.price, ...f.tags, ...f.performers, f.ages, f.activity, f.registrationRequired ? "registration required" : null]
+      .filter(Boolean)
+      .join(" | "),
+    ownNames: [f.title, f.venue, ...f.performers],
+  };
+}
+
 /** Which addable facts exist for this event. */
 export function availableFacts(f: DescribeFacts): AddedFact[] {
   const out: AddedFact[] = [];
@@ -142,7 +157,8 @@ export async function describeEvent(
     return { status: "none", reason: "no fact beyond the title and category", callId: null, model: null, attempts: 0 };
   }
   let last: { callId: string; model: string } | null = null;
-  let sharedRun = "";
+  let problem = "";
+  const checkFacts = factsForChecks(facts);
   for (let attempt = 1; attempt <= 2; attempt++) {
     const result = await generate({
       task: "describe",
@@ -155,7 +171,8 @@ export async function describeEvent(
           ". Never restate the title or category, and don't start with \"Join\".",
         "Set usedFacts to the facts you included. If you can't add any of them, set description to null and usedFacts to [].",
         "Use only the facts given. Don't invent details, prices, ages, or times. Keep any title as published, even if it isn't in English.",
-        attempt > 1 ? "Write it entirely in your own words, with no phrasing borrowed from any listing." : null,
+        "Report, don't judge: no opinions or praise (no \"best\", \"amazing\", \"must-see\"), and no background about people or places beyond the facts given.",
+        attempt > 1 ? `Your previous draft was rejected (${problem}). Write it entirely in your own words, using only the facts given, with no praise.` : null,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -170,9 +187,10 @@ export async function describeEvent(
     if (!description || verified.length === 0) {
       return { status: "none", reason: "the model added no checkable fact", ...last, attempts: attempt };
     }
-    const check = checkOriginalWording(description, sourceDescription);
-    if (check.ok) return { status: "ok", description, usedFacts: verified, ...last, attempts: attempt };
-    sharedRun = check.sharedRun ?? "";
+    const wording = checkOriginalWording(description, sourceDescription);
+    const issues = contentIssues(description, checkFacts);
+    if (wording.ok && !issues) return { status: "ok", description, usedFacts: verified, ...last, attempts: attempt };
+    problem = [wording.ok ? null : `shares "${wording.sharedRun ?? ""}" with the source`, issues ? describeIssues(issues) : null].filter(Boolean).join("; ");
   }
-  return { status: "held", sharedRun, ...last!, attempts: 2 };
+  return { status: "held", problem, ...last!, attempts: 2 };
 }

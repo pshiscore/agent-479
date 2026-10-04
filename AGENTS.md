@@ -86,7 +86,8 @@ imports it.
 
 - **Front page and event experience:** `docs/product/front-page.md` (design
   direction, front page sections, event card and page, tags, search, and
-  follows). Read it before building the homepage (step 18), the event page
+  follows). Entity pages live under `/city`, `/venue`, `/category`, and
+  `/events`; nothing data-named sits at the root (`src/lib/routes.ts`). Read it before building the homepage (step 18), the event page
   (step 19), stories, or feeds.
 
 ## Content rules (no editorial)
@@ -104,7 +105,12 @@ anything else the model writes for readers. They're copied from section E of
   knowledge (artist bios, awards, chart history, "Grammy-winning").
 - **Generated text is labeled.** Every generated story and summary shows its
   sources and when it was generated, and is labeled as generated from public
-  listings.
+  listings. The event page shows "Summary generated <date> from public
+  listings" (`events.description_generated_at`).
+- **Generated text is checked in code** (`src/lib/text/checks.ts`):
+  evaluative words (list in config; the event's own title never counts) and
+  grounding (every proper name and number must appear in the event's stored
+  facts). Flagged text is regenerated once, then held for review.
 - **"Noteworthy" is decided by rules, never judgment.** Starting rules: newly
   announced in the last 7 days; the first appearance of a performer or event
   in our data; a returning annual event; a large-venue show (by venue

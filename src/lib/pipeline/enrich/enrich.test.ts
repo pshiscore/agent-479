@@ -104,6 +104,25 @@ describe("describe", () => {
     expect(await describeEvent(m.generate, facts, SOURCE)).toMatchObject({ status: "ok", attempts: 2 });
   });
 
+  it("regenerates a draft with praise or outside facts, then holds it if it happens again", async () => {
+    const praise = ok("An amazing story time for kids ages 3 to 5.");
+    const clean = ok("Stories and songs for kids ages 3 to 5.");
+    const m = fakeModel({ describe: [praise, clean] });
+    expect(await describeEvent(m.generate, facts, null)).toMatchObject({ status: "ok", attempts: 2, description: "Stories and songs for kids ages 3 to 5." });
+    expect(m.calls[1].system).toMatch(/evaluative: amazing/);
+
+    const background = ok("Stories by Dr. Seuss for kids ages 3 to 5, as read since 1957.");
+    const m2 = fakeModel({ describe: [background, background] });
+    const held = await describeEvent(m2.generate, facts, null);
+    expect(held).toMatchObject({ status: "held", attempts: 2 });
+    expect(held.status === "held" && held.problem).toMatch(/not in the facts: 1957, Seuss/);
+  });
+
+  it("never counts the event's own title as praise", async () => {
+    const m = fakeModel({ describe: ok("Show tunes from Best of Broadway for kids ages 3 to 5.") });
+    expect(await describeEvent(m.generate, { ...facts, title: "Best of Broadway" }, null)).toMatchObject({ status: "ok", attempts: 1 });
+  });
+
   it("makes no model call when nothing beyond the title and category is known", async () => {
     const m = fakeModel({ describe: ok("A yoga session for people interested in practicing yoga.") });
     const r = await describeEvent(m.generate, { ...facts, title: "Yoga @ FPL", ages: null, activity: null }, null);

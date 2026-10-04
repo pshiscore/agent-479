@@ -297,6 +297,10 @@ Anything else stays unpublished, which is the fail-closed behavior.
 
 **Deferred:** Visit Bentonville (aggregator, Phase 1b).
 
+**Phase 1b (product):** "Just announced" generated stories
+(`docs/product/front-page.md`, section B3), community signals, follows,
+feeds, and search.
+
 **Skipped:**
 - Springdale (city): bot challenge
 - Downtown Springdale: robots.txt disallows its feed formats
@@ -633,6 +637,18 @@ See `.env.example`. Model names are deliberately not env vars.
     classes don't bury concerts and festivals. Series grouping covers only
     ~50 of 467 library events, so hiding recurring programs alone won't
     rebalance the page. Planned only; built in this step.*
+    *Owner decisions (2026-10-04), spec in `docs/product/front-page.md`:
+    feature slot chosen by config rules (newly announced in 7 days, then the
+    large-venue tier), event facts only, each choice logged with its rule;
+    Upcoming hides recurring events behind series rows with a "Show
+    recurring" toggle; venue-type filter in Upcoming, search, and city pages;
+    entity pages under /city, /venue, /category, /events (nothing data-named
+    at the root); a "Directions" link instead of a map. "Just announced"
+    generated stories move to Phase 1b. **Gate:** Ticketmaster events don't
+    appear on any public page until their display, attribution, and image
+    terms are re-read, recorded in `docs/sources-terms.md`, and any required
+    attribution or link-back is built. This blocks going public, not
+    building.*
     *Design direction (owner, 2026-10-04): the owner likes The Verge's
     design. Take inspiration from the principles that make it work, but don't
     copy its layout, logo, typefaces, or assets: our design must be our own.*

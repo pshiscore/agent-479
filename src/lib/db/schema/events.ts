@@ -82,6 +82,9 @@ export const events = pgTable(
     normalizedTitle: text("normalized_title").notNull(),
     // Our own words, generated from the facts (step 13). Never source text.
     shortDescription: text("short_description"),
+    // When shortDescription was generated: shown as "Summary generated <date>
+    // from public listings". Null exactly when there's no description.
+    descriptionGeneratedAt: timestamp("description_generated_at", { withTimezone: true }),
     startAt: timestamp("start_at", { withTimezone: true }).notNull(),
     endAt: timestamp("end_at", { withTimezone: true }),
     allDay: boolean("all_day").notNull().default(false),
@@ -140,6 +143,7 @@ export const events = pgTable(
     ),
     check("events_canonical_check", sql.raw(`canonical_event_id is null or canonical_event_id <> id`)),
     // Free and its basis go together (coalesce: NULL must not slip through).
+    check("events_description_generated_check", sql.raw(`(short_description is null) = (description_generated_at is null)`)),
     check("events_free_basis_check", sql.raw(`coalesce(is_free, false) = (free_basis is not null)`)),
     check(
       "events_free_basis_value_check",

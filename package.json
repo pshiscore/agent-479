@@ -28,7 +28,8 @@
     "tm:venues": "tsx scripts/ticketmaster-venues.ts",
     "process:once": "tsx scripts/process-once.ts",
     "eval:extract": "tsx scripts/eval-extract.ts",
-    "eval:blind-export": "tsx scripts/eval-blind-export.ts"
+    "eval:blind-export": "tsx scripts/eval-blind-export.ts",
+    "check:descriptions": "tsx scripts/check-descriptions.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",
