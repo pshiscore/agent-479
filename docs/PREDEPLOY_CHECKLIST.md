@@ -7,8 +7,10 @@ marked (every deploy) each time.
 
 - [x] A real domain is registered: **479.guide** (site name "479 Guide";
       "Agent 479" stays the agent's and bot's name). Owner, 2026-10-04.
-- [ ] 479.guide is attached to the Vercel project (Cloudflare DNS).
-- [ ] `SITE_URL=https://479.guide` in Vercel Production env and `.env.local`.
+- [x] 479.guide is attached to the Vercel project (Cloudflare DNS); www
+      redirects to it. Checked 2026-10-04.
+- [x] `SITE_URL=https://479.guide` in Vercel Production env (owner,
+      2026-10-04).
 - [x] Contact address: **bot@479.guide**, forwarding to the owner's inbox.
       Owner, 2026-10-04.
 - [ ] `BOT_CONTACT_EMAIL=bot@479.guide` in Vercel Production env and
@@ -22,12 +24,12 @@ marked (every deploy) each time.
 
 ## Site lock (until launch)
 
-- [ ] `SITE_LOCKED=true` in Production. (Production is locked unless it's
+- [x] `SITE_LOCKED=true` in Production. (Production is locked unless it's
       exactly `false`, so a missing value stays locked.)
 - [ ] `SITE_PREVIEW_USER` and `SITE_PREVIEW_PASSWORD` set in Production,
       different from the admin credentials. Without them the locked site
       returns 503 for everyone, never opens.
-- [ ] Checked by hand on https://479.guide: `/` asks for the preview password;
+- [x] Checked on https://479.guide (2026-10-04): `/` asks for the preview password;
       `/admin` asks for the admin password and refuses the preview one;
       `/bot` and `/robots.txt` load without a password; every response has
       `X-Robots-Tag: noindex`; `/robots.txt` is `Disallow: /`.
