@@ -3,9 +3,10 @@
 **To:** Jennifer Wilson, Public Relations Director: jwilson@waltonartscenter.org
 (listed on <https://waltonartscenter.org/media-resources/>)
 **Fallback:** info@waltonartscenter.org
-**From:** your personal email
-**Fill in before sending:** `[Your name]`, `[phone, optional]`. Add the site
-link once there's a preview to share.
+**From:** your personal email, with **Reply-To: bot@479.guide** (that address
+forwards to you; Cloudflare routing only receives, so send from your own
+account)
+**Fill in before sending:** `[Your name]`, `[phone, optional]`.
 
 ---
 
@@ -13,9 +14,10 @@ link once there's a preview to share.
 
 Hi Jennifer,
 
-I'm [Your name], a Northwest Arkansas resident building **Agent 479**, a
-free local events calendar and weekly "weekend picks" digest covering
-Bentonville, Rogers, Springdale, Fayetteville, and Bella Vista.
+I'm [Your name], a Northwest Arkansas resident building **479 Guide**
+(<https://479.guide>), a free local events calendar and weekly "weekend
+picks" digest covering Bentonville, Rogers, Springdale, Fayetteville, and
+Bella Vista.
 
 Walton Arts Center is one of the first places people look for something to do,
 and I'd like to list your shows correctly. Before I include them, I wanted to ask
@@ -31,8 +33,9 @@ how you'd prefer we do it.
 1. Do you have a feed we could use, such as an iCal/ICS, RSS, or JSON
    calendar export, or a partner listing service?
 2. If not, may we read your public online calendar once a day? Our automated
-   reader identifies itself by name with a contact address and runs at a very
-   low rate.
+   reader, Agent479Bot, identifies itself with a contact address and runs at a
+   very low rate. What it reads and how to stop it are at
+   <https://479.guide/bot>.
 3. Is there any attribution or wording you'd like us to use, or anything you'd
    rather we not show?
 
@@ -41,13 +44,15 @@ clearly labeled local sponsor to cover hosting costs. Sponsored content would
 always be kept separate from event listings. If that would change your answer,
 please tell me.
 
-If you ever want a listing corrected or removed, one email to me will do it.
-I'm glad to send a preview link before anything goes live.
+If you ever want a listing corrected or removed, one email to bot@479.guide
+will do it. The site isn't public yet; I'm glad to send you a preview login
+before anything goes live.
 
 Thanks for your time and for everything WAC brings to the area.
 
 Best,
 [Your name]
+479 Guide · <https://479.guide> · bot@479.guide
 [phone, optional]
 
 ---

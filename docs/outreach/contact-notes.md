@@ -30,9 +30,10 @@ convenient; none of them block Phase 1.
 
 ## Short template
 
-> Hi, I'm [Your name], a local resident building Agent 479, a free events
-> calendar for Northwest Arkansas. I'd like to include [organization]'s public
-> events, listing just the title, date, time, place, and a link back to your
-> page. Do you have an iCal/ICS or RSS feed we could subscribe to? If you'd
-> rather we not list your events, just say so. Thanks!
-> [Your name]
+> Hi, I'm [Your name], a local resident building 479 Guide
+> (https://479.guide), a free events calendar for Northwest Arkansas. I'd like
+> to include [organization]'s public events, listing just the title, date,
+> time, place, and a link back to your page. Do you have an iCal/ICS or RSS
+> feed we could subscribe to? If you'd rather we not list your events, just
+> say so. Our bot and how to opt out: https://479.guide/bot. Thanks!
+> [Your name], bot@479.guide

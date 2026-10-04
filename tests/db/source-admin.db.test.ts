@@ -10,6 +10,7 @@ import {
   disableManually,
   enableAfterTest,
   enableManually,
+  optOut,
   recordPermission,
   SourceStateError,
   sourcesNeedingAttention,
@@ -117,6 +118,20 @@ describe("source state rules", () => {
         .from(agentActions)
         .where(eq(agentActions.actor, "human:owner"));
       expect(actions.map((a) => a.action)).toEqual(expect.arrayContaining(["update", "disable"]));
+    });
+  });
+
+  it("records an opt-out as a logged manual disable, from any state, and re-enables only with permission", async () => {
+    await inRollback(async (tx) => {
+      const untested = await addSource(tx, { enabled: false, disabledReason: "untested" });
+      const after = await optOut(tx, untested.slug, "Email from the site owner, 2026-10-05", OWNER);
+      expect(after).toMatchObject({ enabled: false, disabledReason: "manual" });
+      const [log] = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, untested.id), eq(agentActions.action, "disable")));
+      expect(log).toMatchObject({ actor: OWNER, reason: "Opt-out request: Email from the site owner, 2026-10-05" });
+      await expect(optOut(tx, untested.slug, "Email from the site owner again", OWNER)).rejects.toThrow(/already opted out/);
+      await expect(optOut(tx, untested.slug, "Agent thinks so", agentActor("fetch"))).rejects.toBeInstanceOf(SourceStateError);
+      await expect(enableManually(tx, untested.slug, "Looks fine to me now", OWNER)).rejects.toThrow(/written permission/);
+      expect(await enableManually(tx, untested.slug, "Permission: site owner emailed on 2026-11-01", OWNER)).toMatchObject({ enabled: true });
     });
   });
 

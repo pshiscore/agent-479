@@ -15,6 +15,10 @@ const REQUIRED_KEYS = [
   "OPENAI_API_KEY",
   "LLM_DAILY_BUDGET_USD",
   "TICKETMASTER_API_KEY",
+  "SITE_LOCKED",
+  "SITE_PREVIEW_USER",
+  "SITE_PREVIEW_PASSWORD",
+  "CRON_ENABLED",
 ];
 
 function parseKeys(contents: string): Map<string, string> {
@@ -43,9 +47,14 @@ describe(".env.example", () => {
       "ADMIN_PASSWORD",
       "OPENAI_API_KEY",
       "TICKETMASTER_API_KEY",
-      "BOT_CONTACT_EMAIL",
+      "SITE_PREVIEW_PASSWORD",
     ];
     for (const key of secretKeys) expect(keys.get(key)).toBe("");
+  });
+
+  it("names the site and the bot's public contact (owner, 2026-10-04)", () => {
+    expect(keys.get("SITE_URL")).toBe("https://479.guide");
+    expect(keys.get("BOT_CONTACT_EMAIL")).toBe("bot@479.guide");
   });
 
   it("does not configure model names (they live in llm_models)", () => {

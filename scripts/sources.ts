@@ -4,6 +4,7 @@
  *   npm run sources -- test-fetch <slug> [--enable]       untested sources only; dry run unless --enable
  *   npm run sources -- enable <slug> --reason "..."        re-enable a blocked or manual source (owner only)
  *   npm run sources -- disable <slug> --reason "..."       turn a source off
+ *   npm run sources -- opt-out <slug> --reason "..."       a site owner asked us to stop (who, when, how)
  *   npm run sources -- permission <slug> --reason "..."    written permission arrived: awaiting → untested
  *   npm run sources -- status                              every source, its state, and recent failures
  *
@@ -23,6 +24,7 @@ import {
   enableAfterTest,
   enableManually,
   NEEDS_ATTENTION_FAILURES,
+  optOut,
   recordPermission,
 } from "@/lib/sources/admin";
 import { PoliteClient } from "@/lib/sources/http";
@@ -70,6 +72,10 @@ async function main() {
       case "disable":
         await disableManually(db, slug ?? "", args.reason ?? "", OWNER);
         console.log(`${slug} disabled (logged)`);
+        return;
+      case "opt-out":
+        await optOut(db, slug ?? "", args.reason ?? "", OWNER);
+        console.log(`${slug} disabled as an opt-out (logged); re-enable only with written permission`);
         return;
       case "permission":
         await recordPermission(db, slug ?? "", args.reason ?? "", OWNER);

@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { assertDatabaseTarget } from "./target";
 
 export type Db = ReturnType<typeof createDb>;
 export type DbTx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -13,6 +14,8 @@ const globalForDb = globalThis as unknown as { agent479Db?: Db };
 function createDb() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is not set (see .env.example)");
+  // Dev and production databases never cross (src/lib/db/target.ts).
+  assertDatabaseTarget(url);
   const client = postgres(url, {
     // Supabase transaction pooler (Supavisor) doesn't support prepared statements.
     prepare: false,

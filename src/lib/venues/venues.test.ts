@@ -280,8 +280,16 @@ describe("censusGeocode", () => {
 });
 
 describe("botUserAgent", () => {
-  it("builds the honest user agent and refuses without a contact", () => {
-    expect(botUserAgent("ops@example.org")).toBe("Agent479Bot (contact: ops@example.org)");
-    expect(() => botUserAgent("  ")).toThrow(/BOT_CONTACT_EMAIL/);
+  it("builds the honest user agent and refuses without a contact or site", () => {
+    expect(botUserAgent("bot@479.guide", "https://479.guide")).toBe("Agent479Bot/1.0 (+https://479.guide/bot; bot@479.guide)");
+    expect(botUserAgent("bot@479.guide", "https://479.guide/")).toBe("Agent479Bot/1.0 (+https://479.guide/bot; bot@479.guide)");
+    expect(() => botUserAgent("  ", "https://479.guide")).toThrow(/BOT_CONTACT_EMAIL/);
+    expect(() => botUserAgent("bot@479.guide", "")).toThrow(/SITE_URL/);
+    expect(() => botUserAgent("bot@479.guide", "https://479.guide/some/page")).toThrow(/SITE_URL/);
+    expect(() => botUserAgent("bot@479.guide", "http://localhost:3000")).toThrow(/SITE_URL/);
+    expect(() => botUserAgent("bot@479.guide", "http://479.guide")).toThrow(/SITE_URL/);
+    // The contact is published in other sites' logs: only an address on the site's domain.
+    expect(() => botUserAgent("someone@gmail.com", "https://479.guide")).toThrow(/at 479.guide/);
+    expect(botUserAgent("Bot@479.guide", "https://www.479.guide")).toBe("Agent479Bot/1.0 (+https://www.479.guide/bot; Bot@479.guide)");
   });
 });

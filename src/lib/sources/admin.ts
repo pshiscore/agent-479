@@ -12,7 +12,13 @@ import type { SourceRow } from "./types";
  * - awaiting_permission → never fetched, not even a test. When the owner
  *   records permission it becomes untested, and the normal path applies.
  * - blocked or manual → enabled only by the owner, by hand, with a reason.
+ * - opted out (a site owner asked us to stop, via /bot) → disabled as manual
+ *   with an "Opt-out request" reason; re-enabled only with a reason that
+ *   starts "Permission", i.e. the site owner's written permission.
  */
+
+export const OPT_OUT_PREFIX = "Opt-out request";
+export const PERMISSION_PREFIX = "Permission";
 
 export class SourceStateError extends Error {}
 
@@ -88,11 +94,39 @@ export async function enableManually(db: DbExecutor, slug: string, reason: strin
   if (source.disabledReason === "awaiting_permission") {
     throw new SourceStateError(`${slug} is awaiting permission: record the permission first`);
   }
+  if ((await lastDisableReason(db, source.id))?.startsWith(OPT_OUT_PREFIX) && !r.startsWith(PERMISSION_PREFIX)) {
+    throw new SourceStateError(`${slug} opted out: re-enable only with the site owner's written permission (a reason starting "${PERMISSION_PREFIX}")`);
+  }
   return change(db, source, { enabled: true, disabledReason: null }, {
     actor,
     action: "enable",
     reason: `Re-enabled by hand (was ${source.disabledReason}): ${r}`,
   });
+}
+
+async function lastDisableReason(db: DbExecutor, sourceId: string): Promise<string | null> {
+  const [a] = await db
+    .select({ reason: agentActions.reason })
+    .from(agentActions)
+    .where(and(eq(agentActions.entityType, "source"), eq(agentActions.entityId, sourceId), eq(agentActions.action, "disable")))
+    .orderBy(desc(agentActions.createdAt))
+    .limit(1);
+  return a?.reason ?? null;
+}
+
+/**
+ * A site owner asked us to stop (by email, per /bot). The source is turned off
+ * by hand, logged as an opt-out. Works whatever state the source is in, so an
+ * untested source can't be test fetched and enabled afterwards.
+ */
+export async function optOut(db: DbExecutor, slug: string, reason: string, actor: string) {
+  const r = requireReason(reason);
+  if (!actor.startsWith("human:")) throw new SourceStateError("only a person records an opt-out");
+  const source = await loadBySlug(db, slug);
+  if (!source.enabled && source.disabledReason === "manual" && (await lastDisableReason(db, source.id))?.startsWith(OPT_OUT_PREFIX)) {
+    throw new SourceStateError(`${slug} has already opted out`);
+  }
+  return change(db, source, { enabled: false, disabledReason: "manual" }, { actor, action: "disable", reason: `${OPT_OUT_PREFIX}: ${r}` });
 }
 
 /** The owner turns a source off. */
