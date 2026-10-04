@@ -59,7 +59,7 @@ describe("actionInputSchema", () => {
 
   it("only proposals carry an approval status, and they must be pending with a dedupe key", () => {
     expect(errorsFor({ ...update, approvalStatus: "pending" })).toContain(
-      "only propose_venue is created with an approval status",
+      "only proposals are created with an approval status",
     );
     expect(errorsFor({ ...proposal, approvalStatus: "approved" })).toContain(
       "propose_venue must be created as pending",

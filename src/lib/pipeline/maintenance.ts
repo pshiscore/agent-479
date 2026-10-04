@@ -1,15 +1,18 @@
-import { and, isNotNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
+import { agentActor } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
-import { rawRecords } from "@/lib/db/schema";
+import { rawRecords, sources } from "@/lib/db/schema";
 import { claimJob } from "@/lib/jobs";
 import { finishRun } from "@/lib/runs";
+import { proposeTicketmasterLinks } from "@/lib/sources/ticketmaster-venues";
 
 /**
  * The daily maintenance job. So far it purges source descriptions (AGENTS.md
  * rule 4): 30 days after the event ends, or, for an open-ended series, 30 days
  * after the item was last seen in its feed; and raw payloads not seen for 30
- * days. Counts go in runs.stats. Later steps add the dedup sweep and source
- * health checks.
+ * days; and proposes Ticketmaster venue links for the owner (never links).
+ * Counts go in runs.stats. Later steps add the dedup sweep and source health
+ * checks.
  */
 
 export async function purgeDescriptions(db: DbExecutor, now: Date): Promise<number> {
@@ -53,7 +56,12 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date } = {
   try {
     const descriptionsPurged = await purgeDescriptions(db, now);
     const payloadsPurged = await purgeStalePayloads(db, now);
-    const stats = { descriptionsPurged, payloadsPurged };
+    // Proposals only: never links a Ticketmaster venue by itself.
+    const [tm] = await db.select({ id: sources.id }).from(sources).where(eq(sources.slug, "ticketmaster"));
+    const linkProposals = tm
+      ? await proposeTicketmasterLinks(db, { actor: agentActor("maintenance"), runId: claim.id })
+      : { proposed: 0, alreadyDecided: 0 };
+    const stats = { descriptionsPurged, payloadsPurged, linkProposals: linkProposals.proposed };
     await finishRun(db, claim.id, { status: "ok", stats });
     return stats;
   } catch (err) {

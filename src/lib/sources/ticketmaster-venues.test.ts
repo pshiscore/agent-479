@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   coverageReport,
   matchTicketmasterVenue,
+  namesMatchClosely,
   normalizeStreetAddress,
   type OurVenue,
   placeholderPoints,
@@ -131,5 +132,22 @@ describe("coverageReport", () => {
     expect(md).toContain(
       "| KovZ1 | Walmart AMP | 5079 W Northgate Rd | Rogers | 12 | **proposed** (same name, same city) | walmart-amp | 5079 W Northgate Rd | 0 m |",
     );
+  });
+});
+
+describe("namesMatchClosely", () => {
+  const momentary = { name: "The Momentary", aliases: [] };
+  const bud = { name: "Bud Walton Arena", aliases: ["Bud Walton"] };
+  it("accepts equal names, whole-word containment, and aliases", () => {
+    expect(namesMatchClosely("The Momentary - AR", momentary)).toBe(true);
+    expect(namesMatchClosely("BUD WALTON ARENA", bud)).toBe(true);
+    expect(namesMatchClosely("Bud Walton", bud)).toBe(true);
+    expect(namesMatchClosely("Arkansas Music Pavilion", AMP)).toBe(true);
+  });
+
+  it("rejects different buildings that share a word", () => {
+    expect(namesMatchClosely("Barnhill Arena", bud)).toBe(false);
+    expect(namesMatchClosely("Momentary Coffee", { name: "Moment Bar", aliases: [] })).toBe(false);
+    expect(namesMatchClosely(null, bud)).toBe(false);
   });
 });

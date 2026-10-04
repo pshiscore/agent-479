@@ -84,6 +84,50 @@
       }
     },
     {
+      "slug": "ozark-music-hall",
+      "name": "Ozark Music Hall",
+      "aliases": [
+        "JJ's Live"
+      ],
+      "venueType": "music_venue",
+      "address": "3615 N Steele Blvd",
+      "city": "Fayetteville",
+      "postalCode": "72703",
+      "lat": 36.117211,
+      "lng": -94.157155,
+      "website": "https://ozarkmusichall.com/",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://ozarkmusichall.com/",
+          "checkedAt": "2026-10-04",
+          "note": "Shown as Ozark Music Hall (formerly JJ's Live)"
+        },
+        "address": {
+          "url": "https://ozarkmusichall.com/",
+          "checkedAt": "2026-10-04"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/498930842",
+          "checkedAt": "2026-10-04",
+          "note": "Building still tagged JJ's Live at 3615 North Steele Boulevard"
+        },
+        "website": {
+          "url": "https://www.experiencefayetteville.com/experience/art/live-music-at-ozark-music-hall",
+          "checkedAt": "2026-10-04",
+          "note": "Experience Fayetteville lists ozarkmusichall.com"
+        }
+      },
+      "notes": "Formerly JJ's Live (and JBGB before that), per Experience Fayetteville.",
+      "handChecks": [
+        {
+          "finding": "OSM way 498930842 is the building at 3615 North Steele Boulevard (still tagged JJ's Live); Ozark Music Hall's own site gives the same address and says it was formerly JJ's Live.",
+          "url": "https://www.openstreetmap.org/way/498930842",
+          "checkedAt": "2026-10-04"
+        }
+      ]
+    },
+    {
       "slug": "theatresquared",
       "name": "TheatreSquared",
       "aliases": [
@@ -309,6 +353,85 @@
           "note": "US Census geocoder match: 453 N GARLAND AVE, FAYETTEVILLE, AR, 72701"
         }
       }
+    },
+    {
+      "slug": "barnhill-arena",
+      "name": "Barnhill Arena",
+      "aliases": [],
+      "venueType": "arena",
+      "address": "285 N Stadium Dr",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.066598,
+      "lng": -94.177998,
+      "website": "https://arkansasrazorbacks.com/facilities/barnhill-arena/",
+      "parent": "university-of-arkansas",
+      "verification": {
+        "name": {
+          "url": "https://arkansasrazorbacks.com/facilities/barnhill-arena/",
+          "checkedAt": "2026-10-04"
+        },
+        "address": {
+          "url": "https://arkansasrazorbacks.com/directions_to_razorback_athletic_facilities_1569684/",
+          "checkedAt": "2026-10-04",
+          "note": "Listed as \"131 Barnhill Arena or 285 N. Stadium Drive\"; the street address is the physical one"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/469590487",
+          "checkedAt": "2026-10-04"
+        },
+        "website": {
+          "url": "https://arkansasrazorbacks.com/facilities/barnhill-arena/",
+          "checkedAt": "2026-10-04"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=285+N+Stadium+Dr%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-04",
+          "note": "US Census geocoder match: 285 N STADIUM DR, FAYETTEVILLE, AR, 72701"
+        }
+      },
+      "notes": "Gymnastics and volleyball (Arkansas Razorbacks)."
+    },
+    {
+      "slug": "razorback-field",
+      "name": "Razorback Field",
+      "aliases": [
+        "Razorback Soccer Field"
+      ],
+      "venueType": "arena",
+      "address": "449 S Garland Ave",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.05842,
+      "lng": -94.176716,
+      "website": "https://arkansasrazorbacks.com/facilities/razorback-field/",
+      "parent": "university-of-arkansas",
+      "verification": {
+        "name": {
+          "url": "https://arkansasrazorbacks.com/facilities/razorback-field/",
+          "checkedAt": "2026-10-04"
+        },
+        "address": {
+          "url": "https://arkansasrazorbacks.com/directions_to_razorback_athletic_facilities_1569684/",
+          "checkedAt": "2026-10-04",
+          "note": "Corner of 6th Street and Garland Avenue"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/469590536",
+          "checkedAt": "2026-10-04",
+          "note": "Tagged Razorback Field (Soccer)"
+        },
+        "website": {
+          "url": "https://arkansasrazorbacks.com/facilities/razorback-field/",
+          "checkedAt": "2026-10-04"
+        },
+        "postalCode": {
+          "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=449+S+Garland+Ave%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
+          "checkedAt": "2026-10-04",
+          "note": "US Census geocoder match: 449 GARLAND ST, FAYETTEVILLE, AR, 72701"
+        }
+      },
+      "notes": "Soccer (Arkansas Razorbacks). Ticketmaster lists 449 Stadium Dr and OSM tags 1175 W Carlson Dr; neither geocodes. The athletics department's 449 S Garland Ave geocodes 95 m from the field."
     },
     {
       "slug": "fayetteville-public-library",

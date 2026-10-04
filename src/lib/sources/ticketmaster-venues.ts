@@ -1,7 +1,7 @@
-import { and, eq, isNotNull } from "drizzle-orm";
-import { recordAction } from "@/lib/actions/record";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { proposeOnce, recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
-import { rawRecords, sources, venueExternalIds, venues } from "@/lib/db/schema";
+import { agentActions, rawRecords, sources, venueExternalIds, venues } from "@/lib/db/schema";
 import { normalizeVenueName, venueNameKeys } from "@/lib/venues/normalize";
 import { distanceMeters, NWA_BOUNDS } from "@/lib/venues/verify";
 
@@ -9,6 +9,8 @@ import { distanceMeters, NWA_BOUNDS } from "@/lib/venues/verify";
  * Ticketmaster venue coverage: which Ticketmaster venues our fetched events
  * use, and whether each maps to one of our venues. A match is only ever a
  * proposal; links (venue_external_ids) are written after the owner approves.
+ * One venue can hold several Ticketmaster IDs (Ticketmaster often has
+ * duplicate records for one building): the unique key is (source, external id).
  */
 
 export interface TmVenue {
@@ -240,3 +242,136 @@ export function coverageReport(matches: VenueMatch[], generatedAt: Date): string
   ].join("\n");
 }
 
+
+const words = (s: string) => new Set(s.split(" ").filter(Boolean));
+
+/**
+ * Names "match closely" when, after normalization, they're equal, one's words
+ * appear whole inside the other ("The Momentary - AR" ⊃ "Momentary"), or their
+ * words overlap by at least 60%. Checked against the venue's name and aliases.
+ */
+export function namesMatchClosely(tmName: string | null, venue: Pick<OurVenue, "name" | "aliases">): boolean {
+  if (!tmName) return false;
+  const t = normalizeVenueName(tmName);
+  if (!t) return false;
+  return venueNameKeys(venue).some((k) => {
+    if (t === k || ` ${t} `.includes(` ${k} `) || ` ${k} `.includes(` ${t} `)) return true;
+    const a = words(t);
+    const b = words(k);
+    const shared = [...a].filter((w) => b.has(w)).length;
+    return shared / new Set([...a, ...b]).size >= 0.6;
+  });
+}
+
+const LINK_PROPOSAL_MAX_M = 150;
+const dedupeKeyFor = (tmVenueId: string, venueSlug: string) => `ticketmaster:${tmVenueId}:${venueSlug}`;
+
+export interface LinkProposal {
+  sourceId: string;
+  tmVenueId: string;
+  tmName: string | null;
+  tmAddress: string | null;
+  venueId: string;
+  venueSlug: string;
+  distanceM: number;
+  events: number;
+}
+
+/**
+ * For Ticketmaster venue IDs not yet linked: when Ticketmaster's point is real
+ * (not a placeholder), within 150 m of a seed venue, AND the names match
+ * closely, log a pending propose_link for the owner. Never links anything.
+ * A proposal the owner already approved or rejected isn't raised again.
+ */
+export async function proposeTicketmasterLinks(db: DbExecutor, opts: { actor: string; runId?: string | null }) {
+  const { sourceId, matches } = await ticketmasterCoverage(db);
+  const ours = await db
+    .select({ id: venues.id, slug: venues.slug, name: venues.name, aliases: venues.aliases, address: venues.address, city: venues.city, lat: venues.lat, lng: venues.lng })
+    .from(venues)
+    .where(eq(venues.active, true));
+  let proposed = 0;
+  let alreadyDecided = 0;
+  for (const m of matches) {
+    if (m.kind === "linked" || m.coordsUnreliable || m.tm.lat === null || m.tm.lng === null) continue;
+    const near = ours
+      .map((v) => ({ v, d: Math.round(distanceMeters({ lat: m.tm.lat!, lng: m.tm.lng! }, v)) }))
+      .filter((x) => x.d <= LINK_PROPOSAL_MAX_M && namesMatchClosely(m.tm.name, x.v))
+      .sort((a, b) => a.d - b.d)[0];
+    if (!near) continue;
+    const dedupeKey = dedupeKeyFor(m.tm.id, near.v.slug);
+    const [decided] = await db
+      .select({ id: agentActions.id })
+      .from(agentActions)
+      .where(
+        and(
+          eq(agentActions.action, "propose_link"),
+          eq(agentActions.dedupeKey, dedupeKey),
+          inArray(agentActions.approvalStatus, ["approved", "rejected"]),
+        ),
+      )
+      .limit(1);
+    if (decided) {
+      alreadyDecided++;
+      continue;
+    }
+    const after: LinkProposal = {
+      sourceId,
+      tmVenueId: m.tm.id,
+      tmName: m.tm.name,
+      tmAddress: m.tm.address,
+      venueId: near.v.id,
+      venueSlug: near.v.slug,
+      distanceM: near.d,
+      events: m.tm.events,
+    };
+    const row = await proposeOnce(db, {
+      runId: opts.runId ?? null,
+      actor: opts.actor,
+      action: "propose_link",
+      entityType: "venue_external_id",
+      after: { ...after },
+      approvalStatus: "pending",
+      dedupeKey,
+      reason: `Ticketmaster venue "${m.tm.name}" is ${near.d} m from ${near.v.slug} and the names match closely`,
+    });
+    if (row) proposed++;
+  }
+  return { proposed, alreadyDecided };
+}
+
+async function decideProposal(
+  db: DbExecutor,
+  proposalId: string,
+  decision: "approved" | "rejected",
+  actor: string,
+  reason: string,
+) {
+  if (!actor.startsWith("human:")) throw new Error("only a person can decide a link proposal");
+  if (reason.trim().length < 10) throw new Error("a reason of at least 10 characters is required");
+  return db.transaction(async (tx) => {
+    const [p] = await tx.select().from(agentActions).where(eq(agentActions.id, proposalId));
+    if (!p || p.action !== "propose_link") throw new Error(`no link proposal ${proposalId}`);
+    if (p.approvalStatus !== "pending") throw new Error(`proposal ${proposalId} is already ${p.approvalStatus}`);
+    let link = null;
+    if (decision === "approved") {
+      const a = p.after as unknown as LinkProposal;
+      link = await linkTicketmasterVenue(tx, {
+        sourceId: a.sourceId,
+        tmVenueId: a.tmVenueId,
+        venueSlug: a.venueSlug,
+        actor,
+        reason: `Approved link proposal ${proposalId}: ${reason}`,
+      });
+    }
+    await tx
+      .update(agentActions)
+      .set({ approvalStatus: decision, reviewedBy: actor, reviewedAt: new Date() })
+      .where(eq(agentActions.id, proposalId));
+    return link;
+  });
+}
+
+export const approveLinkProposal = (db: DbExecutor, id: string, actor: string, reason: string) =>
+  decideProposal(db, id, "approved", actor, reason);
+export const rejectLinkProposal = (db: DbExecutor, id: string, actor: string, reason: string) =>
+  decideProposal(db, id, "rejected", actor, reason);

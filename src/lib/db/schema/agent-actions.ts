@@ -23,6 +23,7 @@ export const AGENT_ACTIONS = [
   "disable",
   "enable",
   "propose_venue",
+  "propose_link",
   "publish",
   "hold",
   "veto",
@@ -55,7 +56,7 @@ export const agentActions = pgTable(
     model: text("model"),
     llmCallId: uuid("llm_call_id").references(() => llmCalls.id, { onDelete: "set null" }),
     confidence: numeric("confidence", { precision: 4, scale: 3, mode: "number" }),
-    // Null unless the action needs a human decision (e.g. propose_venue).
+    // Null unless the action needs a human decision (propose_venue, propose_link).
     approvalStatus: text("approval_status", { enum: APPROVAL_STATUSES }),
     dedupeKey: text("dedupe_key"),
     reviewedBy: text("reviewed_by"),

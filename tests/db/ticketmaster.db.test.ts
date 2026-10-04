@@ -1,13 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
-import { humanActor } from "@/lib/actions/record";
+import { agentActor, humanActor } from "@/lib/actions/record";
 import { type DbTx, getDb } from "@/lib/db/client";
 import { agentActions, rawRecords, sources, venueExternalIds, venues } from "@/lib/db/schema";
 import { storeItems } from "@/lib/pipeline/fetch";
 import { purgeStalePayloads } from "@/lib/pipeline/maintenance";
 import { startRun } from "@/lib/runs";
-import { linkTicketmasterVenue, ticketmasterVenuesInRawRecords } from "@/lib/sources/ticketmaster-venues";
+import {
+  approveLinkProposal,
+  linkTicketmasterVenue,
+  proposeTicketmasterLinks,
+  rejectLinkProposal,
+  ticketmasterVenuesInRawRecords,
+} from "@/lib/sources/ticketmaster-venues";
 import type { FetchedItem } from "@/lib/sources/types";
 import { inRollback } from "./helpers";
 
@@ -89,6 +95,94 @@ describe("Ticketmaster venues", () => {
         linkTicketmasterVenue(tx, { sourceId: s.id, tmVenueId: "V1", venueSlug: v.slug, actor: humanActor("owner"), reason: "again, twice" }),
       ).rejects.toThrow(/already linked/);
       expect(await tx.select().from(venueExternalIds).where(eq(venueExternalIds.sourceId, s.id))).toHaveLength(1);
+    });
+  });
+});
+
+describe("Ticketmaster link proposals", () => {
+  // Uses the real ticketmaster source row (inside a rolled-back transaction).
+  async function setup(tx: DbTx) {
+    const [tm] = await tx.select().from(sources).where(eq(sources.slug, "ticketmaster"));
+    const run = await startRun(tx, "fetch", { sourceId: tm.id });
+    const [venue] = await tx
+      .insert(venues)
+      .values({ slug: `hall-${tag}`, name: `Glimmer Hall ${tag}`, address: "10 Test St", city: "Rogers", lat: 36.31, lng: -94.2, venueType: "music_venue" })
+      .returning();
+    const tmItem = (id: string, venueId: string, name: string, lat: number, lng: number): FetchedItem => ({
+      externalId: `${id}-${tag}`,
+      sourceUrl: null,
+      payload: { format: "ticketmaster", event: { id, venues: [{ id: venueId, name, address: "10 Test St", city: "Rogers", lat, lng }] } },
+      descriptionText: null,
+      descriptionPurgeAfter: null,
+    });
+    return { tm, run, venue, tmItem };
+  }
+  const mine = (tx: DbTx) =>
+    tx
+      .select()
+      .from(agentActions)
+      .where(and(eq(agentActions.action, "propose_link"), eq(agentActions.entityType, "venue_external_id")))
+      .then((rows) => rows.filter((r) => (r.dedupeKey ?? "").includes(tag)));
+
+  it("proposes only close names within 150 m, never links, and doesn't repeat itself", async () => {
+    await inRollback(async (tx) => {
+      const { tm, run, venue, tmItem } = await setup(tx);
+      await storeItems(tx, tm, run.id, [
+        tmItem("E1", `NEAR-${tag}`, `Glimmer Hall ${tag}`, 36.3105, -94.2005), // ~70 m, same name: proposed
+        tmItem("E2", `FAR-${tag}`, `Glimmer Hall ${tag}`, 36.32, -94.2), // ~1.1 km: not proposed
+        tmItem("E3", `OTHER-${tag}`, "Completely Different Club", 36.3101, -94.2001), // close but another name
+      ], new Date());
+
+      await proposeTicketmasterLinks(tx, { actor: agentActor("maintenance") });
+      const proposals = await mine(tx);
+      expect(proposals.map((p) => (p.after as { tmVenueId: string }).tmVenueId)).toEqual([`NEAR-${tag}`]);
+      expect(proposals[0]).toMatchObject({ approvalStatus: "pending", entityId: null });
+      expect(await tx.select().from(venueExternalIds).where(eq(venueExternalIds.venueId, venue.id))).toEqual([]);
+
+      await proposeTicketmasterLinks(tx, { actor: agentActor("maintenance") });
+      expect(await mine(tx)).toHaveLength(1);
+    });
+  });
+
+  it("ignores placeholder points shared by several venues", async () => {
+    await inRollback(async (tx) => {
+      const { tm, run, tmItem } = await setup(tx);
+      // Three venues share one point next to our hall: a placeholder, so no proposal.
+      await storeItems(tx, tm, run.id, [
+        tmItem("P1", `PH1-${tag}`, `Glimmer Hall ${tag}`, 36.3101, -94.2001),
+        tmItem("P2", `PH2-${tag}`, "Other A", 36.3101, -94.2001),
+        tmItem("P3", `PH3-${tag}`, "Other B", 36.3101, -94.2001),
+      ], new Date());
+      await proposeTicketmasterLinks(tx, { actor: agentActor("maintenance") });
+      expect(await mine(tx)).toEqual([]);
+    });
+  });
+
+  it("links on approval (logged), keeps rejections rejected, and allows several TM IDs per venue", async () => {
+    await inRollback(async (tx) => {
+      const { tm, run, venue, tmItem } = await setup(tx);
+      await storeItems(tx, tm, run.id, [
+        tmItem("A1", `DUP1-${tag}`, `Glimmer Hall ${tag}`, 36.3105, -94.2005),
+        tmItem("A2", `DUP2-${tag}`, `Glimmer Hall ${tag}`, 36.3104, -94.2004),
+      ], new Date());
+      await proposeTicketmasterLinks(tx, { actor: agentActor("maintenance") });
+      const [p1, p2] = (await mine(tx)).sort((a, b) => (a.dedupeKey! < b.dedupeKey! ? -1 : 1));
+
+      await expect(approveLinkProposal(tx, p1.id, agentActor("maintenance"), "machine approval")).rejects.toThrow(/only a person/);
+      await approveLinkProposal(tx, p1.id, humanActor("owner"), "Same building, checked the report");
+      await rejectLinkProposal(tx, p2.id, humanActor("owner"), "Not sure yet, leave it out");
+
+      const links = await tx.select().from(venueExternalIds).where(eq(venueExternalIds.venueId, venue.id));
+      expect(links.map((l) => l.externalId)).toEqual([`DUP1-${tag}`]);
+      // A second Ticketmaster ID for the same venue is fine.
+      await linkTicketmasterVenue(tx, { sourceId: tm.id, tmVenueId: `DUP3-${tag}`, venueSlug: venue.slug, actor: humanActor("owner"), reason: "duplicate TM record" });
+      expect(await tx.select().from(venueExternalIds).where(eq(venueExternalIds.venueId, venue.id))).toHaveLength(2);
+
+      const decided = await mine(tx);
+      expect(decided.map((p) => p.approvalStatus).sort()).toEqual(["approved", "rejected"]);
+      // Neither is proposed again.
+      await proposeTicketmasterLinks(tx, { actor: agentActor("maintenance") });
+      expect((await mine(tx)).filter((p) => p.approvalStatus === "pending")).toEqual([]);
     });
   });
 });

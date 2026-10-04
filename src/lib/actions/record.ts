@@ -9,6 +9,9 @@ export const humanActor = (who: string) => `human:${who}`;
 
 const snapshot = z.record(z.string(), z.unknown());
 
+/** Actions that wait for a human decision: created pending, with no entity yet. */
+const PROPOSALS = new Set<string>(["propose_venue", "propose_link"]);
+
 /** Actions that change an existing entity and so need both snapshots to be reversible. */
 const NEEDS_BEFORE_AND_AFTER = new Set<string>([
   "update",
@@ -39,16 +42,16 @@ export const actionInputSchema = z
   })
   .superRefine((a, ctx) => {
     const issue = (message: string) => ctx.addIssue({ code: "custom", message });
-    const isProposal = a.action === "propose_venue";
+    const isProposal = PROPOSALS.has(a.action);
 
     if (isProposal) {
-      if (a.approvalStatus !== "pending") issue("propose_venue must be created as pending");
-      if (!a.dedupeKey) issue("propose_venue needs a dedupeKey");
-      if (!a.after) issue("propose_venue needs the proposed fields in after");
-      if (a.entityId) issue("propose_venue has no entityId until approved");
+      if (a.approvalStatus !== "pending") issue(`${a.action} must be created as pending`);
+      if (!a.dedupeKey) issue(`${a.action} needs a dedupeKey`);
+      if (!a.after) issue(`${a.action} needs the proposed fields in after`);
+      if (a.entityId) issue(`${a.action} has no entityId until approved`);
     } else {
       if (!a.entityId) issue(`${a.action} needs an entityId`);
-      if (a.approvalStatus) issue("only propose_venue is created with an approval status");
+      if (a.approvalStatus) issue("only proposals are created with an approval status");
     }
     if (a.action === "insert") {
       if (!a.after) issue("insert needs after");
