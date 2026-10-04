@@ -29,6 +29,7 @@ export interface OurVenue {
   name: string;
   aliases: string[];
   address: string | null;
+  formerAddresses: string[];
   city: string;
   lat: number;
   lng: number;
@@ -72,10 +73,15 @@ export function normalizeStreetAddress(address: string): string {
 
 /**
  * Ticketmaster gives some venues a placeholder point (seen: one point shared
- * by six Fayetteville venues). A point shared by this many distinct venues is
- * treated as unreliable, and distance is ignored for them.
+ * by six Fayetteville venues). A point shared by 2 or more distinct venues is
+ * treated as unreliable (owner's rule), and distance is ignored for them.
  */
-export const PLACEHOLDER_SHARED_BY = 3;
+export const PLACEHOLDER_SHARED_BY = 2;
+
+/** A venue's current and former street addresses, normalized. */
+export function addressesOf(v: Pick<OurVenue, "address" | "formerAddresses">): string[] {
+  return [v.address, ...v.formerAddresses].filter((a): a is string => !!a).map(normalizeStreetAddress);
+}
 
 export function placeholderPoints(tmVenues: readonly TmVenue[]): Set<string> {
   const counts = new Map<string, number>();
@@ -113,7 +119,7 @@ export function matchTicketmasterVenue(
   const key = tm.name ? normalizeVenueName(tm.name) : "";
   const street = tm.address ? normalizeStreetAddress(tm.address) : "";
   const byName = sameCity.filter((v) => key && venueNameKeys(v).includes(key));
-  const byAddress = sameCity.filter((v) => street && v.address && normalizeStreetAddress(v.address) === street);
+  const byAddress = sameCity.filter((v) => street && addressesOf(v).includes(street));
 
   const both = byName.find((v) => byAddress.includes(v));
   if (both) return result("name", both);
@@ -149,6 +155,11 @@ export async function ticketmasterVenuesInRawRecords(db: DbExecutor, sourceId: s
 }
 
 export async function ticketmasterCoverage(db: DbExecutor) {
+  const { sourceId, matches } = await ticketmasterCoverageData(db);
+  return { sourceId, matches };
+}
+
+async function ticketmasterCoverageData(db: DbExecutor) {
   const [tm] = await db.select().from(sources).where(eq(sources.slug, "ticketmaster"));
   if (!tm) throw new Error("no ticketmaster source");
   const ours: OurVenue[] = await db
@@ -158,6 +169,7 @@ export async function ticketmasterCoverage(db: DbExecutor) {
       name: venues.name,
       aliases: venues.aliases,
       address: venues.address,
+      formerAddresses: venues.formerAddresses,
       city: venues.city,
       lat: venues.lat,
       lng: venues.lng,
@@ -172,13 +184,36 @@ export async function ticketmasterCoverage(db: DbExecutor) {
   const linked = new Map(links.flatMap((l) => (byVenueId.has(l.venueId) ? [[l.externalId, byVenueId.get(l.venueId)!]] : [])));
   const tmVenues = await ticketmasterVenuesInRawRecords(db, tm.id);
   const placeholders = placeholderPoints(tmVenues);
-  return { sourceId: tm.id, matches: tmVenues.map((v) => matchTicketmasterVenue(v, ours, linked, placeholders)) };
+  return {
+    sourceId: tm.id,
+    matches: tmVenues.map((v) => matchTicketmasterVenue(v, ours, linked, placeholders)),
+    ours,
+    placeholders,
+  };
+}
+
+const STATE_SUFFIX = /^(ar|ark|arkansas)$/i;
+
+/**
+ * The room or hall a Ticketmaster venue name points to inside our venue:
+ * "Walton Arts Center - Baum Walker Hall" → "Baum Walker Hall". Null when the
+ * name is just the venue (or the venue plus a state, like "The Momentary - AR").
+ */
+export function subSpaceName(tmName: string | null, venue: Pick<OurVenue, "name" | "aliases">): string | null {
+  if (!tmName) return null;
+  // "Venue - Hall", "Venue – Hall", "Venue | Hall", or "Venue: Hall".
+  const parts = tmName.split(/\s+[-–—|]\s+|\s*:\s+/);
+  if (parts.length < 2) return null;
+  const keys = venueNameKeys(venue);
+  if (!keys.includes(normalizeVenueName(parts[0]))) return null;
+  const rest = parts.slice(1).join(" - ").trim();
+  return rest && !STATE_SUFFIX.test(rest) && !keys.includes(normalizeVenueName(rest)) ? rest : null;
 }
 
 /** Writes an approved link from a Ticketmaster venue ID to one of our venues, logged. */
 export async function linkTicketmasterVenue(
   db: DbExecutor,
-  opts: { sourceId: string; tmVenueId: string; venueSlug: string; actor: string; reason: string },
+  opts: { sourceId: string; tmVenueId: string; tmVenueName?: string | null; venueSlug: string; actor: string; reason: string },
 ) {
   return db.transaction(async (tx) => {
     const [venue] = await tx.select().from(venues).where(eq(venues.slug, opts.venueSlug));
@@ -190,7 +225,12 @@ export async function linkTicketmasterVenue(
     if (existing) throw new Error(`Ticketmaster venue ${opts.tmVenueId} is already linked`);
     const [created] = await tx
       .insert(venueExternalIds)
-      .values({ venueId: venue.id, sourceId: opts.sourceId, externalId: opts.tmVenueId })
+      .values({
+        venueId: venue.id,
+        sourceId: opts.sourceId,
+        externalId: opts.tmVenueId,
+        subSpace: subSpaceName(opts.tmVenueName ?? null, venue),
+      })
       .returning();
     await recordAction(tx, {
       actor: opts.actor,
@@ -273,32 +313,55 @@ export interface LinkProposal {
   tmAddress: string | null;
   venueId: string;
   venueSlug: string;
-  distanceM: number;
+  // Which rule proposed it: a real point within 150 m, or a matching street address.
+  path: "location" | "address";
+  // Only for the location path; Ticketmaster's point is never used otherwise.
+  distanceM: number | null;
   events: number;
 }
 
 /**
- * For Ticketmaster venue IDs not yet linked: when Ticketmaster's point is real
- * (not a placeholder), within 150 m of a seed venue, AND the names match
- * closely, log a pending propose_link for the owner. Never links anything.
- * A proposal the owner already approved or rejected isn't raised again.
+ * Whether to propose linking a Ticketmaster venue to one of ours (never to
+ * link it). Names must match closely, plus EITHER:
+ *   a) Ticketmaster's point is real (not a placeholder) and within 150 m, OR
+ *   b) its street address matches the venue's address or a former address,
+ *      in the same city.
+ */
+export function linkProposalFor(
+  tm: TmVenue,
+  ours: readonly OurVenue[],
+  placeholders: ReadonlySet<string>,
+): { venue: OurVenue; path: "location" | "address"; distanceM: number | null } | null {
+  const named = ours.filter((v) => namesMatchClosely(tm.name, v));
+  if (named.length === 0) return null;
+  const realPoint = tm.lat !== null && tm.lng !== null && !placeholders.has(`${tm.lat},${tm.lng}`);
+  if (realPoint) {
+    const near = named
+      .map((v) => ({ v, d: Math.round(distanceMeters({ lat: tm.lat!, lng: tm.lng! }, v)) }))
+      .filter((x) => x.d <= LINK_PROPOSAL_MAX_M)
+      .sort((a, b) => a.d - b.d)[0];
+    if (near) return { venue: near.v, path: "location", distanceM: near.d };
+  }
+  const street = tm.address ? normalizeStreetAddress(tm.address) : "";
+  const city = (tm.city ?? "").toLowerCase();
+  const byAddress = named.find((v) => street && v.city.toLowerCase() === city && addressesOf(v).includes(street));
+  return byAddress ? { venue: byAddress, path: "address", distanceM: null } : null;
+}
+
+/**
+ * Logs a pending propose_link for every unlinked Ticketmaster venue that
+ * linkProposalFor accepts. Never links anything. A proposal the owner already
+ * approved or rejected isn't raised again.
  */
 export async function proposeTicketmasterLinks(db: DbExecutor, opts: { actor: string; runId?: string | null }) {
-  const { sourceId, matches } = await ticketmasterCoverage(db);
-  const ours = await db
-    .select({ id: venues.id, slug: venues.slug, name: venues.name, aliases: venues.aliases, address: venues.address, city: venues.city, lat: venues.lat, lng: venues.lng })
-    .from(venues)
-    .where(eq(venues.active, true));
+  const { sourceId, matches, ours, placeholders } = await ticketmasterCoverageData(db);
   let proposed = 0;
   let alreadyDecided = 0;
   for (const m of matches) {
-    if (m.kind === "linked" || m.coordsUnreliable || m.tm.lat === null || m.tm.lng === null) continue;
-    const near = ours
-      .map((v) => ({ v, d: Math.round(distanceMeters({ lat: m.tm.lat!, lng: m.tm.lng! }, v)) }))
-      .filter((x) => x.d <= LINK_PROPOSAL_MAX_M && namesMatchClosely(m.tm.name, x.v))
-      .sort((a, b) => a.d - b.d)[0];
-    if (!near) continue;
-    const dedupeKey = dedupeKeyFor(m.tm.id, near.v.slug);
+    if (m.kind === "linked") continue;
+    const hit = linkProposalFor(m.tm, ours, placeholders);
+    if (!hit) continue;
+    const dedupeKey = dedupeKeyFor(m.tm.id, hit.venue.slug);
     const [decided] = await db
       .select({ id: agentActions.id })
       .from(agentActions)
@@ -319,11 +382,16 @@ export async function proposeTicketmasterLinks(db: DbExecutor, opts: { actor: st
       tmVenueId: m.tm.id,
       tmName: m.tm.name,
       tmAddress: m.tm.address,
-      venueId: near.v.id,
-      venueSlug: near.v.slug,
-      distanceM: near.d,
+      venueId: hit.venue.id,
+      venueSlug: hit.venue.slug,
+      path: hit.path,
+      distanceM: hit.distanceM,
       events: m.tm.events,
     };
+    const why =
+      hit.path === "location"
+        ? `is ${hit.distanceM} m from ${hit.venue.slug}`
+        : `has the same street address as ${hit.venue.slug}`;
     const row = await proposeOnce(db, {
       runId: opts.runId ?? null,
       actor: opts.actor,
@@ -332,7 +400,7 @@ export async function proposeTicketmasterLinks(db: DbExecutor, opts: { actor: st
       after: { ...after },
       approvalStatus: "pending",
       dedupeKey,
-      reason: `Ticketmaster venue "${m.tm.name}" is ${near.d} m from ${near.v.slug} and the names match closely`,
+      reason: `Ticketmaster venue "${m.tm.name}" ${why}, and the names match closely`,
     });
     if (row) proposed++;
   }
@@ -358,6 +426,7 @@ async function decideProposal(
       link = await linkTicketmasterVenue(tx, {
         sourceId: a.sourceId,
         tmVenueId: a.tmVenueId,
+        tmVenueName: a.tmName,
         venueSlug: a.venueSlug,
         actor,
         reason: `Approved link proposal ${proposalId}: ${reason}`,

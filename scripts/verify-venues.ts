@@ -130,7 +130,7 @@ async function main() {
         v.slug,
         cell(v.name),
         v.venueType,
-        cell(oneLine(v)),
+        cell(oneLine(v)) + (v.formerAddresses.length ? `<br>formerly: ${cell(v.formerAddresses.join("; "))}` : ""),
         osm(v),
         delta,
         v.parent ?? "",

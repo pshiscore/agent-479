@@ -77,7 +77,8 @@ async function main() {
       for (const pair of args.link) {
         const [tmVenueId, venueSlug] = pair.split("=");
         if (!tmVenueId || !venueSlug) throw new Error(`bad --link ${pair}; use <tmVenueId>=<venueSlug>`);
-        await linkTicketmasterVenue(db, { sourceId, tmVenueId, venueSlug, actor: OWNER, reason: why });
+        const tmVenueName = matches.find((m) => m.tm.id === tmVenueId)?.tm.name ?? null;
+        await linkTicketmasterVenue(db, { sourceId, tmVenueId, tmVenueName, venueSlug, actor: OWNER, reason: why });
         console.log(`linked ${tmVenueId} → ${venueSlug} (logged)`);
       }
       return;

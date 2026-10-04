@@ -80,6 +80,16 @@ describe("seed file schema", () => {
     expect(() => venue({ lat: 36.0661234 })).toThrow(/6 decimal/);
   });
 
+  it("requires a source for former addresses", () => {
+    expect(() => venue({ formerAddresses: ["1240 Leroy Pond Dr"] })).toThrow(/former addresses need provenance/);
+    const v = venue({
+      formerAddresses: ["1240 Leroy Pond Dr"],
+      verification: { name: prov, address: prov, location: prov, formerAddresses: prov },
+    });
+    expect(v.formerAddresses).toEqual(["1240 Leroy Pond Dr"]);
+    expect(venue().formerAddresses).toEqual([]);
+  });
+
   it("rejects unknown keys, so typos don't silently drop data", () => {
     expect(() => venue({ adress: "x" })).toThrow();
   });

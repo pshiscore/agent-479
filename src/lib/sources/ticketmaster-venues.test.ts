@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   coverageReport,
+  linkProposalFor,
   matchTicketmasterVenue,
   namesMatchClosely,
   normalizeStreetAddress,
   type OurVenue,
   placeholderPoints,
+  subSpaceName,
   type TmVenue,
 } from "./ticketmaster-venues";
 
@@ -15,6 +17,7 @@ const AMP: OurVenue = {
   name: "Walmart AMP",
   aliases: ["Walmart Arkansas Music Pavilion", "Arkansas Music Pavilion", "The AMP"],
   address: "5079 W Northgate Rd",
+  formerAddresses: [],
   city: "Rogers",
   lat: 36.302881,
   lng: -94.183763,
@@ -25,6 +28,7 @@ const WAC: OurVenue = {
   name: "Walton Arts Center",
   aliases: ["WAC"],
   address: "495 W Dickson St",
+  formerAddresses: [],
   city: "Fayetteville",
   lat: 36.065862,
   lng: -94.164794,
@@ -96,7 +100,7 @@ describe("Ticketmaster's unreliable coordinates", () => {
   ];
   const placeholders = placeholderPoints(venues);
 
-  it("treats a point shared by 3+ venues as a placeholder", () => {
+  it("treats a point shared by 2+ venues as a placeholder", () => {
     expect([...placeholders]).toEqual(["35.9902,-94.083"]);
   });
 
@@ -149,5 +153,57 @@ describe("namesMatchClosely", () => {
     expect(namesMatchClosely("Barnhill Arena", bud)).toBe(false);
     expect(namesMatchClosely("Momentary Coffee", { name: "Moment Bar", aliases: [] })).toBe(false);
     expect(namesMatchClosely(null, bud)).toBe(false);
+  });
+});
+
+describe("placeholder threshold", () => {
+  it("flags a point shared by just two venues", () => {
+    expect(placeholderPoints([tm({ id: "X" }), tm({ id: "Y" }), tm({ id: "Z", lat: 36.1, lng: -94.1 })]).size).toBe(1);
+  });
+});
+
+describe("linkProposalFor", () => {
+  const BUD: OurVenue = {
+    id: "v-bud",
+    slug: "bud-walton-arena",
+    name: "Bud Walton Arena",
+    aliases: ["Bud Walton"],
+    address: "1270 Nolan Richardson Dr",
+    formerAddresses: ["1240 Leroy Pond Dr"],
+    city: "Fayetteville",
+    lat: 36.06157,
+    lng: -94.178107,
+  };
+  const none = new Set<string>();
+
+  it("path a: a real point within 150 m and a close name", () => {
+    expect(linkProposalFor(tm({ address: "elsewhere", lat: 36.3035, lng: -94.1835 }), [AMP], none)).toMatchObject({ venue: AMP, path: "location" });
+  });
+
+  it("path b: a matching street address, including a former address, and a close name", () => {
+    const bud = tm({ id: "B", name: "Bud Walton Arena", address: "1240 Leroy Pond Drive", city: "Fayetteville", lat: 35.9902, lng: -94.083 });
+    expect(linkProposalFor(bud, [BUD], new Set(["35.9902,-94.083"]))).toEqual({ venue: BUD, path: "address", distanceM: null });
+  });
+
+  it("never proposes without a close name, whatever the address or distance", () => {
+    expect(linkProposalFor(tm({ name: "Some Other Hall" }), [AMP], none)).toBeNull();
+  });
+
+  it("doesn't use a placeholder point, and doesn't match an address in another city", () => {
+    expect(linkProposalFor(tm({ address: "elsewhere", lat: 36.3035, lng: -94.1835 }), [AMP], new Set(["36.3035,-94.1835"]))).toBeNull();
+    expect(linkProposalFor(tm({ city: "Springdale", lat: null, lng: null }), [AMP], none)).toBeNull();
+  });
+});
+
+describe("subSpaceName", () => {
+  it("takes the room name after the venue name", () => {
+    expect(subSpaceName("Walton Arts Center - Baum Walker Hall", WAC)).toBe("Baum Walker Hall");
+    expect(subSpaceName("WAC: Starr Theater", WAC)).toBe("Starr Theater");
+  });
+
+  it("ignores state suffixes and plain names", () => {
+    expect(subSpaceName("The Momentary - AR", { name: "The Momentary", aliases: [] })).toBeNull();
+    expect(subSpaceName("Walmart AMP", AMP)).toBeNull();
+    expect(subSpaceName("Other Place - Hall B", WAC)).toBeNull();
   });
 });

@@ -226,6 +226,11 @@
         "website": {
           "url": "https://arkansasrazorbacks.com/facilities/bud-walton-arena/",
           "checkedAt": "2026-10-03"
+        },
+        "formerAddresses": {
+          "url": "https://arkansasrazorbacks.com/directions_to_razorback_athletic_facilities_1569684/",
+          "checkedAt": "2026-10-04",
+          "note": "The athletics directions page still lists 1240 Leroy Pond Drive, the pre-2021 street name; Ticketmaster uses it too"
         }
       },
       "notes": "Athletics directions page still lists the pre-2021 street name (1240 Leroy Pond Drive); the street is now Nolan Richardson Drive.",
@@ -235,6 +240,9 @@
           "url": "https://www.openstreetmap.org/way/469590531",
           "checkedAt": "2026-10-03"
         }
+      ],
+      "formerAddresses": [
+        "1240 Leroy Pond Dr"
       ]
     },
     {
@@ -429,9 +437,17 @@
           "url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=449+S+Garland+Ave%2C+Fayetteville%2C+AR&benchmark=Public_AR_Current&format=json",
           "checkedAt": "2026-10-04",
           "note": "US Census geocoder match: 449 GARLAND ST, FAYETTEVILLE, AR, 72701"
+        },
+        "formerAddresses": {
+          "url": "https://app.ticketmaster.com/discovery/v2/events.json",
+          "checkedAt": "2026-10-04",
+          "note": "Ticketmaster's venue record Z7r9jZa7rZ lists 449 Stadium Dr (read from the Discovery API events feed); recorded as a former address at the owner's request"
         }
       },
-      "notes": "Soccer (Arkansas Razorbacks). Ticketmaster lists 449 Stadium Dr and OSM tags 1175 W Carlson Dr; neither geocodes. The athletics department's 449 S Garland Ave geocodes 95 m from the field."
+      "notes": "Soccer (Arkansas Razorbacks). Ticketmaster lists 449 Stadium Dr and OSM tags 1175 W Carlson Dr; neither geocodes. The athletics department's 449 S Garland Ave geocodes 95 m from the field.",
+      "formerAddresses": [
+        "449 Stadium Dr"
+      ]
     },
     {
       "slug": "fayetteville-public-library",

@@ -108,10 +108,10 @@ describe("Ticketmaster link proposals", () => {
       .insert(venues)
       .values({ slug: `hall-${tag}`, name: `Glimmer Hall ${tag}`, address: "10 Test St", city: "Rogers", lat: 36.31, lng: -94.2, venueType: "music_venue" })
       .returning();
-    const tmItem = (id: string, venueId: string, name: string, lat: number, lng: number): FetchedItem => ({
+    const tmItem = (id: string, venueId: string, name: string, lat: number, lng: number, address = `${id} Elsewhere Ave`): FetchedItem => ({
       externalId: `${id}-${tag}`,
       sourceUrl: null,
-      payload: { format: "ticketmaster", event: { id, venues: [{ id: venueId, name, address: "10 Test St", city: "Rogers", lat, lng }] } },
+      payload: { format: "ticketmaster", event: { id, venues: [{ id: venueId, name, address, city: "Rogers", lat, lng }] } },
       descriptionText: null,
       descriptionPurgeAfter: null,
     });
@@ -141,6 +141,21 @@ describe("Ticketmaster link proposals", () => {
 
       await proposeTicketmasterLinks(tx, { actor: agentActor("maintenance") });
       expect(await mine(tx)).toHaveLength(1);
+    });
+  });
+
+  it("proposes by street address (path b) when the point is a placeholder", async () => {
+    await inRollback(async (tx) => {
+      const { tm, run, tmItem } = await setup(tx);
+      await storeItems(tx, tm, run.id, [
+        tmItem("Q1", `ADDR-${tag}`, `Glimmer Hall ${tag}`, 35.99, -94.08, "10 Test Street"),
+        tmItem("Q2", `ADDR2-${tag}`, "Unrelated Venue", 35.99, -94.08, "99 Other Rd"),
+      ], new Date());
+      await proposeTicketmasterLinks(tx, { actor: agentActor("maintenance") });
+      const proposals = await mine(tx);
+      expect(proposals.map((p) => (p.after as { tmVenueId: string; path: string }))).toEqual([
+        expect.objectContaining({ tmVenueId: `ADDR-${tag}`, path: "address", distanceM: null }),
+      ]);
     });
   });
 
@@ -174,6 +189,7 @@ describe("Ticketmaster link proposals", () => {
 
       const links = await tx.select().from(venueExternalIds).where(eq(venueExternalIds.venueId, venue.id));
       expect(links.map((l) => l.externalId)).toEqual([`DUP1-${tag}`]);
+      expect(links[0].subSpace).toBeNull();
       // A second Ticketmaster ID for the same venue is fine.
       await linkTicketmasterVenue(tx, { sourceId: tm.id, tmVenueId: `DUP3-${tag}`, venueSlug: venue.slug, actor: humanActor("owner"), reason: "duplicate TM record" });
       expect(await tx.select().from(venueExternalIds).where(eq(venueExternalIds.venueId, venue.id))).toHaveLength(2);

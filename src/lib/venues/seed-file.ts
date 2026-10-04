@@ -53,6 +53,8 @@ export const seedVenueSchema = z
     aliases: z.array(z.string().trim().min(2)).default([]),
     venueType: z.enum(VENUE_TYPES),
     address: z.string().trim().min(3).nullable().default(null),
+    // Earlier street addresses other sources may still use; for matching only.
+    formerAddresses: z.array(z.string().trim().min(3)).default([]),
     city: z.string().trim().min(2),
     state: z
       .string()
@@ -70,6 +72,7 @@ export const seedVenueSchema = z
     verification: z.strictObject({
       name: provenanceSchema,
       address: provenanceSchema.optional(),
+      formerAddresses: provenanceSchema.optional(),
       postalCode: provenanceSchema.optional(),
       location: provenanceSchema,
       website: provenanceSchema.optional(),
@@ -87,6 +90,9 @@ export const seedVenueSchema = z
     }
     if (v.postalCode && !v.verification.postalCode && !v.verification.address) {
       issue(["verification", "postalCode"], "postal code needs provenance");
+    }
+    if (v.formerAddresses.length > 0 && !v.verification.formerAddresses) {
+      issue(["verification", "formerAddresses"], "former addresses need provenance");
     }
     if (v.website && !v.verification.website) {
       issue(["verification", "website"], "website needs provenance");

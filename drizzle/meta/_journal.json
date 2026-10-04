@@ -78,6 +78,13 @@
       "when": 1791075194793,
       "tag": "0010_propose_link",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791075784943,
+      "tag": "0011_former_addresses_sub_space",
+      "breakpoints": true
     }
   ]
 }

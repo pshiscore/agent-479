@@ -44,6 +44,7 @@ export interface FieldProvenance {
 export interface VenueVerification {
   name?: FieldProvenance;
   address?: FieldProvenance;
+  formerAddresses?: FieldProvenance;
   postalCode?: FieldProvenance;
   location?: FieldProvenance;
   website?: FieldProvenance;
@@ -64,6 +65,9 @@ export const venues = pgTable(
     name: text("name").notNull(),
     aliases: text("aliases").array().notNull().default(sql`'{}'::text[]`),
     address: text("address"),
+    // Earlier street addresses other sources may still use (e.g. Bud Walton's
+    // pre-2021 street name). Sourced like any other field; used for matching only.
+    formerAddresses: text("former_addresses").array().notNull().default(sql`'{}'::text[]`),
     city: text("city").notNull(),
     state: text("state").notNull().default("AR"),
     postalCode: text("postal_code"),
@@ -108,6 +112,10 @@ export const venueExternalIds = pgTable(
       .notNull()
       .references((): AnyPgColumn => sources.id, { onDelete: "restrict" }),
     externalId: text("external_id").notNull(),
+    // The room or hall inside the venue this external record names, e.g.
+    // "Baum Walker Hall" for Ticketmaster's "Walton Arts Center - Baum Walker
+    // Hall". Copied onto events and shown as "Baum Walker Hall, Walton Arts Center".
+    subSpace: text("sub_space"),
     createdAt: createdAt(),
   },
   (t) => [

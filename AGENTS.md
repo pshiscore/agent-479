@@ -112,6 +112,20 @@ These apply to research and one-off scripts as well as to the app and pipeline.
 - **Re-seeding never flips `enabled` or `disabled_reason`.**
 - **Categories and tags are retired, never deleted** (`active = false`), and
   re-seeding never changes `active`.
+- **Ticketmaster venue links are proposed, never automatic.** A link is
+  proposed for the owner's approval when names match closely AND EITHER
+  Ticketmaster's point is real and within 150 m, OR its street address
+  matches the venue's address or a former address (`venues.former_addresses`,
+  sourced like any other field). Everything else stays in `needs_venue`.
+  Every link and decision is logged.
+- **Ticketmaster coordinates are never used** for display, distance, maps, or
+  tagging; always use our venue's coordinates. Their only uses are proposing
+  links for the owner's review and detecting placeholders: a point shared by
+  2 or more different Ticketmaster venues is a placeholder and is ignored.
+- **Sub-spaces:** when an external venue record names a room or hall inside a
+  seed venue ("Walton Arts Center - Baum Walker Hall"), the link stores it
+  (`venue_external_ids.sub_space`), events carry it, and the site shows
+  "Baum Walker Hall, Walton Arts Center".
 - **Link-policy domains are normalized** (`normalizeDomain`: lowercase, no
   scheme, port, trailing dot, or "www.") before they're stored and looked up.
 
