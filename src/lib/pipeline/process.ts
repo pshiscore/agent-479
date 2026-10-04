@@ -49,7 +49,11 @@ export async function processRecord(
       await set({ status: "skipped", skipReason: skip, facts, lastError: null, venueId: null, locationKey: null });
       return { outcome: "skipped", detail: skip };
     }
-    const venue = await resolveVenue(db, facts, source, { llmPick: opts.llmPick, runId: opts.runId });
+    // A venue the owner approved for this record (/admin/proposals) stays put.
+    const venue =
+      record.venueMatchedBy === "owner" && record.venueId
+        ? { venueId: record.venueId, subSpace: record.subSpace, matchedBy: "owner" }
+        : await resolveVenue(db, facts, source, { llmPick: opts.llmPick, runId: opts.runId });
     if (!venue) {
       await set({ status: "needs_venue", facts, locationKey: locationKey(facts.location), venueId: null, subSpace: null, venueMatchedBy: null, lastError: null, skipReason: null });
       return { outcome: "needs_venue", detail: facts.location.text ?? "no location" };

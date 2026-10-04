@@ -66,6 +66,11 @@ function matches(given: { user: string; password: string } | null, user?: string
   return u && p;
 }
 
+/** True when the Authorization header carries the admin credentials (and they're configured). */
+export function isAdminAuthorization(authorization: string | null, env: AccessEnv): boolean {
+  return matches(parseBasicAuth(authorization), env.ADMIN_USERNAME, env.ADMIN_PASSWORD);
+}
+
 export function decideAccess(pathname: string, authorization: string | null, env: AccessEnv): AccessDecision {
   const locked = isSiteLocked(env);
   const noindex = locked || !isProduction(env);

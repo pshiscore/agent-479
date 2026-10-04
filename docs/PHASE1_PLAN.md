@@ -608,6 +608,21 @@ See `.env.example`. Model names are deliberately not env vars.
     rooms at once), 36 tiebreak calls, $0.002.
 16. **Admin:** Basic Auth in `src/proxy.ts`, then `/admin/agent-log` with
     diffs, rollback, venue proposal approve and reject, and Community stats.
+    *Built, awaiting owner approval.* Basic Auth in `src/proxy.ts` (built
+    with the site lock), re-checked in every admin page and Server Action
+    (`requireAdmin`). `/admin`: upcoming events, needs_venue count and
+    locations, pending proposals, LLM spend, Community's 7-day share and top
+    hint themes (warns above 15%), sources (state, failures, blocked with the
+    logged reason, dedup mode), dedup counts, recent runs.
+    `/admin/agent-log`: filters by action, entity, run, or entity history;
+    field-level diffs; rollback (`src/lib/actions/rollback.ts`) for event
+    updates (fields and tags), event inserts (hidden, never deleted), merges
+    (unmerge), and source enable/disable, each refusing if the entity changed
+    since, and linked both ways. `/admin/proposals`: approve or reject with a
+    note (logged); approving a Ticketmaster link writes it, approving a venue
+    match pins the venue on the record (kept on reprocessing), approving a
+    venue or category records the decision (those go through the venue seed
+    or the taxonomy seed).
 17. **`/admin/dedup-review`:** you label about 30 pairs. Export the regression
     fixtures and test, set thresholds, go `live`.
 18. **Homepage:** filters, series rows, recurring hidden by default.

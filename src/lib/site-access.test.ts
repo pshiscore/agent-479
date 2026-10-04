@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ADMIN_REALM, type AccessEnv, decideAccess, isSiteLocked, parseBasicAuth, PREVIEW_REALM } from "./site-access";
+import { ADMIN_REALM, type AccessEnv, decideAccess, isAdminAuthorization, isSiteLocked, parseBasicAuth, PREVIEW_REALM } from "./site-access";
 
 const basic = (user: string, password: string) => `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}`;
 const PROD: AccessEnv = {
@@ -62,6 +62,15 @@ describe("decideAccess", () => {
     expect(decideAccess("/", null, { ...PROD, SITE_LOCKED: "false" })).toEqual({ allow: true, noindex: false });
     expect(decideAccess("/", null, { VERCEL_ENV: "preview" })).toEqual({ allow: true, noindex: true });
     expect(decideAccess("/", null, {})).toEqual({ allow: true, noindex: true });
+  });
+});
+
+describe("isAdminAuthorization", () => {
+  it("accepts only the admin login, and nothing when admin isn't configured", () => {
+    expect(isAdminAuthorization(basic("owner", "admin-pass"), PROD)).toBe(true);
+    expect(isAdminAuthorization(basic("friend", "preview-pass"), PROD)).toBe(false);
+    expect(isAdminAuthorization(null, PROD)).toBe(false);
+    expect(isAdminAuthorization(basic("", ""), {})).toBe(false);
   });
 });
 

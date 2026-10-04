@@ -207,6 +207,10 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   `merge` action holds the full before-state. The same title in two different
   rooms at once never auto-merges. Thresholds come from the owner's labels
   (step 17), never from guesses.
+- **Admin actions re-check the admin login.** Every admin page and Server
+  Action calls `requireAdmin()`; the proxy alone isn't enough. Owner actions
+  are `human:owner`, carry a note, and are logged like everything else.
+  Rollbacks never delete: an inserted event is hidden, a merge is unmerged.
 - **Eval fixtures never contain source text.** They use real facts (titles,
   venues) with descriptions written for the fixture.
 - **Notes are facts in our own words.** No phrasing copied from sources; a
