@@ -45,7 +45,7 @@ export default async function Proposals({ searchParams }: PageProps<"/admin/prop
               <p className="mb-2 text-zinc-500">{WHAT_APPROVING_DOES[p.action] ?? ""}</p>
               <form action={decide} className="flex flex-wrap items-center gap-2">
                 <input type="hidden" name="proposalId" value={p.id} />
-                <input name="note" required minLength={3} placeholder="Your note (why)" className={`${input} min-w-64 flex-1`} />
+                <input name="note" required minLength={3} placeholder="Note (required): why approve or reject?" className={`${input} min-w-64 flex-1`} />
                 <button name="decision" value="approved" className={button}>
                   Approve
                 </button>
