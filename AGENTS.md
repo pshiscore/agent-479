@@ -77,7 +77,10 @@ imports it.
     preview login except `/bot` and `/robots.txt`, `/admin` always needs the
     admin login, and responses are noindex. `CRON_ENABLED` must be exactly
     "true" for any scheduled job to run. Development and production databases
-    never cross (`src/lib/db/target.ts`).
+    never cross (`src/lib/db/target.ts`): the Supabase project is production
+    only; development, scripts, and tests use local Postgres
+    (`agent479_dev`); production is migrated only with
+    `MIGRATE_PRODUCTION=yes`.
 
 ## Fetching
 
