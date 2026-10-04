@@ -570,7 +570,7 @@ See `.env.example`. Model names are deliberately not env vars.
     retry, then hold), then write the event logged row by row. `npm run
     eval:extract`: 22/22 on the labeled set, 4/4 injection fixtures resisted.
     First full run: 545 events, 0 held, 0 failed, about $0.13.
-14. **Series detection and labels.** *Built, awaiting owner approval.*
+14. **Series detection and labels** ✅ *Approved and merged 2026-10-04.*
     Migration 0015 adds `event_series` (one per source, venue, and normalized
     title; `kind` recurring or run; code-computed `recurrence_label`;
     `detected_by` rrule or pattern; retired with `active = false`, never
