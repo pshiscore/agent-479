@@ -33,13 +33,46 @@ export interface TestFetchReport {
 
 const isoDay = (v: string) => `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`;
 
+interface ItemFacts {
+  // Local start as written: "YYYYMMDD..." (ICS) or "YYYYMMDDTHHMMSS" built from Ticketmaster's localDate/localTime.
+  start: string | null;
+  title: string | null;
+  hasLocation: boolean;
+  recurring: boolean;
+}
+
+interface TmPayloadEvent {
+  name?: string | null;
+  start?: { localDate?: string | null; localTime?: string | null } | null;
+  venues?: unknown[];
+}
+
+/** The few facts the test summary needs, from either payload format. */
+function itemFacts(payload: Record<string, unknown>): ItemFacts | null {
+  if (payload.format === "ticketmaster") {
+    const e = payload.event as TmPayloadEvent | undefined;
+    if (!e) return null;
+    const date = e.start?.localDate?.replaceAll("-", "") ?? null;
+    const time = e.start?.localTime?.replaceAll(":", "") ?? "";
+    return {
+      start: date && /^\d{8}$/.test(date) ? (time ? `${date}T${time}` : date) : null,
+      title: e.name ?? null,
+      hasLocation: (e.venues?.length ?? 0) > 0,
+      recurring: false,
+    };
+  }
+  const e = (payload as { event?: IcsEvent }).event;
+  if (!e) return null;
+  return { start: e.dtstart?.value ?? null, title: e.summary, hasLocation: !!e.location, recurring: !!e.rrule };
+}
+
 export function summarize(slug: string, result: FetchResult, today: Date): TestFetchReport {
   const p = chicagoParts(today);
   const todayKey = `${p.year}${String(p.month).padStart(2, "0")}${String(p.day).padStart(2, "0")}`;
-  const events = result.items.map((i) => (i.payload as { event?: IcsEvent }).event).filter((e): e is IcsEvent => !!e);
-  const starts = events.map((e) => e.dtstart?.value.slice(0, 8)).filter((d): d is string => !!d && /^\d{8}$/.test(d));
+  const events = result.items.map((i) => itemFacts(i.payload)).filter((e): e is ItemFacts => !!e);
+  const starts = events.map((e) => e.start?.slice(0, 8)).filter((d): d is string => !!d && /^\d{8}$/.test(d));
   const sorted = [...starts].sort();
-  const upcoming = events.filter((e) => e.rrule || (e.dtstart && e.dtstart.value.slice(0, 8) >= todayKey)).length;
+  const upcoming = events.filter((e) => e.recurring || (e.start && e.start.slice(0, 8) >= todayKey)).length;
   const lastDate = sorted.at(-1) ?? null;
   const daysAhead = lastDate
     ? Math.round((Date.parse(isoDay(lastDate)) - Date.parse(isoDay(todayKey))) / 86_400_000)
@@ -57,18 +90,18 @@ export function summarize(slug: string, result: FetchResult, today: Date): TestF
     feedUrls: result.feedUrls,
     items: result.items.length,
     withStart: starts.length,
-    recurring: events.filter((e) => e.rrule).length,
+    recurring: events.filter((e) => e.recurring).length,
     upcoming,
-    withLocation: events.filter((e) => e.location).length,
-    withUrl: events.filter((e) => e.url).length,
+    withLocation: events.filter((e) => e.hasLocation).length,
+    withUrl: result.items.filter((i) => i.sourceUrl).length,
     firstDate: sorted[0] ? isoDay(sorted[0]) : null,
     lastDate: lastDate ? isoDay(lastDate) : null,
     daysAhead,
     sample: events
-      .filter((e) => e.dtstart && e.dtstart.value.slice(0, 8) >= todayKey)
-      .sort((a, b) => a.dtstart!.value.localeCompare(b.dtstart!.value))
+      .filter((e) => e.start && e.start.slice(0, 8) >= todayKey)
+      .sort((a, b) => a.start!.localeCompare(b.start!))
       .slice(0, 8)
-      .map((e) => ({ start: e.dtstart!.value, title: e.summary ?? "(no title)" })),
+      .map((e) => ({ start: e.start!, title: e.title ?? "(no title)" })),
     fetcherStats: result.stats,
   };
 }

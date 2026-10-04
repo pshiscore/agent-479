@@ -1,11 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { coverageReport, matchTicketmasterVenue, type OurVenue, type TmVenue } from "./ticketmaster-venues";
+import {
+  coverageReport,
+  matchTicketmasterVenue,
+  normalizeStreetAddress,
+  type OurVenue,
+  placeholderPoints,
+  type TmVenue,
+} from "./ticketmaster-venues";
 
 const AMP: OurVenue = {
   id: "v-amp",
   slug: "walmart-amp",
   name: "Walmart AMP",
   aliases: ["Walmart Arkansas Music Pavilion", "Arkansas Music Pavilion", "The AMP"],
+  address: "5079 W Northgate Rd",
   city: "Rogers",
   lat: 36.302881,
   lng: -94.183763,
@@ -15,6 +23,7 @@ const WAC: OurVenue = {
   slug: "walton-arts-center",
   name: "Walton Arts Center",
   aliases: ["WAC"],
+  address: "495 W Dickson St",
   city: "Fayetteville",
   lat: 36.065862,
   lng: -94.164794,
@@ -45,19 +54,19 @@ describe("matchTicketmasterVenue", () => {
   });
 
   it("flags a name match that is far away instead of proposing it", () => {
-    expect(matchTicketmasterVenue(tm({ lat: 36.35, lng: -94.25 }), OURS, new Map())).toMatchObject({ kind: "name_far", venue: AMP });
+    expect(matchTicketmasterVenue(tm({ address: "900 Other Rd", lat: 36.35, lng: -94.25 }), OURS, new Map())).toMatchObject({ kind: "name_far", venue: AMP });
   });
 
   it("doesn't match the same name in another city", () => {
-    expect(matchTicketmasterVenue(tm({ city: "Springdale", lat: 36.18, lng: -94.13 }), OURS, new Map()).kind).toBe("none");
+    expect(matchTicketmasterVenue(tm({ city: "Springdale", address: "1 Elsewhere St", lat: 36.18, lng: -94.13 }), OURS, new Map()).kind).toBe("none");
   });
 
   it("proposes an unnamed match only within 150 m", () => {
-    expect(matchTicketmasterVenue(tm({ name: "AMP Lawn Seats", lat: 36.3035, lng: -94.1835 }), OURS, new Map())).toMatchObject({
+    expect(matchTicketmasterVenue(tm({ name: "AMP Lawn Seats", address: null, lat: 36.3035, lng: -94.1835 }), OURS, new Map())).toMatchObject({
       kind: "nearby",
       venue: AMP,
     });
-    expect(matchTicketmasterVenue(tm({ name: "Some Bar", lat: 36.31, lng: -94.19 }), OURS, new Map()).kind).toBe("none");
+    expect(matchTicketmasterVenue(tm({ name: "Some Bar", address: null, lat: 36.31, lng: -94.19 }), OURS, new Map()).kind).toBe("none");
   });
 
   it("ignores venues outside NWA", () => {
@@ -67,16 +76,60 @@ describe("matchTicketmasterVenue", () => {
   });
 });
 
+describe("normalizeStreetAddress", () => {
+  it("makes common spellings of one address equal", () => {
+    expect(normalizeStreetAddress("5079 West Northgate Road,")).toBe("5079 w northgate rd");
+    expect(normalizeStreetAddress("5079 W. Northgate Rd")).toBe("5079 w northgate rd");
+    expect(normalizeStreetAddress("1255 S Razorback Rd,")).toBe(normalizeStreetAddress("1255 South Razorback Road"));
+  });
+});
+
+describe("Ticketmaster's unreliable coordinates", () => {
+  // Real case: six Fayetteville venues all carried 35.9902, -94.083.
+  const PLACEHOLDER = { lat: 35.9902, lng: -94.083 };
+  const venues = [
+    tm({ id: "A", name: "Walton Arts Center - Baum Walker Hall", address: "495 W Dickson St", city: "Fayetteville", ...PLACEHOLDER }),
+    tm({ id: "B", name: "Barnhill Arena", address: "285 N. Stadium Drive", city: "Fayetteville", ...PLACEHOLDER }),
+    tm({ id: "C", name: "Razorback Field", address: "449 Stadium Dr,", city: "Fayetteville", ...PLACEHOLDER }),
+    tm({}),
+  ];
+  const placeholders = placeholderPoints(venues);
+
+  it("treats a point shared by 3+ venues as a placeholder", () => {
+    expect([...placeholders]).toEqual(["35.9902,-94.083"]);
+  });
+
+  it("matches on street address when the name differs, ignoring the fake distance", () => {
+    expect(matchTicketmasterVenue(venues[0], OURS, new Map(), placeholders)).toMatchObject({
+      kind: "address",
+      venue: WAC,
+      distanceM: null,
+      coordsUnreliable: true,
+    });
+  });
+
+  it("doesn't call a placeholder-located name match far away", () => {
+    const wacByName = tm({ id: "D", name: "Walton Arts Center", address: "1 Wrong St", city: "Fayetteville", ...PLACEHOLDER });
+    expect(matchTicketmasterVenue(wacByName, OURS, new Map(), placeholders)).toMatchObject({ kind: "name", venue: WAC, distanceM: null });
+  });
+
+  it("leaves real unknowns as no match", () => {
+    expect(matchTicketmasterVenue(venues[1], OURS, new Map(), placeholders).kind).toBe("none");
+  });
+});
+
 describe("coverageReport", () => {
   it("summarizes events by status and lists every venue", () => {
     const matches = [
       matchTicketmasterVenue(tm({}), OURS, new Map()),
-      matchTicketmasterVenue(tm({ id: "K2", name: "Unknown Club", lat: 36.2, lng: -94.1, events: 3 }), OURS, new Map()),
+      matchTicketmasterVenue(tm({ id: "K2", name: "Unknown Club", address: "1 Club St", lat: 36.2, lng: -94.1, events: 3 }), OURS, new Map()),
     ];
     const md = coverageReport(matches, new Date("2026-10-03T15:00:00Z"));
     expect(md).toContain("2 Ticketmaster venues, 15 events.");
     expect(md).toContain("- Proposed matches: 12 events");
     expect(md).toContain("- Need a decision: 3 events");
-    expect(md).toContain("| KovZ1 | Walmart AMP | Rogers | 12 | **proposed** (same name, same city) | walmart-amp | 0 m |");
+    expect(md).toContain(
+      "| KovZ1 | Walmart AMP | 5079 W Northgate Rd | Rogers | 12 | **proposed** (same name, same city) | walmart-amp | 5079 W Northgate Rd | 0 m |",
+    );
   });
 });

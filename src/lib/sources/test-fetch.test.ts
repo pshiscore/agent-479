@@ -22,6 +22,19 @@ describe("summarize", () => {
     expect(r.sample.map((s) => s.title)).toEqual(["Event b", "Event c"]);
   });
 
+  it("reads Ticketmaster payloads too", () => {
+    const tm = (id: string, localDate: string) => ({
+      externalId: id,
+      sourceUrl: `https://www.ticketmaster.com/event/${id}`,
+      descriptionText: null,
+      descriptionPurgeAfter: null,
+      payload: { format: "ticketmaster", event: { id, name: `Show ${id}`, start: { localDate, localTime: "19:30:00" }, venues: [{ id: "V1" }] } },
+    });
+    const r = summarize("ticketmaster", { items: [tm("a", "2026-10-10"), tm("b", "2026-12-01")], feedUrls: [], stats: {} }, TODAY);
+    expect(r).toMatchObject({ pass: true, items: 2, withStart: 2, upcoming: 2, withLocation: 2, withUrl: 2, lastDate: "2026-12-01" });
+    expect(r.sample[0]).toEqual({ start: "20261010T193000", title: "Show a" });
+  });
+
   it("counts a recurring event with a past start as upcoming", () => {
     expect(summarize("s", result([item("a", "20260105T100000", { rrule: "FREQ=WEEKLY" })]), TODAY)).toMatchObject({ pass: true, upcoming: 1, recurring: 1 });
   });
