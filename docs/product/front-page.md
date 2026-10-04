@@ -101,8 +101,12 @@ These rules are also standing rules in `AGENTS.md`.
     Broadway" passes.
   - **Grounding:** every proper name and every number in a generated
     description must appear in that event's stored facts (title, venue,
-    city, performers, dates, prices, ages). Anything else is flagged. This
-    catches background the model adds from its own knowledge.
+    city, performers, dates, prices, ages, and the activity phrase taken from
+    the source's own listing). Anything else is flagged. This catches
+    background the model adds from its own knowledge.
+  - **Glossary:** acronym expansions that count as facts (ESL, GED), only
+    for events whose facts contain the acronym. Only the owner adds entries;
+    an unknown expansion is logged as a proposal.
   - Flagged text is regenerated once; if it fails again, it's held for
     review and the event shows no summary.
 - **"Noteworthy" is decided by rules, never judgment.**

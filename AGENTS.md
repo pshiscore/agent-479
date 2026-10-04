@@ -110,7 +110,9 @@ anything else the model writes for readers. They're copied from section E of
 - **Generated text is checked in code** (`src/lib/text/checks.ts`):
   evaluative words (list in config; the event's own title never counts) and
   grounding (every proper name and number must appear in the event's stored
-  facts). Flagged text is regenerated once, then held for review.
+  facts). Stored facts include the activity phrase the extraction step takes
+  from the source's own listing (owner, 2026-10-04), and glossary expansions
+  (`src/config/glossary.ts`) when the acronym is in the event's facts. Flagged text is regenerated once, then held for review.
 - **"Noteworthy" is decided by rules, never judgment.** Starting rules: newly
   announced in the last 7 days; the first appearance of a performer or event
   in our data; a returning annual event; a large-venue show (by venue
