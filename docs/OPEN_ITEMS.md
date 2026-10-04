@@ -7,6 +7,7 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 
 | # | Item | Raised | Blocks |
 |---|---|---|---|
+| 18 | **Step 17:** approve deploying the dedup review page (branch `step-17-dedup-review`, no migration). Then label the ~30 pairs at https://479.guide/admin/dedup-review. After that I export the labels, run `eval:dedup`, propose thresholds, and you decide which sources go live. | 2026-10-04 | Dedup thresholds; merging in live mode |
 | 17 | **Ticketmaster display terms** before any public page shows Ticketmaster events (checklist). | 2026-10-04 | Step 18 going public |
 | 8 | **`.env.local` (optional):** `.env.production.local` now exists (a copy, made 2026-10-04). Local scripts and tests still refuse the production database by design; point `.env.local` at `postgresql://localhost:5432/agent479_dev` whenever you want to run them yourself. | 2026-10-04 | Running local scripts yourself |
 | 9 | **Vercel env vars.** Run `npx vercel login` and `npx vercel link` once, then approve the list in the 479 Guide report. Until `SITE_PREVIEW_USER`/`SITE_PREVIEW_PASSWORD` are set, the locked site returns 503 to everyone. | 2026-10-04 | Previewing the site |
