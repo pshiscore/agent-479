@@ -7,6 +7,9 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 
 | # | Item | Raised | Blocks |
 |---|---|---|---|
+| 15 | **Front-page decisions branch** (`front-page-decisions`): approve to merge. Needs migration 0017 on production first (I apply it with `MIGRATE_PRODUCTION=yes`). | 2026-10-04 | Content checks in production |
+| 16 | **Grounding and acronyms:** 109 of the 121 flagged descriptions expand "ESL" to "English" or "English as a Second Language". Treat as ungrounded (regenerate or hold), or allow a small glossary of expansions (ESL, GED) as facts? | 2026-10-04 | Re-describing the flagged events |
+| 17 | **Ticketmaster display terms** before any public page shows Ticketmaster events (checklist). | 2026-10-04 | Step 18 going public |
 | 8 | **`.env.local` (optional):** `.env.production.local` now exists (a copy, made 2026-10-04). Local scripts and tests still refuse the production database by design; point `.env.local` at `postgresql://localhost:5432/agent479_dev` whenever you want to run them yourself. | 2026-10-04 | Running local scripts yourself |
 | 9 | **Vercel env vars.** Run `npx vercel login` and `npx vercel link` once, then approve the list in the 479 Guide report. Until `SITE_PREVIEW_USER`/`SITE_PREVIEW_PASSWORD` are set, the locked site returns 503 to everyone. | 2026-10-04 | Previewing the site |
 | 10 | **`.env.local`:** set `SITE_URL=https://479.guide` and `BOT_CONTACT_EMAIL=bot@479.guide`. Local fetches refuse to run until then. | 2026-10-04 | Local fetches, test fetches |
