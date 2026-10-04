@@ -55,16 +55,19 @@ marked (every deploy) each time.
 
 ## Data
 
-- [ ] **Separate production database.** Production uses its own database;
-      the current Supabase project (`sjpzfskwhkvcqqhbxrbd`) is development
-      only. Enforced in code (`src/lib/db/target.ts`): production refuses the
-      dev database, and local code, scripts, tests, and previews refuse any
-      other. Production is migrated deliberately with
-      `MIGRATE_PRODUCTION=yes npm run db:migrate` reading
-      `.env.production.local`.
-- [ ] Production `DATABASE_URL` and `DATABASE_URL_UNPOOLED` point at the
-      production database, never the dev one (the app refuses to start
-      otherwise).
+- [x] **Separate production database** (owner, 2026-10-04): the Supabase
+      project `sjpzfskwhkvcqqhbxrbd` is production only. Development runs on
+      Postgres 17 on the laptop (`postgresql://localhost:5432/agent479_dev`,
+      Homebrew), seeded with a copy of production taken 2026-10-04. Enforced
+      in code (`src/lib/db/target.ts`): production may use only that project;
+      local code, scripts, tests, and previews only a local database.
+- [ ] `.env.local` points at the local database; the Supabase connection
+      strings live only in `.env.production.local` (gitignored) and Vercel.
+- [ ] Production is migrated deliberately:
+      `MIGRATE_PRODUCTION=yes npm run db:migrate` (reads
+      `.env.production.local`). Migrations 0014 and 0015 (step 13 follow-ups
+      and step 14) are already applied to it.
+- [ ] Vercel Production `DATABASE_URL` is the Supabase transaction pooler.
 - [ ] `npm run db:verify` passes against production.
 - [ ] All Drizzle migrations are applied to the production Supabase project
       (`drizzle-kit migrate`, never `push`).
