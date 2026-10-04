@@ -133,3 +133,46 @@ Build step 11 (the museum fetchers) waits until permission is granted.
 **Coverage gap at launch:** Springdale and Bella Vista have almost no
 coverage, and museum and arts-center events depend on the three permission
 requests.
+
+---
+
+## What's new (openings): candidate sources (review 2026-10-04)
+
+Research only, nothing built or fetched by the bot. Checked with web search
+and by reading robots.txt and terms pages; springdalear.gov (bot challenge)
+and bentonvillelibrary.org (403) were not fetched. "Lead" means it can point
+us at a likely opening but can't by itself support a card: under the owner's
+rule, "Opening soon" needs a source stating a target date or month, and "Now
+open" needs a source confirming the opening.
+
+| Source | Offers | Format | robots.txt / terms | Commercial use | Updates | NWA items / month (est.) | Signal |
+|---|---|---|---|---|---|---|---|
+| Fayetteville permits (`maps.fayetteville-ar.gov` ArcGIS layer "Permit") | Permit no., type, work class (New Construction, Interior Only, Alteration, Shell), address, free-text description (sometimes the business name, e.g. a coffee drive-through or a golf simulator lounge), status, issue and final dates | ArcGIS REST API (JSON) | No robots.txt (404: unrestricted under RFC 9309); no license or use constraints in the layer metadata | Unknown (public record) | Nightly | Dozens of commercial permits; a few restaurant or shop finish-outs | Lead only (construction under way; no opening date, no certificate of occupancy in the layer) |
+| Rogers permits (`permitting.rogersar.gov/publicportal`) | Online permit and license portal | Web app (account-based) | Not checked in depth | Unknown | Live | Unknown | Lead at best; the old monthly PDF reports in the city's archive stop around 2014 |
+| Bentonville permits (eTrakit; Annual Development Report) | Permit tracking; yearly totals (1,354 permits, 716 certificates of occupancy in 2024) | Web app; annual PDF | Not checked in depth | Unknown | Live; reports yearly | Unknown | Annual report too late; portal a lead at best |
+| Springdale permits | n/a | n/a | springdalear.gov shows a bot challenge to automated requests: not fetched (a block means stop) | n/a | n/a | n/a | Ask the city |
+| Bella Vista permits | Only permit totals found (via news) | n/a | Not found | n/a | n/a | n/a | None found |
+| Arkansas ABC weekly list (`dfa.arkansas.gov/.../YYYYMMDD_ABC_WeeklyReports.pdf`) | Statewide pending alcohol permit applications: business name, address, county, application type (NEW, TOL transfer, REP), permit type. **Also the applicant's personal name: never store it.** | PDF, weekly, predictable URL; archive back to 2017 | robots.txt allows (only two policy PDFs disallowed); no terms on the page | Unknown (public record) | Weekly | ~2-3 NWA applications a week (one sampled week: Mr Wok, Rogers; The Fermentary Public House; Mermaids, Fayetteville, a transfer) | Lead only (no opening date) |
+| Arkansas Dept. of Health food inspections (`foodserviceprod.adh.arkansas.gov`) | Inspection reports, typed pre-opening, routine, follow-up, complaint; searchable by name, city, county, ZIP, date range | Web search form (ASP.NET), no API or export found | No robots.txt (unrestricted); no terms of use on the page | Unknown (public record) | As inspections happen | Unknown; a pre-opening inspection precedes every new restaurant permit | Strong lead ("about to open"), not a confirmation |
+| Rogers-Lowell Chamber (`rogerslowell.com`) | Ribbon-cutting service; "Upcoming Ribbon Cuttings" posts in chamber news | HTML (Accrisoft) | robots.txt allows, Crawl-delay 5; terms not found | Unknown | Periodic posts | Several a month (an ambassador attended 50+ in a year) | Now open (a ribbon cutting confirms an opening, with a date) |
+| Fayetteville Chamber (`fayettevillear.com`) | Member events; ribbon cuttings reported in the press | HTML | robots.txt allows all, with `Content-Signal: search=yes, ai-input=yes, ai-train=yes`; calendar URL not found yet | Unknown | n/a | Unknown | Now open, if a ribbon-cutting list exists |
+| Greater Bentonville Area Chamber | Ribbon cuttings for members (weekdays, business hours) | Not found | Not checked | Unknown | n/a | Unknown | Now open, if listed |
+| Business and venue announcements (own sites, official social accounts) | The business's own statement of an opening date | Varies | Per site | Per site | Ad hoc | Per business | Both; the best confirmation, but one site at a time |
+| Talk Business & Politics (`talkbusiness.net`) | Frequent NWA opening stories with stated dates ("Sweetgreen's Bentonville store will open November 25"; periodic "restaurants, retail stores planned" roundups) | HTML; RSS at `/feed/` | robots.txt disallows AI crawlers by name (GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Bytespider), not other agents; no terms page found; footer "All Rights Reserved" | Unknown; their robots.txt signals they don't want AI use | Daily | Several a month | Both (dates stated), but terms unclear: ask first |
+| Arkansas Business "What's New: Business Openings Across Arkansas" | Monthly statewide openings roundup | HTML | Terms: content is "strictly for personal, non-commercial use only" | **No** | Monthly | A few NWA items a month | Both, but not usable without permission |
+
+**Recommendation (2026-10-04):**
+- No single permitted source gives enough confirmed openings at launch. The
+  public records (ABC list, health department, Fayetteville permits) are
+  leads with no opening dates, so on their own they can't put a card up.
+- Build What's new as a lead-and-confirm flow: leads from the ABC weekly
+  list (names and addresses only, never applicants' names), the health
+  department's pre-opening inspections, and Fayetteville commercial permits
+  become owner proposals; a card appears only when a confirming source
+  states a date: a chamber ribbon cutting, the business's own site, or an
+  owner-verified check.
+- Ask permission where the dated facts are: Talk Business & Politics
+  (richest dated source), the chambers (a ribbon-cutting list or feed), and
+  Arkansas Business. Springdale permits need a request (bot challenge).
+- Expect a thin section at launch (a handful of items a month), so keep the
+  hide-when-empty rule.
