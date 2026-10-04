@@ -570,7 +570,19 @@ See `.env.example`. Model names are deliberately not env vars.
     retry, then hold), then write the event logged row by row. `npm run
     eval:extract`: 22/22 on the labeled set, 4/4 injection fixtures resisted.
     First full run: 545 events, 0 held, 0 failed, about $0.13.
-14. **Series detection and labels.**
+14. **Series detection and labels.** *Built, awaiting owner approval.*
+    Migration 0015 adds `event_series` (one per source, venue, and normalized
+    title; `kind` recurring or run; code-computed `recurrence_label`;
+    `detected_by` rrule or pattern; retired with `active = false`, never
+    deleted) and the `events.series_id` foreign key. The process job runs
+    `detectSeries` after enrich: an ICS RRULE makes a series directly;
+    otherwise a weekday-and-time slot with 3+ upcoming occurrences within 60
+    days is recurring ("Tuesdays", "Tue & Thu", "Every other Tuesday"), and
+    occurrences on consecutive days are a run ("Oct 6–11"). One-offs at other
+    times stay standalone. Every series and `series_id` change is logged row by
+    row. No current feed sends RRULEs (each occurrence arrives separately), so
+    RRULE expansion into per-occurrence events is deferred until a source needs
+    it.
     *Owner decisions (2026-10-04), built on top of step 13 before step 14:
     descriptions must add a fact (describe@3) or are left empty; extract@3
     adds `spanish` and `activity`; code-set "Ticketed" and "En español" tags;

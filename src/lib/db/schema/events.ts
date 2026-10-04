@@ -20,9 +20,52 @@ import { categories, tags } from "./taxonomy";
 import { venues } from "./venues";
 
 export const EVENT_STATUSES = ["scheduled", "cancelled", "postponed", "merged", "hidden"] as const;
+export const SERIES_KINDS = ["recurring", "run"] as const;
+export const SERIES_DETECTED_BY = ["rrule", "pattern"] as const;
 export const FREE_BASES = ["stated", "source_default"] as const;
 
 const money = (name: string) => numeric(name, { precision: 10, scale: 2, mode: "number" });
+
+/**
+ * A recurring program ("Tuesdays") or a run of consecutive performances
+ * ("Oct 6–11"), found by series detection (build step 14, plan section 5,
+ * rule 8). One per (source, venue, normalized title). The label is computed in
+ * code. Never deleted: a series that stops qualifying is marked inactive and
+ * its events are detached, logged.
+ */
+export const eventSeries = pgTable(
+  "event_series",
+  {
+    id: id(),
+    slug: text("slug").notNull(),
+    title: text("title").notNull(),
+    normalizedTitle: text("normalized_title").notNull(),
+    sourceId: uuid("source_id")
+      .notNull()
+      .references(() => sources.id, { onDelete: "restrict" }),
+    venueId: uuid("venue_id")
+      .notNull()
+      .references(() => venues.id, { onDelete: "restrict" }),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id, { onDelete: "restrict" }),
+    kind: text("kind", { enum: SERIES_KINDS }).notNull(),
+    recurrenceLabel: text("recurrence_label").notNull(),
+    rrule: text("rrule"),
+    detectedBy: text("detected_by", { enum: SERIES_DETECTED_BY }).notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex("event_series_slug_uniq").on(t.slug),
+    uniqueIndex("event_series_group_uniq").on(t.sourceId, t.venueId, t.normalizedTitle),
+    check("event_series_kind_check", sql.raw(`kind in ${sqlList(SERIES_KINDS)}`)),
+    check("event_series_detected_by_check", sql.raw(`detected_by in ${sqlList(SERIES_DETECTED_BY)}`)),
+    check("event_series_slug_check", sql.raw(`slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`)),
+    check("event_series_rrule_check", sql.raw(`(detected_by = 'rrule') = (rrule is not null)`)),
+  ],
+).enableRLS();
 
 /**
  * What the site shows. Written by the pipeline only after a venue is resolved
@@ -52,8 +95,7 @@ export const events = pgTable(
     categoryId: uuid("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "restrict" }),
-    // FK to event_series is added when that table exists (build step 14).
-    seriesId: uuid("series_id"),
+    seriesId: uuid("series_id").references(() => eventSeries.id, { onDelete: "restrict" }),
     isFree: boolean("is_free"),
     // Where "free" came from: the event's own listing, or the source's
     // published default (sources.default_price_note). Null unless free.

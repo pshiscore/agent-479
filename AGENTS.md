@@ -182,6 +182,10 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   and LLM call ids. A generated description that still reuses source wording
   after one retry is held: the event is written without one, with a logged
   `hold`.
+- **Series are detected in code, never by a model.** Same source, venue, and
+  normalized title: 3+ occurrences in 60 days on a matching weekday and time
+  is recurring; consecutive days is a run. Labels come from code
+  (`src/lib/pipeline/series/detect.ts`). Series are retired, never deleted.
 - **Eval fixtures never contain source text.** They use real facts (titles,
   venues) with descriptions written for the fixture.
 - **Notes are facts in our own words.** No phrasing copied from sources; a
