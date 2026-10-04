@@ -40,7 +40,7 @@ export async function processRecord(
   try {
     if (!record.payload) throw new MapError("payload was purged");
     const facts = mapRecord(record.payload, source);
-    const skip = exclusionReason(facts, opts.now);
+    const skip = exclusionReason(facts, opts.now, source.config);
     if (skip) {
       await set({ status: "skipped", skipReason: skip, facts, lastError: null, venueId: null, locationKey: null });
       return { outcome: "skipped", detail: skip };

@@ -595,6 +595,89 @@
       }
     },
     {
+      "slug": "the-ramble",
+      "name": "The Ramble",
+      "aliases": [],
+      "venueType": "area",
+      "address": null,
+      "city": "Fayetteville",
+      "postalCode": null,
+      "lat": 36.065773,
+      "lng": -94.165912,
+      "website": "https://www.fayetteville-ar.gov/4424/The-Ramble",
+      "parent": null,
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/4424/The-Ramble",
+          "checkedAt": "2026-10-04"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/1391832980",
+          "checkedAt": "2026-10-04",
+          "note": "Park outline tagged The Ramble; the point is its center"
+        },
+        "website": {
+          "url": "https://www.fayetteville-ar.gov/4424/The-Ramble",
+          "checkedAt": "2026-10-04"
+        },
+        "notes": [
+          {
+            "url": "https://www.fayetteville-ar.gov/4424/The-Ramble",
+            "checkedAt": "2026-10-04",
+            "note": "Completed in 2024; two parts, Upper Ramble and Lower Ramble"
+          }
+        ]
+      },
+      "notes": "Downtown park completed in 2024, made up of the Upper Ramble and the Lower Ramble. Typed as an area: the city gives no single street address for it."
+    },
+    {
+      "slug": "upper-ramble",
+      "name": "Upper Ramble",
+      "aliases": [],
+      "venueType": "park",
+      "address": "251 N West Ave",
+      "city": "Fayetteville",
+      "postalCode": "72701",
+      "lat": 36.065635,
+      "lng": -94.165561,
+      "website": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Upper-Ramble-146",
+      "parent": "the-ramble",
+      "verification": {
+        "name": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Upper-Ramble-146",
+          "checkedAt": "2026-10-04"
+        },
+        "address": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Upper-Ramble-146",
+          "checkedAt": "2026-10-04"
+        },
+        "location": {
+          "url": "https://www.openstreetmap.org/way/374646783",
+          "checkedAt": "2026-10-04",
+          "note": "Address point tagged 251/255 North West Avenue"
+        },
+        "website": {
+          "url": "https://www.fayetteville-ar.gov/Facilities/Facility/Details/Upper-Ramble-146",
+          "checkedAt": "2026-10-04"
+        },
+        "notes": [
+          {
+            "url": "https://www.fayetteville-ar.gov/4424/The-Ramble",
+            "checkedAt": "2026-10-04",
+            "note": "Between Dickson and Center Streets along West Avenue"
+          }
+        ]
+      },
+      "notes": "The northern part of The Ramble, between Dickson and Center Streets along West Avenue.",
+      "handChecks": [
+        {
+          "finding": "Upper Ramble's point is about 70 m from Walton Arts Center's. They're different places: the city describes the Upper Ramble as the park between Dickson and Center Streets along West Avenue, and Walton Arts Center is the building at 495 W Dickson St.",
+          "url": "https://www.fayetteville-ar.gov/4424/The-Ramble",
+          "checkedAt": "2026-10-04"
+        }
+      ]
+    },
+    {
       "slug": "gulley-park",
       "name": "Gulley Park",
       "aliases": [],

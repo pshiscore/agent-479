@@ -48,6 +48,17 @@ export const sources = pgTable(
     fetchIntervalMinutes: integer("fetch_interval_minutes").notNull(),
     commercialUseOk: text("commercial_use_ok", { enum: COMMERCIAL_USE }).notNull().default("unknown"),
     termsNotes: text("terms_notes").notNull(),
+    // The source's own published statement about prices, e.g. "Programs are
+    // free unless the event lists a fee." When set, its events are Free unless
+    // their listing mentions a fee, cost, or ticket price. Only set from a page
+    // the owner verified in the browser; that page is recorded beside it.
+    defaultPriceNote: text("default_price_note"),
+    defaultPriceNoteSource: jsonb("default_price_note_source").$type<{
+      url: string;
+      checkedAt: string;
+      verifiedBy: "owner";
+      confirmed: string;
+    }>(),
     dedupMode: text("dedup_mode", { enum: DEDUP_MODES }).notNull().default("shadow"),
     lastFetchedAt: timestamp("last_fetched_at", { withTimezone: true }),
     lastSuccessAt: timestamp("last_success_at", { withTimezone: true }),
@@ -70,6 +81,10 @@ export const sources = pgTable(
         `(enabled and disabled_reason is null) or ` +
           `(not enabled and disabled_reason is not null and disabled_reason in ${sqlList(DISABLED_REASONS)})`,
       ),
+    ),
+    check(
+      "sources_price_note_check",
+      sql.raw(`(default_price_note is null) = (default_price_note_source is null)`),
     ),
     check("sources_trust_check", sql.raw(`trust_level between 1 and 5`)),
     check("sources_interval_check", sql.raw(`fetch_interval_minutes >= 15`)),

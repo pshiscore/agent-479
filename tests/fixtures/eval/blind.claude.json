@@ -1,0 +1,268 @@
+{
+  "labeler": "claude",
+  "note": "Labelled blind from blind.csv facts only, before seeing the model or owner labels. Tags: model-chosen tags only (free, 21-plus, registration-required are code-set).",
+  "labels": [
+    {
+      "id": "b25040bd-1bcc-471e-b8f6-4b3b20f7f868",
+      "title": "\"The Librarians\" Film Screening",
+      "category": "film",
+      "tags": []
+    },
+    {
+      "id": "2a248c39-ce73-4e83-893e-6433f54088b2",
+      "title": "Teen Cuisine: Rainbow Cookies (Grades 5–12) *",
+      "category": "food-drink",
+      "tags": []
+    },
+    {
+      "id": "d1dff674-8351-4a3a-ad2e-3712e9d834d6",
+      "title": "Mindfulness Meditation",
+      "category": "outdoors-fitness",
+      "tags": []
+    },
+    {
+      "id": "1faa045e-cecd-41f7-8c00-389a99dddfb9",
+      "title": "Homeschool Workshop: Developing Engineers * (Ages 6–12)",
+      "category": "family-kids",
+      "tags": [
+        "family-friendly"
+      ]
+    },
+    {
+      "id": "394f289d-9ffd-4134-ae40-912d1af3cbec",
+      "title": "Halloween Family Movies: Scooby-Doo and the Witch's Ghost",
+      "category": "film",
+      "tags": [
+        "family-friendly"
+      ]
+    },
+    {
+      "id": "5285ae37-1244-4e5a-b1b6-ce4c649a1521",
+      "title": "Out Loud – An LGBTQ+ Open Mic",
+      "category": "arts-theater",
+      "tags": []
+    },
+    {
+      "id": "7835aa8f-2a67-4724-81d9-a9345adfad3c",
+      "title": "Snail Mail w/ Soccer Mommy",
+      "category": "music",
+      "tags": []
+    },
+    {
+      "id": "719a7388-b651-4a3f-8eac-5183a6a76143",
+      "title": "Plant & Seed Swap",
+      "category": "community",
+      "tags": []
+    },
+    {
+      "id": "31529dd8-a78b-4974-aef8-4407d7ef79c1",
+      "title": "Scribble Your Emotions – Art as Medicine *",
+      "category": "arts-theater",
+      "tags": []
+    },
+    {
+      "id": "1623d6c5-f69d-4ea9-8692-00afc885e361",
+      "title": "Arkansas Razorbacks Womens Volleyball vs. Kentucky Wildcats Womens Volleyball",
+      "category": "sports",
+      "tags": []
+    },
+    {
+      "id": "f9e2ff58-cd43-4d86-a625-5688018b051b",
+      "title": "City Expo and Community Volunteer Fair",
+      "category": "community",
+      "tags": [
+        "volunteer"
+      ]
+    },
+    {
+      "id": "d1bd37ef-9ec1-4b8a-86a6-4185968d1647",
+      "title": "Arkansas Razorbacks Mens Basketball vs. Gonzaga Bulldogs Mens Basketball",
+      "category": "sports",
+      "tags": []
+    },
+    {
+      "id": "04f7356c-c41f-4c68-bb20-bbe88a708a6d",
+      "title": "Ghost Walks",
+      "category": "talks-learning",
+      "tags": [
+        "outdoor"
+      ]
+    },
+    {
+      "id": "4221f3ae-a29a-46b7-8ac2-0267b7abcf85",
+      "title": "Sawyer Hill",
+      "category": "music",
+      "tags": []
+    },
+    {
+      "id": "a9fb9706-8693-4433-88e7-cad8605ce8e7",
+      "title": "Mah Jongg Madness *",
+      "category": "community",
+      "tags": []
+    },
+    {
+      "id": "cb6ce9f7-1eb5-456e-9b68-5f23efc1afa9",
+      "title": "Fall Developers Forum",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "2c4a3a4e-898a-4cc2-b989-78bd00975284",
+      "title": "Toddler Time (Ages 2–3)",
+      "category": "family-kids",
+      "tags": [
+        "family-friendly"
+      ]
+    },
+    {
+      "id": "0eb5d658-c95c-4e9d-891f-81b25c94dbc7",
+      "title": "Emerging Tech Breakfast Club – Fayetteville *",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "465797c4-7068-48a0-a655-5b28c2b2acac",
+      "title": "Arkansas Razorbacks Womens Volleyball vs. Vanderbilt Commodores Womens Volleyball",
+      "category": "sports",
+      "tags": []
+    },
+    {
+      "id": "323a24c9-d7dc-482a-ba5d-8cb5220d64f3",
+      "title": "Board Game Exchange",
+      "category": "community",
+      "tags": []
+    },
+    {
+      "id": "9634d04e-536d-474f-ab76-b1261bb627d9",
+      "title": "Baby Bookworms (Ages 0–24 months)",
+      "category": "family-kids",
+      "tags": [
+        "family-friendly"
+      ]
+    },
+    {
+      "id": "20e59718-6c55-4fe8-b0b0-4c6b88041f89",
+      "title": "Math Olympiads: Elementary (Grades 4–6) *",
+      "category": "family-kids",
+      "tags": [
+        "family-friendly"
+      ]
+    },
+    {
+      "id": "ca17d0ca-9c55-4556-acb4-0f74ad00c249",
+      "title": "Arkansas Razorbacks Mens Basketball vs. Mississippi Valley Delta Devils Mens Basketball",
+      "category": "sports",
+      "tags": []
+    },
+    {
+      "id": "3f0189bd-34f0-4ef3-9a9d-d3e43a26418d",
+      "title": "CreativeMornings/Fayetteville *",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "3a81d13c-a92b-4701-b655-e7c89a63eaa5",
+      "title": "Volunteer Genealogy Assistance with DAR Members",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "784b3c74-f0ee-448b-9967-2658175b5ff7",
+      "title": "American Red Cross Blood Drive",
+      "category": "community",
+      "tags": [
+        "volunteer"
+      ]
+    },
+    {
+      "id": "6e4ee6ea-b6ce-47de-ac8b-ec581ad0b438",
+      "title": "Break Down Genealogy Brick Walls",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "fa8ba4e2-ae21-46cd-b78d-f5745d151911",
+      "title": "Arkansas Razorbacks Football vs. LSU Tigers Football",
+      "category": "sports",
+      "tags": [
+        "outdoor"
+      ]
+    },
+    {
+      "id": "ab782529-2897-4e8b-812f-a668f972a2f2",
+      "title": "Blood Drive",
+      "category": "community",
+      "tags": [
+        "volunteer"
+      ]
+    },
+    {
+      "id": "643febc2-315e-4a5f-ade2-ac7364c86da8",
+      "title": "Citizenship Class *",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "beb1c067-103c-41b8-845b-469955b647f9",
+      "title": "Yoga @ FPL",
+      "category": "outdoors-fitness",
+      "tags": []
+    },
+    {
+      "id": "8558232b-9f32-4b00-b2fb-1fd028174c10",
+      "title": "VariYoga Zen with Jen",
+      "category": "outdoors-fitness",
+      "tags": []
+    },
+    {
+      "id": "4a0b3305-424d-4b12-a524-25a09b3a8f95",
+      "title": "ESL for Beginner, Intermediate & Advanced Levels *",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "9041bf83-8a93-4735-ae10-c9e31ed72553",
+      "title": "Arkansas Razorbacks Mens Basketball vs. Mississippi State Bulldogs Mens Basketball",
+      "category": "sports",
+      "tags": []
+    },
+    {
+      "id": "1bfe3612-9596-4c5c-bbd8-aa738b5eb7b6",
+      "title": "Braxton Keith",
+      "category": "music",
+      "tags": []
+    },
+    {
+      "id": "138f4766-1c73-4e44-be9a-314e7414d842",
+      "title": "Math Olympiads: Middle (Grades 7–8) *",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "e570cbb6-c151-423c-ad42-99b4fb687182",
+      "title": "Lucas Zelnick",
+      "category": "comedy",
+      "tags": []
+    },
+    {
+      "id": "cb1599d0-0ddd-4f6a-855a-d9b656d68a5a",
+      "title": "Clases de GED *",
+      "category": "talks-learning",
+      "tags": []
+    },
+    {
+      "id": "198a01cc-b9ba-42cd-a553-cd091bd5847d",
+      "title": "Arkansas Razorbacks Mens Basketball vs. Oklahoma Sooners Mens Basketball",
+      "category": "sports",
+      "tags": []
+    },
+    {
+      "id": "5faf4aeb-fb7f-4c49-b1e1-fb9903b6afd5",
+      "title": "Museum and Me: Earth Day",
+      "category": "family-kids",
+      "tags": [
+        "family-friendly"
+      ]
+    }
+  ]
+}

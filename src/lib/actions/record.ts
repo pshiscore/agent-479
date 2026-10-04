@@ -10,7 +10,7 @@ export const humanActor = (who: string) => `human:${who}`;
 const snapshot = z.record(z.string(), z.unknown());
 
 /** Actions that wait for a human decision: created pending, with no entity yet. */
-const PROPOSALS = new Set<string>(["propose_venue", "propose_link"]);
+const PROPOSALS = new Set<string>(["propose_venue", "propose_link", "propose_category"]);
 
 /** Actions that change an existing entity and so need both snapshots to be reversible. */
 const NEEDS_BEFORE_AND_AFTER = new Set<string>([

@@ -3,6 +3,7 @@ import {
   type AnyPgColumn,
   boolean,
   check,
+  integer,
   index,
   numeric,
   pgTable,
@@ -19,6 +20,7 @@ import { categories, tags } from "./taxonomy";
 import { venues } from "./venues";
 
 export const EVENT_STATUSES = ["scheduled", "cancelled", "postponed", "merged", "hidden"] as const;
+export const FREE_BASES = ["stated", "source_default"] as const;
 
 const money = (name: string) => numeric(name, { precision: 10, scale: 2, mode: "number" });
 
@@ -53,6 +55,15 @@ export const events = pgTable(
     // FK to event_series is added when that table exists (build step 14).
     seriesId: uuid("series_id"),
     isFree: boolean("is_free"),
+    // Where "free" came from: the event's own listing, or the source's
+    // published default (sources.default_price_note). Null unless free.
+    freeBasis: text("free_basis", { enum: FREE_BASES }),
+    // Ages in years and school grades (K = 0), when the listing states them.
+    ageMin: integer("age_min"),
+    ageMax: integer("age_max"),
+    gradeMin: integer("grade_min"),
+    gradeMax: integer("grade_max"),
+    registrationRequired: boolean("registration_required"),
     priceMin: money("price_min"),
     priceMax: money("price_max"),
     priceText: text("price_text"),
@@ -86,6 +97,21 @@ export const events = pgTable(
       sql.raw(`(status = 'merged') = (canonical_event_id is not null)`),
     ),
     check("events_canonical_check", sql.raw(`canonical_event_id is null or canonical_event_id <> id`)),
+    // Free and its basis go together (coalesce: NULL must not slip through).
+    check("events_free_basis_check", sql.raw(`coalesce(is_free, false) = (free_basis is not null)`)),
+    check(
+      "events_free_basis_value_check",
+      sql.raw(`free_basis is null or free_basis in ${sqlList(FREE_BASES)}`),
+    ),
+    check(
+      "events_age_check",
+      sql.raw(
+        `(age_min is null or age_min between 0 and 120) and (age_max is null or age_max between 0 and 120) and ` +
+          `(age_min is null or age_max is null or age_max >= age_min) and ` +
+          `(grade_min is null or grade_min between 0 and 12) and (grade_max is null or grade_max between 0 and 12) and ` +
+          `(grade_min is null or grade_max is null or grade_max >= grade_min)`,
+      ),
+    ),
   ],
 ).enableRLS();
 

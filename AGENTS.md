@@ -145,10 +145,22 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   Census geocoder, then tourism listings, then Wikipedia. An owner-verified
   record confirms what a page says, not that the page is right, so it carries
   the rank of the page it came from.
-- **Code owns the "Free" and "21+" tags.** They come from the price and age
-  facts (structured prices first, then what extraction found in the source's
-  description); the classifier never chooses them, so a tag can't contradict
-  `events.is_free`.
+- **Code owns the "Free", "21+", and "Registration required" tags.** They come
+  from the facts; the classifier never chooses them, so a tag can't contradict
+  `events.is_free` or `events.registration_required`.
+- **"Free" only when stated**, by the event's own listing or by the source's
+  published default (`sources.default_price_note`, set only from a page the
+  owner verified in the browser). A source default never applies when the
+  listing mentions a fee, cost, or ticket price. `events.free_basis` records
+  which (`stated` or `source_default`).
+- **Categories describe what an event is, not where.** Community is the last
+  resort and every Community pick logs a hint; when one hint theme passes 15
+  events in 30 days, the maintenance job proposes a category to the owner.
+- **Source-level exclusions** (`sources.config.excludeLocations`) skip
+  locations that aren't public events, like the library bookmobile's stop
+  schedule (`service_schedule`). Changing one is a logged seed update.
+- **needs_venue records are archived after their event ends**
+  (`needs_venue_expired`); the admin page shows the current needs_venue count.
 - **Events are written only by the enrich stage**, from a mapped record with a
   resolved venue and a classified category, logged row by row with the model
   and LLM call ids. A generated description that still reuses source wording

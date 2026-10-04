@@ -27,6 +27,7 @@ import {
 } from "@/lib/sources/admin";
 import { PoliteClient } from "@/lib/sources/http";
 import { testFetch } from "@/lib/sources/test-fetch";
+import { needsVenueSummary } from "@/lib/pipeline/maintenance";
 
 const { values: args, positionals } = parseArgs({
   options: { enable: { type: "boolean", default: false }, reason: { type: "string" } },
@@ -76,6 +77,8 @@ async function main() {
         return;
       case "status": {
         const rows = await db.select().from(sources).orderBy(sources.slug);
+        const nv = await needsVenueSummary(db);
+        console.log(`Records waiting for a venue (needs_venue): ${nv.total}`);
         console.table(
           rows.map((s) => ({
             slug: s.slug,

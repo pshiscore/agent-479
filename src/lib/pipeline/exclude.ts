@@ -1,3 +1,4 @@
+import { normalizeVenueName } from "@/lib/venues/normalize";
 import type { Facts } from "./map";
 
 /**
@@ -14,7 +15,27 @@ const OFFICE_CLOSURE = /\b(offices? (are |will be )?closed|city hall (is |will b
 const DAY_MS = 86_400_000;
 const MAX_AHEAD_MS = 548 * DAY_MS; // 18 months
 
-export function exclusionReason(facts: Facts, now: Date): string | null {
+/**
+ * A source-level rule: locations from this source that aren't public events
+ * (e.g. a bookmobile's stop schedule). Lives in sources.config, so adding or
+ * changing one is a logged seed update.
+ */
+export interface ExcludedLocation {
+  name: string;
+  reason: string;
+  note: string;
+}
+
+export function sourceExclusions(config: unknown): ExcludedLocation[] {
+  const list = (config as { excludeLocations?: unknown } | null)?.excludeLocations;
+  return Array.isArray(list) ? (list as ExcludedLocation[]) : [];
+}
+
+export function exclusionReason(facts: Facts, now: Date, sourceConfig: unknown = null): string | null {
+  const name = facts.location.name ? normalizeVenueName(facts.location.name) : null;
+  for (const rule of sourceExclusions(sourceConfig)) {
+    if (name && name === normalizeVenueName(rule.name)) return rule.reason;
+  }
   if (OFFICE_CLOSURE.test(facts.title)) return "office_closure";
   if (GOVERNMENT_MEETING.test(facts.title)) return "government_meeting";
   const start = Date.parse(facts.startAt);

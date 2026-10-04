@@ -20,6 +20,12 @@ export interface EventDraft {
   categoryId: string;
   tagIds: string[];
   isFree: boolean | null;
+  freeBasis: "stated" | "source_default" | null;
+  ageMin: number | null;
+  ageMax: number | null;
+  gradeMin: number | null;
+  gradeMax: number | null;
+  registrationRequired: boolean | null;
   priceMin: number | null;
   priceMax: number | null;
   shortDescription: string | null;
@@ -67,6 +73,12 @@ export async function writeEvent(
     subSpace: draft.subSpace,
     categoryId: draft.categoryId,
     isFree: draft.isFree,
+    freeBasis: draft.freeBasis,
+    ageMin: draft.ageMin,
+    ageMax: draft.ageMax,
+    gradeMin: draft.gradeMin,
+    gradeMax: draft.gradeMax,
+    registrationRequired: draft.registrationRequired,
     priceMin: draft.priceMin,
     priceMax: draft.priceMax,
     primarySourceUrl: f.sourceUrl,

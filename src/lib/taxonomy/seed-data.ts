@@ -40,4 +40,8 @@ export const TAG_SEEDS: TagSeed[] = [
   { slug: "21-plus", name: "21+" },
   { slug: "dog-friendly", name: "Dog-friendly" },
   { slug: "biking", name: "Biking" },
+  // Owner, 2026-10-04: blood drives, cleanups, volunteer shifts.
+  { slug: "volunteer", name: "Volunteer" },
+  // Set in code from extraction, never by the classifier.
+  { slug: "registration-required", name: "Registration required" },
 ];

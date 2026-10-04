@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { agentActor, recordAction } from "@/lib/actions/record";
 import type { TaxonomyEntry } from "@/lib/categories";
 import type { DbExecutor } from "@/lib/db/client";
-import { rawRecords, venues } from "@/lib/db/schema";
+import { rawRecords, sources, venues } from "@/lib/db/schema";
 import { formatInChicago } from "@/lib/time";
 import { venueDisplayName } from "@/lib/venues/display";
 import type { Facts } from "../map";
@@ -10,6 +10,7 @@ import { writeEvent } from "../write-event";
 import { classifyEvent } from "./classify";
 import { describeEvent } from "./describe";
 import { type Extraction, extractFacts } from "./extract";
+import { decideFree } from "./free";
 import type { Generate } from "./types";
 
 /**
@@ -42,6 +43,7 @@ export async function enrichRecord(
 ) {
   const facts = record.facts as unknown as Facts;
   const [venue] = await db.select().from(venues).where(eq(venues.id, record.venueId!));
+  const [source] = await db.select({ defaultPriceNote: sources.defaultPriceNote }).from(sources).where(eq(sources.id, record.sourceId));
   const description = record.descriptionText;
 
   // 1. Extract (only when there's a description to read).
@@ -56,7 +58,8 @@ export async function enrichRecord(
   // Structured prices (Ticketmaster) beat extracted ones.
   const priceMin = facts.price.min ?? extraction?.priceMin ?? null;
   const priceMax = facts.price.max ?? extraction?.priceMax ?? null;
-  const isFree = facts.price.min !== null || facts.price.max !== null ? false : (extraction?.isFree ?? null);
+  const free = decideFree(facts, extraction, description, source?.defaultPriceNote ?? null);
+  const isFree = free.isFree;
   const adultsOnly = extraction?.ageRestriction === "21_plus" || facts.legalAgeEnforced === true;
 
   // 2. Classify.
@@ -73,6 +76,7 @@ export async function enrichRecord(
   if (adultsOnly) tagSlugs.add("21-plus");
   if (extraction?.familyFriendly) tagSlugs.add("family-friendly");
   if (adultsOnly) tagSlugs.delete("family-friendly");
+  if (extraction?.registrationRequired) tagSlugs.add("registration-required");
   const tagIds = deps.taxonomy.tags.filter((t) => tagSlugs.has(t.slug)).map((t) => t.id);
   const category = deps.taxonomy.categories.find((c) => c.slug === classified.data.category)!;
 
@@ -106,6 +110,7 @@ export async function enrichRecord(
     classifyCallId: classified.callId,
     describeCallId: described.callId,
     closestMissingCategory: classified.data.closestMissingCategory,
+    freeBasis: free.basis,
     extraction,
     descriptionHeld: described.status === "held",
   };
@@ -119,6 +124,12 @@ export async function enrichRecord(
       categoryId: category.id,
       tagIds,
       isFree,
+      freeBasis: free.basis,
+      ageMin: extraction?.ageMin ?? null,
+      ageMax: extraction?.ageMax ?? null,
+      gradeMin: extraction?.gradeMin ?? null,
+      gradeMax: extraction?.gradeMax ?? null,
+      registrationRequired: extraction?.registrationRequired ?? null,
       priceMin,
       priceMax,
       shortDescription: described.status === "ok" ? described.description : null,

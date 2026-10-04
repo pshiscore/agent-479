@@ -129,6 +129,14 @@ export const SOURCE_SEEDS: SourceSeed[] = [
       feedUrl: FAYLIB_ICAL_30_DAYS,
       // Event page for a numeric UID; checked 2026-10-04 against event 17128407.
       eventUrl: "https://faylib.org/event/{uid}",
+      // Not public events: skipped like city meetings (owner, 2026-10-04).
+      excludeLocations: [
+        {
+          name: "FPL on Wheels Bookmobile",
+          reason: "service_schedule",
+          note: "Bookmobile stops are a service schedule, not events.",
+        },
+      ],
       feedUrlSource: {
         verifiedBy: "owner",
         checkedAt: "2026-10-03",

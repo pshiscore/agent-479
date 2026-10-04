@@ -577,6 +577,8 @@ See `.env.example`. Model names are deliberately not env vars.
 17. **`/admin/dedup-review`:** you label about 30 pairs. Export the regression
     fixtures and test, set thresholds, go `live`.
 18. **Homepage:** filters, series rows, recurring hidden by default.
+    *Owner, 2026-10-04: add a venue-type filter (e.g. "At the library").
+    Categories stay about what an event is, not where.*
     *Design direction (owner, 2026-10-04): the owner likes The Verge's
     design. Take inspiration from the principles that make it work, but don't
     copy its layout, logo, typefaces, or assets: our design must be our own.*

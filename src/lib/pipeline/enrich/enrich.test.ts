@@ -72,14 +72,14 @@ describe("classify", () => {
 
 describe("extract", () => {
   it("resolves a stated price over a 'free' claim, and an inverted range", async () => {
-    const m = fakeModel({ extract: { isFree: true, priceMin: 10, priceMax: 5, ageRestriction: null, familyFriendly: null, registrationRequired: null } });
+    const m = fakeModel({ extract: { isFree: true, priceMin: 10, priceMax: 5, ageRestriction: null, familyFriendly: null, registrationRequired: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null } });
     const r = await extractFacts(m.generate, FACTS, "Tickets $10.");
     expect(r.data).toMatchObject({ isFree: false, priceMin: 10, priceMax: 10 });
   });
 });
 
 describe("describe", () => {
-  const facts = { title: "Story Time", when: "Tuesday, October 13, 9:30 AM", venue: "Fayetteville Public Library", city: "Fayetteville", category: "Family & Kids", price: "Free", performers: [], tags: ["Free"], registrationRequired: null };
+  const facts = { title: "Story Time", when: "Tuesday, October 13, 9:30 AM", venue: "Fayetteville Public Library", city: "Fayetteville", category: "Family & Kids", price: "Free", performers: [], tags: ["Free"], registrationRequired: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null };
   const SOURCE = "Join us for songs rhymes and picture books with our friendly librarians every week in the story room";
 
   it("accepts original wording on the first try, and never shows the model the source text", async () => {
@@ -111,7 +111,7 @@ describe("injection fixtures: code-level controls hold even if the model obeys",
 
   it.each(cases.map((c) => [c.id, c] as const))("%s: the listing reaches the model only inside the untrusted block", async (_id, c) => {
     const m = fakeModel({
-      extract: { isFree: null, priceMin: null, priceMax: null, ageRestriction: null, familyFriendly: null, registrationRequired: null },
+      extract: { isFree: null, priceMin: null, priceMax: null, ageRestriction: null, familyFriendly: null, registrationRequired: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null },
       classify: { category: "music", tags: [], closestMissingCategory: null },
     });
     const facts = { ...FACTS, title: c.title };
@@ -133,7 +133,7 @@ describe("injection fixtures: code-level controls hold even if the model obeys",
   });
 
   it("a model can't set a ticket URL: no stage's output schema has a URL field", async () => {
-    const m = fakeModel({ extract: { isFree: false, priceMin: 5, priceMax: 5, ageRestriction: null, familyFriendly: null, registrationRequired: null, ticketUrl: "https://evil.example" } });
+    const m = fakeModel({ extract: { isFree: false, priceMin: 5, priceMax: 5, ageRestriction: null, familyFriendly: null, registrationRequired: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null, ticketUrl: "https://evil.example" } });
     const r = await extractFacts(m.generate, FACTS, "x");
     expect(JSON.stringify(r.data)).not.toContain("evil.example");
   });

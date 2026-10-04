@@ -48,3 +48,14 @@ describe("exclusionReason", () => {
     expect(exclusionReason(facts({ startAt: "2026-01-05T00:00:00.000Z", recurrence: { rrule: "FREQ=WEEKLY", exdates: [] } }), NOW)).toBeNull();
   });
 });
+
+describe("source-level exclusions", () => {
+  const config = { excludeLocations: [{ name: "FPL on Wheels Bookmobile", reason: "service_schedule", note: "Bookmobile stops are a service schedule, not events." }] };
+  it("skips a listed location, matched by normalized name, and nothing else", () => {
+    const at = (name: string | null) => facts({ location: { text: null, name, room: null, street: null, city: null, externalVenueId: null } });
+    expect(exclusionReason(at("FPL on Wheels Bookmobile"), NOW, config)).toBe("service_schedule");
+    expect(exclusionReason(at("fpl on wheels bookmobile."), NOW, config)).toBe("service_schedule");
+    expect(exclusionReason(at("Fayetteville Public Library"), NOW, config)).toBeNull();
+    expect(exclusionReason(at("FPL on Wheels Bookmobile"), NOW, null)).toBeNull();
+  });
+});

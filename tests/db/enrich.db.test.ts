@@ -61,7 +61,7 @@ describe("enrichRecord", () => {
     await inRollback(async (tx) => {
       const { rec, run } = await mappedRecord(tx, SOURCE_TEXT);
       const generate = fakeModel(tx, {
-        extract: [{ isFree: true, priceMin: null, priceMax: null, ageRestriction: "all_ages", familyFriendly: true, registrationRequired: false }],
+        extract: [{ isFree: true, priceMin: null, priceMax: null, ageRestriction: "all_ages", familyFriendly: true, registrationRequired: false, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null }],
         classify: [{ category: "community", tags: [], closestMissingCategory: "Library programs" }],
         describe: [{ description: "A short morning of stories and songs for preschoolers at the library." }],
       });
@@ -121,7 +121,7 @@ describe("enrichRecord", () => {
       const { rec, run } = await mappedRecord(tx, SOURCE_TEXT);
       const copied = "Songs rhymes and picture books for children ages three to five with our friendly librarians.";
       const generate = fakeModel(tx, {
-        extract: [{ isFree: null, priceMin: null, priceMax: null, ageRestriction: null, familyFriendly: null, registrationRequired: null }],
+        extract: [{ isFree: null, priceMin: null, priceMax: null, ageRestriction: null, familyFriendly: null, registrationRequired: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null }],
         classify: [{ category: "family-kids", tags: [], closestMissingCategory: null }],
         describe: [{ description: copied }],
       });

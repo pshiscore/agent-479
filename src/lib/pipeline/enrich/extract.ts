@@ -15,10 +15,14 @@ export const extractionSchema = z.object({
   ageRestriction: z.enum(["all_ages", "18_plus", "21_plus"]).nullable(),
   familyFriendly: z.boolean().nullable(),
   registrationRequired: z.boolean().nullable(),
+  ageMin: z.number().int().min(0).max(120).nullable(),
+  ageMax: z.number().int().min(0).max(120).nullable(),
+  gradeMin: z.number().int().min(0).max(12).nullable(),
+  gradeMax: z.number().int().min(0).max(12).nullable(),
 });
 export type Extraction = z.infer<typeof extractionSchema>;
 
-export const EXTRACT_PROMPT_VERSION = "extract@1";
+export const EXTRACT_PROMPT_VERSION = "extract@2";
 
 export async function extractFacts(
   generate: Generate,
@@ -37,6 +41,8 @@ export async function extractFacts(
       "- ageRestriction: all_ages, 18_plus, or 21_plus only if stated; otherwise null.",
       "- familyFriendly: true only if it says it's for families or children; otherwise null.",
       "- registrationRequired: true if it says registration, sign-up, or tickets are required in advance; false if it says no registration is needed; otherwise null.",
+      '- ageMin/ageMax: the age range in years if the title or listing states one ("Ages 3–5" → 3 and 5; "18+" → 18 and null); otherwise null.',
+      '- gradeMin/gradeMax: the school grade range if stated ("Grades 5–12" → 5 and 12; kindergarten is 0); otherwise null.',
     ].join("\n"),
     input: `Event title: ${facts.title}\n\n${wrapUntrusted("event listing", description, 4_000)}`,
     promptVersion: EXTRACT_PROMPT_VERSION,
@@ -49,6 +55,8 @@ export async function extractFacts(
     ...d,
     isFree: priced ? false : d.isFree,
     priceMax: d.priceMin !== null && d.priceMax !== null && d.priceMax < d.priceMin ? d.priceMin : d.priceMax,
+    ageMax: d.ageMin !== null && d.ageMax !== null && d.ageMax < d.ageMin ? null : d.ageMax,
+    gradeMax: d.gradeMin !== null && d.gradeMax !== null && d.gradeMax < d.gradeMin ? null : d.gradeMax,
   };
   return { data, callId: result.callId, model: result.model };
 }
