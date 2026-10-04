@@ -17,12 +17,16 @@ const APP = path.resolve(import.meta.dirname, "../src/app");
 // Files in src/app that aren't routes.
 const NOT_ROUTES = new Set(["layout.tsx", "page.tsx", "globals.css", "not-found.tsx", "error.tsx", "loading.tsx", "global-error.tsx"]);
 
-const rootRoutes = readdirSync(APP)
+// Route groups "(x)" add no URL segment: their children are root routes too.
+const topLevel = (dir: string): string[] =>
+  readdirSync(dir).flatMap((n) => (/^\(.*\)$/.test(n) ? topLevel(path.join(dir, n)) : [n]));
+
+const rootRoutes = topLevel(APP)
   .filter((n) => !NOT_ROUTES.has(n))
   // A route file ("route.ts", "page.tsx") names its folder; image and text files are served under their own name.
   .map((n) => n.replace(/\.tsx?$/, ""))
-  // Route groups "(x)" and private folders "_x" don't create URL segments.
-  .filter((n) => !/^\(.*\)$/.test(n) && !n.startsWith("_"));
+  // Private folders "_x" don't create URL segments.
+  .filter((n) => !n.startsWith("_"));
 
 const seeds = JSON.parse(readFileSync(path.resolve(import.meta.dirname, "../data/venues.seed.json"), "utf8")) as {
   venues: { slug: string; city: string }[];

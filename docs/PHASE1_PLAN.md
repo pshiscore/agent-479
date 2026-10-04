@@ -644,6 +644,20 @@ See `.env.example`. Model names are deliberately not env vars.
     sources barely overlap, so expect mostly "different" labels; real
     cross-source duplicates arrive with overlapping sources.
 18. **Homepage:** filters, series rows, recurring hidden by default.
+    *Built 2026-10-04, behind the site lock, awaiting owner review.* Layout
+    A2 (`docs/product/front-page.md`): filter bar (GET form: every view is a
+    URL), "This weekend" timeline (rolls to the coming weekend once the
+    current one is over; at most 2 per venue, 14 in all, categories spread),
+    feature card (chosen by `src/config/front-page.ts` rules in the process
+    job, logged in `homepage_features`, migration 0020; first on phones),
+    Lists with counts, the library shelf (one card per series), Further out
+    (each title once), footer. Pages: `/upcoming`, `/city/<slug>`,
+    `/venue/<slug>`, `/category/<slug>`, `/venues`; recurring programs fold
+    into series rows unless "Show recurring". "More info" links to the
+    official listing until the event page (step 19). Ticketmaster events stay
+    off public pages once unlocked until `TICKETMASTER_DISPLAY_APPROVED`.
+    Not yet: What's new (no sources), the digest banner (step 20), search and
+    the interested star (Phase 1b).
     *Owner, 2026-10-04: add a venue-type filter (e.g. "At the library").
     Categories stay about what an event is, not where.*
     *Owner, 2026-10-04: library events get their own shelf on the homepage

@@ -16,6 +16,8 @@ import { proposeVenues } from "./venue-proposals";
 import { checkVagueLocation, vagueRecordsDue } from "./location-detail";
 import { detectSeries } from "./series";
 import { runDedup } from "./dedup";
+import { selectFeature } from "./feature";
+import { sourceVisible } from "@/lib/site/visibility";
 import { PoliteClient } from "@/lib/sources/http";
 
 /**
@@ -170,6 +172,9 @@ export async function runProcessJob(
       }
     }
 
+    // The homepage feature slot (step 18): rules from config, logged when it changes.
+    const feature = await selectFeature(db, { now, actor: ACTOR, runId: claim.id, publicFilter: (slug) => sourceVisible(slug) });
+
     // Vague locations (a bare city or ZIP, or prose): look on the event's own
     // detail page for a specific place, and propose what's found to the owner.
     const detailLimit = opts.detailBatchSize ?? 10;
@@ -202,7 +207,7 @@ export async function runProcessJob(
       .select({ toEnrichLeft: sql<number>`count(*)::int` })
       .from(rawRecords)
       .where(eq(rawRecords.status, "mapped"));
-    const stats = { batch: batch.length, ...counts, series, dedup, venueProposals: proposals.proposed, remaining, toEnrichLeft, stoppedForBudget };
+    const stats = { batch: batch.length, ...counts, series, dedup, featureChanged: feature.changed, venueProposals: proposals.proposed, remaining, toEnrichLeft, stoppedForBudget };
     await finishRun(db, claim.id, { status: stoppedForBudget ? "partial" : "ok", stats });
     return stats;
   } catch (err) {

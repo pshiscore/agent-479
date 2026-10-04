@@ -19,6 +19,7 @@ describe("schema", () => {
         "event_series",
         "event_sources",
         "event_tags",
+        "homepage_features",
         "events",
         "link_policies",
         "llm_calls",

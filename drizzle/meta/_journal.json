@@ -141,6 +141,13 @@
       "when": 1791153360149,
       "tag": "0019_description_generated_check",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791157381544,
+      "tag": "0020_homepage_features",
+      "breakpoints": true
     }
   ]
 }
