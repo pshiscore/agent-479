@@ -588,8 +588,8 @@ See `.env.example`. Model names are deliberately not env vars.
     adds `spanish` and `activity`; code-set "Ticketed" and "En español" tags;
     the qualifier-word resolver rule; vague-location detail checks with
     `propose_venue_match` (migration 0014).*
-15. **Dedup engine in shadow mode,** with `dedup_candidates` and `dedup_labels`.
-    *Built, awaiting owner approval.* Migration 0016. The process job runs
+15. **Dedup engine in shadow mode,** with `dedup_candidates` and `dedup_labels` ✅
+    *Approved and merged 2026-10-04; migration 0016 applied to production.* Migration 0016. The process job runs
     `runDedup` after series: blocking in SQL (same venue or parent, ±3h or
     overlapping all-day dates, upcoming scheduled events, pairs not yet
     decided); pure score-and-decide in `dedup/score.ts` (max of pg_trgm-style

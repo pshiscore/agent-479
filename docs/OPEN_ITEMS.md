@@ -7,8 +7,7 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 
 | # | Item | Raised | Blocks |
 |---|---|---|---|
-| 13 | **Step 15 approval** (dedup in shadow mode), branch `step-15-dedup`. Merging needs migration 0016 on production first, which needs `.env.production.local` (item 8: the simplest way is a copy of today's `.env.local`, which still holds the Supabase strings). | 2026-10-04 | Merging step 15 |
-| 8 | **Move the database settings** (production is now the existing Supabase project; dev is local Postgres). Create `.env.production.local` holding your current `DATABASE_URL` and `DATABASE_URL_UNPOOLED` lines; then in `.env.local` set both to `postgresql://localhost:5432/agent479_dev`. Until then every local script and test refuses to run, by design. | 2026-10-04 | All local work |
+| 8 | **`.env.local` (optional):** `.env.production.local` now exists (a copy, made 2026-10-04). Local scripts and tests still refuse the production database by design; point `.env.local` at `postgresql://localhost:5432/agent479_dev` whenever you want to run them yourself. | 2026-10-04 | Running local scripts yourself |
 | 9 | **Vercel env vars.** Run `npx vercel login` and `npx vercel link` once, then approve the list in the 479 Guide report. Until `SITE_PREVIEW_USER`/`SITE_PREVIEW_PASSWORD` are set, the locked site returns 503 to everyone. | 2026-10-04 | Previewing the site |
 | 10 | **`.env.local`:** set `SITE_URL=https://479.guide` and `BOT_CONTACT_EMAIL=bot@479.guide`. Local fetches refuse to run until then. | 2026-10-04 | Local fetches, test fetches |
 | 12 | **Spot check:** "Paper Flower Crafting" got the En español tag; confirm on the library's page whether it's conducted in Spanish. | 2026-10-04 | Nothing |
@@ -26,4 +25,5 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 - The Ramble typed `area` (2026-10-04).
 - Step 13 approved and merged (2026-10-04).
 - Step 14 approved and merged (2026-10-04).
+- Step 15 approved and merged; migration 0016 applied to production (2026-10-04).
 - Production database: keep the existing Supabase project as production; development on local Postgres (2026-10-04).
