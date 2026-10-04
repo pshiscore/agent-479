@@ -629,7 +629,7 @@ See `.env.example`. Model names are deliberately not env vars.
     or the taxonomy seed).
 17. **`/admin/dedup-review`:** you label about 30 pairs. Export the regression
     fixtures and test, set thresholds, go `live`.
-    *Built, awaiting owner approval and labels.* `/admin/dedup-review` queues
+    *Deployed 2026-10-04; awaiting the owner's labels.* `/admin/dedup-review` queues
     the 30 unlabeled pairs nearest a threshold, one per pair of titles (18
     weekly "Math Olympiads" pairs take one label), side by side with scores
     and the engine's decision; Same/Different with an optional note, logged;
