@@ -1,18 +1,19 @@
 # Venue verification report
 
-Generated 2026-10-04T01:17:23.599Z from `data/venues.seed.json`.
+Generated 2026-10-04T01:20:25.524Z from `data/venues.seed.json`.
 
 - Venues: 54
 - Errors: 0, warnings: 13
 - Geocoder cross-check: yes (warns above 250 m, or 1000 m for parks and campuses)
-- Contents sha256: `1d67ae8e3decb61e053521d5cad9b241cbcb791d2dca7b74a35f5d07ff725b31`
-- **Changed since sign-off** by Vlad on 2026-10-03. Review again.
+- Contents sha256: `0879d72160ad972ee92e7ffd322485e7aed2f46ba2601068614a30c9ed2e16b2`
+- Signed off by Vlad on 2026-10-04, and the contents still match.
 
 ## Issues
 
 - **warning** `ozark-music-hall`: geocoder found no match for the address
   - hand check (2026-10-04): OSM way 498930842 is the building at 3615 North Steele Boulevard (still tagged JJ's Live); Ozark Music Hall's own site gives the same address and says it was formerly JJ's Live. [source](https://www.openstreetmap.org/way/498930842)
 - **warning** `university-of-arkansas`: geocoder matched a different street (street name "university of arkansas" vs "university"): "1 S UNIVERSITY AVE" for "1 University of Arkansas"
+  - hand check (2026-10-04): A campus has no single physical address. "1 University of Arkansas" is the university's official address, as uark.edu shows it. The location point is Old Main, the campus landmark (OSM way 468186739). Buildings on campus are separate venues with their own street addresses. [source](https://www.uark.edu/)
 - **warning** `bud-walton-arena`: geocoder found no match for the address
   - hand check (2026-10-03): OSM way 469590531 is Bud Walton Arena (leisure=stadium), tagged 1270 W Nolan Richardson Dr, the same address Wikipedia gives. The street was renamed in 2021, which may be why the geocoder finds no match. [source](https://www.openstreetmap.org/way/469590531)
 - **warning** `razorback-field`: geocoder matched a different street (street type "ave" vs "st"): "449 GARLAND ST" for "449 S Garland Ave"
@@ -100,5 +101,5 @@ Generated 2026-10-04T01:17:23.599Z from `data/venues.seed.json`.
 After reviewing, set this in the seed file, then run `npm run venues:seed`:
 
 ```json
-"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "1d67ae8e3decb61e053521d5cad9b241cbcb791d2dca7b74a35f5d07ff725b31" }
+"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "0879d72160ad972ee92e7ffd322485e7aed2f46ba2601068614a30c9ed2e16b2" }
 ```

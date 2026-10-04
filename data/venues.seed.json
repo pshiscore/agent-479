@@ -2,8 +2,8 @@
   "$comment": "Hand-verified venues with per-field provenance. Rules for editing this file are in CLAUDE.md. Check with npm run venues:verify -- --geocode; only the owner sets reviewed; then npm run venues:seed.",
   "reviewed": {
     "by": "Vlad",
-    "at": "2026-10-03",
-    "sha256": "9ad869cd27be205e3c100741030b26b387ad6a3ee0ab1e7df86f95ebfd01d963"
+    "at": "2026-10-04",
+    "sha256": "0879d72160ad972ee92e7ffd322485e7aed2f46ba2601068614a30c9ed2e16b2"
   },
   "venues": [
     {
@@ -194,7 +194,14 @@
           "url": "https://www.uark.edu/",
           "checkedAt": "2026-10-03"
         }
-      }
+      },
+      "handChecks": [
+        {
+          "finding": "A campus has no single physical address. \"1 University of Arkansas\" is the university's official address, as uark.edu shows it. The location point is Old Main, the campus landmark (OSM way 468186739). Buildings on campus are separate venues with their own street addresses.",
+          "url": "https://www.uark.edu/",
+          "checkedAt": "2026-10-04"
+        }
+      ]
     },
     {
       "slug": "bud-walton-arena",

@@ -132,6 +132,10 @@ These apply to research and one-off scripts as well as to the app and pipeline.
 ## Data
 
 - **Physical address over mailing address** when a venue lists both.
+  Exception: campus-type venues use the institution's official address, since
+  a campus has no single physical address. The location point is the campus
+  landmark. Buildings on campus are separate venues with their own street
+  addresses.
 - **Source priority for address fields** (street, ZIP, and so on), when
   sources disagree: first the venue's own site and government pages, then the
   Census geocoder, then tourism listings, then Wikipedia. An owner-verified
