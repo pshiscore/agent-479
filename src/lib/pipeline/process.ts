@@ -15,6 +15,7 @@ import { type LlmVenuePick, llmVenuePick, resolveVenue } from "./venue-resolve";
 import { proposeVenues } from "./venue-proposals";
 import { checkVagueLocation, vagueRecordsDue } from "./location-detail";
 import { detectSeries } from "./series";
+import { runDedup } from "./dedup";
 import { PoliteClient } from "@/lib/sources/http";
 
 /**
@@ -77,6 +78,7 @@ export async function runProcessJob(
     enrichBatchSize?: number;
     generate?: Generate;
     detailBatchSize?: number;
+    dedupLlmLimit?: number;
     http?: PoliteClient;
   } = {},
 ) {
@@ -153,6 +155,17 @@ export async function runProcessJob(
     // Series (build step 14): group upcoming events into recurring programs and runs.
     const series = await detectSeries(db, { now, actor: ACTOR, runId: claim.id });
 
+    // Dedup (build step 15): shadow mode logs decisions; only live sources merge.
+    let dedup: Awaited<ReturnType<typeof runDedup>> | null = null;
+    if (!stoppedForBudget) {
+      try {
+        dedup = await runDedup(db, { now, actor: ACTOR, generate, runId: claim.id, llmLimit: opts.dedupLlmLimit ?? 20 });
+      } catch (err) {
+        if (!(err instanceof LlmError)) throw err;
+        stoppedForBudget = err.code === "budget_exceeded";
+      }
+    }
+
     // Vague locations (a bare city or ZIP, or prose): look on the event's own
     // detail page for a specific place, and propose what's found to the owner.
     const detailLimit = opts.detailBatchSize ?? 10;
@@ -185,7 +198,7 @@ export async function runProcessJob(
       .select({ toEnrichLeft: sql<number>`count(*)::int` })
       .from(rawRecords)
       .where(eq(rawRecords.status, "mapped"));
-    const stats = { batch: batch.length, ...counts, series, venueProposals: proposals.proposed, remaining, toEnrichLeft, stoppedForBudget };
+    const stats = { batch: batch.length, ...counts, series, dedup, venueProposals: proposals.proposed, remaining, toEnrichLeft, stoppedForBudget };
     await finishRun(db, claim.id, { status: stoppedForBudget ? "partial" : "ok", stats });
     return stats;
   } catch (err) {

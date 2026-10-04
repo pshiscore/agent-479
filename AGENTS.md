@@ -201,6 +201,12 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   normalized title: 3+ occurrences in 60 days on a matching weekday and time
   is recurring; consecutive days is a run. Labels come from code
   (`src/lib/pipeline/series/detect.ts`). Series are retired, never deleted.
+- **Dedup merges only in live mode.** Every source starts `dedup_mode =
+  shadow`: decisions are logged in `dedup_candidates`, nothing merges. A merge
+  never deletes: the loser is `merged` with `canonical_event_id`, and one
+  `merge` action holds the full before-state. The same title in two different
+  rooms at once never auto-merges. Thresholds come from the owner's labels
+  (step 17), never from guesses.
 - **Eval fixtures never contain source text.** They use real facts (titles,
   venues) with descriptions written for the fixture.
 - **Notes are facts in our own words.** No phrasing copied from sources; a

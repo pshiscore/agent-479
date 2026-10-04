@@ -6,3 +6,4 @@ export * from "./sources";
 export * from "./taxonomy";
 export * from "./raw-records";
 export * from "./events";
+export * from "./dedup";

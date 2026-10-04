@@ -14,6 +14,8 @@ describe("schema", () => {
       [
         "agent_actions",
         "categories",
+        "dedup_candidates",
+        "dedup_labels",
         "event_series",
         "event_sources",
         "event_tags",

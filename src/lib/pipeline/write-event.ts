@@ -99,6 +99,17 @@ export async function writeEvent(
       if (link) [existing] = await tx.select().from(events).where(eq(events.id, link.eventId));
     }
 
+    // Merged away by dedup: the survivor owns the fields now, so this record
+    // only refreshes its source row (which already points at the survivor).
+    if (existing?.status === "merged") {
+      await tx
+        .update(eventSources)
+        .set({ rawRecordId: record.id, sourceUrl: f.sourceUrl, ticketUrl: f.ticketUrl, lastSeenAt: now })
+        .where(and(eq(eventSources.sourceId, record.sourceId), eq(eventSources.externalId, record.externalId)));
+      await tx.update(rawRecords).set({ status: "extracted", eventId: existing.id }).where(eq(rawRecords.id, record.id));
+      return { event: existing, created: false };
+    }
+
     let event: EventRow;
     let created = false;
     if (existing) {

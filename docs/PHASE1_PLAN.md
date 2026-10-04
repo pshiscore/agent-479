@@ -589,6 +589,23 @@ See `.env.example`. Model names are deliberately not env vars.
     the qualifier-word resolver rule; vague-location detail checks with
     `propose_venue_match` (migration 0014).*
 15. **Dedup engine in shadow mode,** with `dedup_candidates` and `dedup_labels`.
+    *Built, awaiting owner approval.* Migration 0016. The process job runs
+    `runDedup` after series: blocking in SQL (same venue or parent, ±3h or
+    overlapping all-day dates, upcoming scheduled events, pairs not yet
+    decided); pure score-and-decide in `dedup/score.ts` (max of pg_trgm-style
+    trigram similarity and a word-level token-set score; a matching
+    Ticketmaster event ID is certain); the LLM tiebreak (`dedup@1`, facts only,
+    titles untrusted, at most 20 calls a run). Two owner-visible refinements:
+    the same title at once in two different rooms never auto-merges (the
+    tiebreak sees both rooms), and two occurrences of one detected series at
+    different times are distinct without a model call. Every decision is a
+    logged `dedup_candidates` row. Merging (`dedup/merge.ts`: survivor by
+    source trust, loser `merged` with `canonical_event_id`, source rows moved,
+    empty fields filled, tags joined, full before-state in one `merge` action)
+    runs only when both sources are `live`; all are `shadow`. A re-enrich of a
+    merged-away record only refreshes its source row. First shadow run on the
+    545 events: 498 pairs, 497 distinct, 1 uncertain (Yoga @ FPL listed in two
+    rooms at once), 36 tiebreak calls, $0.002.
 16. **Admin:** Basic Auth in `src/proxy.ts`, then `/admin/agent-log` with
     diffs, rollback, venue proposal approve and reject, and Community stats.
 17. **`/admin/dedup-review`:** you label about 30 pairs. Export the regression
