@@ -17,6 +17,8 @@ export const RESERVED_ROOT_SEGMENTS = [
   "robots.txt",
   "sitemap.xml",
   "favicon.ico",
+  "icon.svg",
+  "apple-icon.png",
   "_next",
   ".well-known",
   "search",

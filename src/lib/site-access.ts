@@ -10,8 +10,8 @@ import { createHash, timingSafeEqual } from "node:crypto";
  *   without giving admin access. Admin credentials work too. If the preview
  *   credentials aren't set, the locked site is closed, never open.
  * - Always public: /bot (who we are and how to opt out), /robots.txt, the
- *   cron routes (they check CRON_SECRET themselves), and Next's static build
- *   files.
+ *   cron routes (they check CRON_SECRET themselves), Next's static build
+ *   files, and the site icons (so even the locked site and /bot show them).
  * - Production is locked unless SITE_LOCKED is exactly "false"; everywhere
  *   else it's locked only when SITE_LOCKED is "true". While locked, and on
  *   every non-production deployment, responses carry X-Robots-Tag: noindex.
@@ -35,7 +35,7 @@ export type AccessDecision =
 export const PREVIEW_REALM = "479 Guide preview";
 export const ADMIN_REALM = "479 Guide admin";
 
-const PUBLIC_PATHS = [/^\/bot\/?$/, /^\/robots\.txt$/, /^\/api\/cron\//, /^\/_next\/static\//, /^\/favicon\.ico$/];
+const PUBLIC_PATHS = [/^\/bot\/?$/, /^\/robots\.txt$/, /^\/api\/cron\//, /^\/_next\/static\//, /^\/favicon\.ico$/, /^\/icon\.svg$/, /^\/apple-icon\.png$/];
 const ADMIN_PATHS = [/^\/admin(\/|$)/, /^\/api\/admin(\/|$)/];
 
 export function isProduction(env: AccessEnv): boolean {

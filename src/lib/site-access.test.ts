@@ -45,7 +45,7 @@ describe("decideAccess", () => {
   });
 
   it("leaves /bot, /robots.txt, cron routes, and static build files public, still noindex while locked", () => {
-    for (const path of ["/bot", "/bot/", "/robots.txt", "/api/cron/fetch", "/_next/static/chunks/a.js", "/favicon.ico"]) {
+    for (const path of ["/bot", "/bot/", "/robots.txt", "/api/cron/fetch", "/_next/static/chunks/a.js", "/favicon.ico", "/icon.svg", "/apple-icon.png"]) {
       expect(decideAccess(path, null, PROD)).toEqual({ allow: true, noindex: true });
     }
     expect(decideAccess("/bots", null, PROD)).toMatchObject({ allow: false });

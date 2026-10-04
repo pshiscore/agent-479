@@ -19,7 +19,8 @@ const NOT_ROUTES = new Set(["layout.tsx", "page.tsx", "globals.css", "not-found.
 
 const rootRoutes = readdirSync(APP)
   .filter((n) => !NOT_ROUTES.has(n))
-  .map((n) => n.replace(/\.(tsx?|ico|png|svg|txt)$/, (ext) => (ext === ".ico" || ext === ".txt" ? ext : "")))
+  // A route file ("route.ts", "page.tsx") names its folder; image and text files are served under their own name.
+  .map((n) => n.replace(/\.tsx?$/, ""))
   // Route groups "(x)" and private folders "_x" don't create URL segments.
   .filter((n) => !/^\(.*\)$/.test(n) && !n.startsWith("_"));
 
