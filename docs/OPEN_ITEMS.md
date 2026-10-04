@@ -7,7 +7,7 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 
 | # | Item | Raised | Blocks |
 |---|---|---|---|
-| 8 | **Production database.** Create a second Supabase project (recommended, us-east-2) or say if you want Neon. Put its two connection strings in `.env.production.local`; then I run the migrations (`MIGRATE_PRODUCTION=yes`). | 2026-10-04 | Production data; launch |
+| 8 | **Move the database settings** (production is now the existing Supabase project; dev is local Postgres). Create `.env.production.local` holding your current `DATABASE_URL` and `DATABASE_URL_UNPOOLED` lines; then in `.env.local` set both to `postgresql://localhost:5432/agent479_dev`. Until then every local script and test refuses to run, by design. | 2026-10-04 | All local work |
 | 9 | **Vercel env vars.** Run `npx vercel login` and `npx vercel link` once, then approve the list in the 479 Guide report. Until `SITE_PREVIEW_USER`/`SITE_PREVIEW_PASSWORD` are set, the locked site returns 503 to everyone. | 2026-10-04 | Previewing the site |
 | 10 | **`.env.local`:** set `SITE_URL=https://479.guide` and `BOT_CONTACT_EMAIL=bot@479.guide`. Local fetches refuse to run until then. | 2026-10-04 | Local fetches, test fetches |
 | 11 | **Step 14 approval** (series detection), on branch `step-14-series`, plus the step 13 follow-up decisions on the same branch. | 2026-10-04 | Merging to main |
@@ -25,3 +25,4 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 - Free default: no source states one; `default_price_note` stays null (2026-10-04).
 - The Ramble typed `area` (2026-10-04).
 - Step 13 approved and merged (2026-10-04).
+- Production database: keep the existing Supabase project as production; development on local Postgres (2026-10-04).
