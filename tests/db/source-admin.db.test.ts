@@ -165,7 +165,8 @@ describe("purgeDescriptions", () => {
         row("open-stale", { descriptionPurgeAfter: null, fetchedAt: new Date("2026-11-01T00:00:00Z") }),
         row("open-fresh", { descriptionPurgeAfter: null, fetchedAt: new Date("2026-12-10T00:00:00Z") }),
       ]);
-      expect(await purgeDescriptions(tx, now)).toBe(2);
+      // The count can include real rows due by then (rolled back): check this source's rows.
+      expect(await purgeDescriptions(tx, now)).toBeGreaterThanOrEqual(2);
       const left = await tx
         .select({ externalId: rawRecords.externalId, d: rawRecords.descriptionText })
         .from(rawRecords)

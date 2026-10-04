@@ -39,7 +39,10 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     kind: "api",
     fetcher: "ticketmaster",
     baseUrl: "https://app.ticketmaster.com/discovery/v2/",
-    config: {},
+    // Centered between Springdale and Rogers; 40 miles reaches Bella Vista,
+    // Siloam Springs, Eureka Springs, and Prairie Grove. Venues outside NWA are
+    // dropped later, when no venue matches. 1,000 results max per query.
+    config: { center: { lat: 36.25, lng: -94.15 }, radiusMiles: 40, windowDays: 180, pageSize: 200 },
     defaultVenueSlug: null,
     trustLevel: 4,
     fetchIntervalMinutes: 6 * 60,

@@ -533,7 +533,14 @@ See `.env.example`. Model names are deliberately not env vars.
    step 10. Owner decisions on descriptions, logging, blocks, and test fetches
    are in AGENTS.md.
 10. **Ticketmaster fetcher** with the facts-only whitelist and a venue
-    coverage report.
+    coverage report. *Built; waiting on `TICKETMASTER_API_KEY` for the live
+    test fetch and the coverage report.* Discovery API v2, 40 miles around
+    NWA, 180 days, 200 per page up to the API's 1,000-result limit. The
+    payload is built from a whitelist (no images, info, pleaseNote, promoter
+    text, or descriptions). API keys are redacted from every stored URL and
+    error. The maintenance job purges payloads not seen for 30 days.
+    `npm run tm:venues` writes the coverage report; links are written only
+    after the owner approves them.
 11. **Momentary and Crystal Bridges fetchers:** gated on written permission.
     Skipped until it arrives, and not built speculatively.
 12. **Events tables:** `events`, `event_sources`, `event_tags`. Mappers and

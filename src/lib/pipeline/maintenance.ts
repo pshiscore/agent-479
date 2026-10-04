@@ -7,8 +7,9 @@ import { finishRun } from "@/lib/runs";
 /**
  * The daily maintenance job. So far it purges source descriptions (AGENTS.md
  * rule 4): 30 days after the event ends, or, for an open-ended series, 30 days
- * after the item was last seen in its feed. Counts go in runs.stats. Later
- * steps add the dedup sweep, payload purge, and source health checks.
+ * after the item was last seen in its feed; and raw payloads not seen for 30
+ * days. Counts go in runs.stats. Later steps add the dedup sweep and source
+ * health checks.
  */
 
 export async function purgeDescriptions(db: DbExecutor, now: Date): Promise<number> {
@@ -25,6 +26,25 @@ export async function purgeDescriptions(db: DbExecutor, now: Date): Promise<numb
   return purged.length;
 }
 
+/**
+ * Raw payloads (and any description) for items no fetch has seen in 30 days
+ * are purged: storage "only for reasonable periods" (Ticketmaster's terms;
+ * plan section 3). If an item comes back, the fetch stores it again.
+ */
+export async function purgeStalePayloads(db: DbExecutor, now: Date): Promise<number> {
+  const purged = await db
+    .update(rawRecords)
+    .set({ payload: null, descriptionText: null })
+    .where(
+      and(
+        isNotNull(rawRecords.payload),
+        sql`${rawRecords.fetchedAt} <= ${now.toISOString()}::timestamptz - interval '30 days'`,
+      ),
+    )
+    .returning({ id: rawRecords.id });
+  return purged.length;
+}
+
 /** Returns null if another maintenance job holds the lease. */
 export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date } = {}) {
   const now = opts.now ?? new Date();
@@ -32,7 +52,8 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date } = {
   if (!claim) return null;
   try {
     const descriptionsPurged = await purgeDescriptions(db, now);
-    const stats = { descriptionsPurged };
+    const payloadsPurged = await purgeStalePayloads(db, now);
+    const stats = { descriptionsPurged, payloadsPurged };
     await finishRun(db, claim.id, { status: "ok", stats });
     return stats;
   } catch (err) {

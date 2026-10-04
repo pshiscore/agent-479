@@ -1,4 +1,5 @@
 import { botFetch, FetchBlockedError } from "@/lib/http/fetch";
+import { redactUrl } from "@/lib/http/redact";
 import { isAllowed, parseRobots, type RobotsRules } from "@/lib/http/robots";
 
 /**
@@ -11,16 +12,20 @@ import { isAllowed, parseRobots, type RobotsRules } from "@/lib/http/robots";
  */
 
 export class FetchFailedError extends Error {
+  readonly url: string;
   constructor(
-    readonly url: string,
+    url: string,
     readonly reason: string,
   ) {
-    super(`Fetch failed for ${url}: ${reason}`);
+    const safe = redactUrl(url);
+    super(`Fetch failed for ${safe}: ${reason}`);
     this.name = "FetchFailedError";
+    this.url = safe;
   }
 }
 
 export interface PoliteResponse {
+  // Final URL after redirects, with any API key redacted: safe to store.
   url: string;
   status: number;
   contentType: string | null;
@@ -82,7 +87,7 @@ export class PoliteClient {
       }
       if (!res.ok) throw new FetchFailedError(String(current), `HTTP ${res.status}`);
       return {
-        url: String(current),
+        url: redactUrl(current),
         status: res.status,
         contentType: res.headers.get("content-type"),
         text: await readCapped(res, this.opts.maxBytes, String(current)),

@@ -24,7 +24,8 @@
     "db:seed:taxonomy": "tsx scripts/seed-taxonomy.ts",
     "fetch:once": "tsx scripts/fetch-once.ts",
     "sources": "tsx scripts/sources.ts",
-    "maintenance:once": "tsx scripts/maintenance-once.ts"
+    "maintenance:once": "tsx scripts/maintenance-once.ts",
+    "tm:venues": "tsx scripts/ticketmaster-venues.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

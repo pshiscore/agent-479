@@ -1,5 +1,6 @@
 import { botUserAgent } from "@/lib/bot-identity";
 import { isWithinDomain } from "./domain";
+import { redactUrl } from "./redact";
 
 /**
  * The only way this codebase makes outbound requests (enforced by ESLint).
@@ -17,18 +18,20 @@ import { isWithinDomain } from "./domain";
 export const BLOCK_STATUSES = new Set([401, 403, 406, 429, 451]);
 
 export class FetchBlockedError extends Error {
+  readonly url: string;
   constructor(
-    readonly url: string,
+    url: string,
     readonly reason: string,
   ) {
     super(`Blocked by ${new URL(url).host}: ${reason}. Stop; don't retry another way. Record it and ask the owner.`);
     this.name = "FetchBlockedError";
+    this.url = redactUrl(url);
   }
 }
 
 /**
  * Domains we never fetch from, for any reason, until written permission
- * arrives (CLAUDE.md). Displaying links to them is fine; fetching isn't.
+ * arrives (AGENTS.md). Displaying links to them is fine; fetching isn't.
  * Remove a domain here only together with its source's terms_notes update.
  */
 export const UNPERMITTED_DOMAINS = [
@@ -41,9 +44,11 @@ export const UNPERMITTED_DOMAINS = [
 
 /** Our own rule refused the request before it was sent. */
 export class FetchNotPermittedError extends Error {
-  constructor(readonly url: string) {
-    super(`Not permitted: ${new URL(url).host} is awaiting permission (CLAUDE.md). Nothing was sent.`);
+  readonly url: string;
+  constructor(url: string) {
+    super(`Not permitted: ${new URL(url).host} is awaiting permission (AGENTS.md). Nothing was sent.`);
     this.name = "FetchNotPermittedError";
+    this.url = redactUrl(url);
   }
 }
 

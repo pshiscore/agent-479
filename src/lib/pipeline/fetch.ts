@@ -63,7 +63,12 @@ export async function storeItems(db: DbExecutor, source: SourceRow, runId: strin
   if (items.length === 0) return stats;
   await db.transaction(async (tx) => {
     const existing = await tx
-      .select({ id: rawRecords.id, externalId: rawRecords.externalId, contentHash: rawRecords.contentHash })
+      .select({
+        id: rawRecords.id,
+        externalId: rawRecords.externalId,
+        contentHash: rawRecords.contentHash,
+        purged: sql<boolean>`${rawRecords.payload} is null`,
+      })
       .from(rawRecords)
       .where(and(eq(rawRecords.sourceId, source.id), inArray(rawRecords.externalId, items.map((i) => i.externalId))));
     const byExternal = new Map(existing.map((r) => [r.externalId, r]));
@@ -85,7 +90,7 @@ export async function storeItems(db: DbExecutor, source: SourceRow, runId: strin
           descriptionPurgeAfter: item.descriptionPurgeAfter,
           fetchedAt: now,
         });
-      } else if (prior.contentHash === contentHash) {
+      } else if (prior.contentHash === contentHash && !prior.purged) {
         unchangedIds.push(prior.id);
       } else {
         await tx
