@@ -21,16 +21,23 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
 ## A2. Chosen layout (owner, 2026-10-04: option 2 of the mockups)
 
 - **Header:** the 479 Guide wordmark; This weekend, Upcoming, Venues, Lists;
-  a search box; a "Get the Friday digest" button.
+  a search box. (No digest sign-up button: email delivery is for later.)
+- **Friday digest hero banner** (owner, 2026-10-04): the digest is posted
+  every Friday morning and shown as a hero banner at the top of the front
+  page, with a short summary of the weekend (for example how many events, a
+  few highlights by rule) and a link to the full digest. Email sign-up and
+  delivery come later.
 - **Filter bar** under the header: City, Category, Free, Family-friendly,
   21+, En español, and "Show recurring".
 - **Main column:** "This weekend" as a day-by-day timeline (a dot and line
   per day; time, title, venue and city links, category and up to 3 tags,
   "More info", and an interested star).
 - **Right column:** the Feature card (date, title, venue and city, tags,
-  "More info", "Get tickets"); Lists (name and count); the Friday digest
-  sign-up.
-- **Full width below:** What's new (section H), "At the library this week",
+  "More info", "Get tickets"); Lists (name and count); What's new (at most 5
+  items and a "See all new places" link to /new). Without a right column,
+  What's new goes directly after "This weekend"; on phones it follows the
+  weekend list.
+- **Full width below:** "At the library this week",
   "Further out" (date, title, time, venue, and a "See all upcoming" link to
   the full Upcoming view), then the footer ("479 Guide lists events from
   public sources across Northwest Arkansas. Summaries are generated from
@@ -55,8 +62,8 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
    "Family-friendly this week", and "New venues". No taste-based rankings.
 5. **At the library this week:** a collapsed shelf, so library programs don't
    crowd out everything else.
-6. **What's new:** factual cards for places that just opened (section H),
-   with a link to the longer "What's new" view.
+6. **What's new:** factual cards for places that just opened or are about
+   to (section H), in the right column under Lists, with a link to /new.
 7. **Upcoming:** all events by day, filterable by city, category, tag, and
    venue type.
    - Recurring events are hidden by default and shown as series rows
@@ -179,19 +186,25 @@ openings over a longer period.
   chamber of commerce ribbon-cutting calendars, city and downtown
   association announcements, and tourism sites' "new" listings. News sites
   are out unless their terms allow it.
-- **Homepage card:** openings from the last 30 days (newest first, a few at
-  most). **"What's new" view** (`/new`): openings from the last 90 days,
-  filterable by city and kind. The section hides when there's nothing new.
+- **Windows (owner, 2026-10-04):** 30 days on the homepage, 90 days on
+  `/new`, both counted from the opening date, not the date we found it.
+  The homepage shows at most 5 items; `/new` filters by city and kind. The
+  section hides when there's nothing new.
+- **"Opening soon" and "Now open" are kept separate:**
+  - "Opening soon" only when a source states a target date or month, shown
+    as the source states it ("Opening in November").
+  - An item moves to "Now open" only when a source confirms the opening; the
+    change is logged with its source.
+  - If a stated opening date passes by 30 days with no confirmation, the item
+    is hidden and flagged for a re-check. Stale "opening soon" items never
+    stay up.
 - **A new venue that hosts events** also appears in the "New venues" list
   (section B4) once it's in our venues.
 
 ## G. Open questions for later
 
-- **What's new windows:** 30 days on the homepage and 90 in the full view
-  are starting values; confirm them, and whether "opening soon"
-  announcements belong too.
-- **Friday digest sign-up** (in the chosen layout): which email provider, and
-  where subscriber addresses are stored. Nothing collects emails yet.
+- **Digest by email** (later): which email provider, and where subscriber
+  addresses are stored. Nothing collects emails yet.
 - **Embedded map** on the event page: which provider, and is it worth the
   cost and the third-party requests? For now the page has a "Directions" link
   only.
