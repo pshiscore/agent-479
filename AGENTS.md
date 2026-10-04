@@ -145,6 +145,17 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   Census geocoder, then tourism listings, then Wikipedia. An owner-verified
   record confirms what a page says, not that the page is right, so it carries
   the rank of the page it came from.
+- **Code owns the "Free" and "21+" tags.** They come from the price and age
+  facts (structured prices first, then what extraction found in the source's
+  description); the classifier never chooses them, so a tag can't contradict
+  `events.is_free`.
+- **Events are written only by the enrich stage**, from a mapped record with a
+  resolved venue and a classified category, logged row by row with the model
+  and LLM call ids. A generated description that still reuses source wording
+  after one retry is held: the event is written without one, with a logged
+  `hold`.
+- **Eval fixtures never contain source text.** They use real facts (titles,
+  venues) with descriptions written for the fixture.
 - **Notes are facts in our own words.** No phrasing copied from sources; a
   fact stated in a note cites its source (`verification.notes`).
 - **ZIP codes:** fill a missing ZIP from the Census geocoder's match and cite

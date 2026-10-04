@@ -5,7 +5,10 @@
  * With --reprocess, records not yet turned into events go back to pending
  * first (after a mapper or resolver fix); the reset is its own run in runs.
  *
- * Usage: npm run process:once [-- --all] [-- --no-llm] [-- --reprocess]
+ * --enrich N enriches up to N mapped records per batch (default 20);
+ * --no-enrich maps and resolves only.
+ *
+ * Usage: npm run process:once [-- --all] [-- --no-llm] [-- --reprocess] [-- --enrich N | --no-enrich]
  */
 import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local", quiet: true });
@@ -22,6 +25,8 @@ const { values: args } = parseArgs({
     all: { type: "boolean", default: false },
     "no-llm": { type: "boolean", default: false },
     reprocess: { type: "boolean", default: false },
+    enrich: { type: "string" },
+    "no-enrich": { type: "boolean", default: false },
   },
 });
 
@@ -40,13 +45,15 @@ async function main() {
       console.log(reset);
     }
     for (let i = 0; i < 100; i++) {
-      const stats = await runProcessJob(db, { llmPick: args["no-llm"] ? null : undefined });
+      const enrichBatchSize = args["no-enrich"] ? 0 : args.enrich ? Number(args.enrich) : undefined;
+      const stats = await runProcessJob(db, { llmPick: args["no-llm"] ? null : undefined, enrichBatchSize });
       if (!stats) {
         console.log("Another process job holds the lease; nothing done.");
         return;
       }
       console.log(stats);
-      if (!args.all || stats.remaining === 0 || stats.batch === 0 || stats.stoppedForBudget) return;
+      const done = stats.remaining === 0 && (args["no-enrich"] || stats.toEnrichLeft === 0);
+      if (!args.all || done || stats.stoppedForBudget || (stats.batch === 0 && args["no-enrich"])) return;
     }
   } finally {
     await db.$client.end({ timeout: 5 });

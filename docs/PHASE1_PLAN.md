@@ -563,7 +563,13 @@ See `.env.example`. Model names are deliberately not env vars.
     trigram, then an LLM pick among candidates. First full run: 545 mapped,
     40 needs_venue, 4 skipped, 0 failed, 0 LLM calls.
 13. **LLM extract, classify, and describe,** including the Community hint,
-    injection fixtures, and the eval script.
+    injection fixtures, and the eval script. *Built, awaiting owner approval.*
+    Enrich stage in the process job: extract (from the source description,
+    values only), classify (enums from active rows; Community needs a hint),
+    code-set Free and 21+ tags, describe from facts only (8-word check, one
+    retry, then hold), then write the event logged row by row. `npm run
+    eval:extract`: 22/22 on the labeled set, 4/4 injection fixtures resisted.
+    First full run: 545 events, 0 held, 0 failed, about $0.13.
 14. **Series detection and labels.**
 15. **Dedup engine in shadow mode,** with `dedup_candidates` and `dedup_labels`.
 16. **Admin:** Basic Auth in `src/proxy.ts`, then `/admin/agent-log` with

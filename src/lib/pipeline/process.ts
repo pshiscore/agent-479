@@ -3,8 +3,11 @@ import { agentActor } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources } from "@/lib/db/schema";
 import { claimJob } from "@/lib/jobs";
-import { LlmError } from "@/lib/llm";
+import { loadActiveTaxonomy } from "@/lib/categories";
+import { generateStructured, LlmError } from "@/lib/llm";
 import { finishRun } from "@/lib/runs";
+import { enrichRecord } from "./enrich";
+import type { Generate } from "./enrich/types";
 import { exclusionReason } from "./exclude";
 import { MapError, mapRecord, SkipRecord } from "./map";
 import { locationKey } from "./map/location";
@@ -15,7 +18,8 @@ import { proposeVenues } from "./venue-proposals";
  * The process stage (build step 12): map each pending raw record to facts,
  * drop the ones we don't list, and find its venue. Each record ends mapped,
  * needs_venue, skipped, or failed; counts go in runs.stats. Events are written
- * after classification (build step 13), never for needs_venue records.
+ * from mapped records by the enrich stage (build step 13), never for
+ * needs_venue records.
  */
 
 export type Outcome = "mapped" | "needs_venue" | "skipped" | "failed";
@@ -63,7 +67,7 @@ export async function processRecord(
 
 export async function runProcessJob(
   db: DbExecutor,
-  opts: { now?: Date; batchSize?: number; llmPick?: LlmVenuePick | null } = {},
+  opts: { now?: Date; batchSize?: number; llmPick?: LlmVenuePick | null; enrichBatchSize?: number; generate?: Generate } = {},
 ) {
   const now = opts.now ?? new Date();
   const claim = await claimJob(db, "process", { now });
@@ -102,12 +106,49 @@ export async function runProcessJob(
         throw err;
       }
     }
+    // Enrich mapped records into events, soonest first (build step 13).
+    const enrichLimit = opts.enrichBatchSize ?? 20;
+    if (!stoppedForBudget && enrichLimit > 0) {
+      const toEnrich = await db
+        .select()
+        .from(rawRecords)
+        .where(eq(rawRecords.status, "mapped"))
+        .orderBy(sql`${rawRecords.facts}->>'startAt'`)
+        .limit(enrichLimit);
+      if (toEnrich.length) {
+        const taxonomy = await loadActiveTaxonomy(db);
+        const generate = opts.generate ?? (((req) => generateStructured(req, { db })) as Generate);
+        for (const record of toEnrich) {
+          try {
+            const r = await enrichRecord(db, record, { generate, taxonomy, runId: claim.id });
+            bump(r.created ? "events_created" : "events_updated");
+            if (r.held) bump("descriptions_held");
+          } catch (err) {
+            if (err instanceof LlmError) {
+              bump(`enrich_llm_${err.code}`);
+              stoppedForBudget = err.code === "budget_exceeded";
+              if (stoppedForBudget) break;
+              continue;
+            }
+            bump("enrich_failed");
+            await db
+              .update(rawRecords)
+              .set({ lastError: `enrich: ${(err instanceof Error ? err.message : String(err)).slice(0, 1900)}` })
+              .where(eq(rawRecords.id, record.id));
+          }
+        }
+      }
+    }
     const proposals = await proposeVenues(db, { actor: ACTOR, runId: claim.id });
     const [{ remaining }] = await db
       .select({ remaining: sql<number>`count(*)::int` })
       .from(rawRecords)
       .where(and(eq(rawRecords.status, "pending"), isNotNull(rawRecords.payload)));
-    const stats = { batch: batch.length, ...counts, venueProposals: proposals.proposed, remaining, stoppedForBudget };
+    const [{ toEnrichLeft }] = await db
+      .select({ toEnrichLeft: sql<number>`count(*)::int` })
+      .from(rawRecords)
+      .where(eq(rawRecords.status, "mapped"));
+    const stats = { batch: batch.length, ...counts, venueProposals: proposals.proposed, remaining, toEnrichLeft, stoppedForBudget };
     await finishRun(db, claim.id, { status: stoppedForBudget ? "partial" : "ok", stats });
     return stats;
   } catch (err) {

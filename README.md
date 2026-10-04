@@ -47,7 +47,8 @@ npm run dev                  # http://localhost:3000
 | `npm run sources -- <command>` | `test-fetch <slug> [--enable]` (untested sources only), `enable`/`disable`/`permission <slug> --reason "..."`, `status` (all logged) |
 | `npm run fetch:once` | Run the fetch job once, as the cron route does |
 | `npm run maintenance:once` | Run the maintenance job once (purges expired source descriptions) |
-| `npm run process:once [-- --all] [-- --reprocess]` | Run the process job (map, exclude, resolve venues) as the cron route does |
+| `npm run process:once [-- --all] [-- --reprocess] [-- --enrich N \| --no-enrich]` | Run the process job (map, exclude, resolve venues, enrich into events) as the cron route does |
+| `npm run eval:extract` | Live eval: classification accuracy and injection resistance on committed fixtures (a few cents) |
 | `npm run tm:venues [-- --link <tmVenueId>=<slug> --reason "..."]` | Ticketmaster venue coverage report (`data/ticketmaster-venues.md`); link approved venues (logged) |
 
 ## Cron jobs
