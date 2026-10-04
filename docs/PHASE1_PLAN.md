@@ -606,9 +606,9 @@ See `.env.example`. Model names are deliberately not env vars.
     merged-away record only refreshes its source row. First shadow run on the
     545 events: 498 pairs, 497 distinct, 1 uncertain (Yoga @ FPL listed in two
     rooms at once), 36 tiebreak calls, $0.002.
-16. **Admin:** Basic Auth in `src/proxy.ts`, then `/admin/agent-log` with
+16. ✅ **Admin:** Basic Auth in `src/proxy.ts`, then `/admin/agent-log` with
     diffs, rollback, venue proposal approve and reject, and Community stats.
-    *Built, awaiting owner approval.* Basic Auth in `src/proxy.ts` (built
+    *Approved and merged 2026-10-04.* Basic Auth in `src/proxy.ts` (built
     with the site lock), re-checked in every admin page and Server Action
     (`requireAdmin`). `/admin`: upcoming events, needs_venue count and
     locations, pending proposals, LLM spend, Community's 7-day share and top
@@ -643,3 +643,5 @@ See `.env.example`. Model names are deliberately not env vars.
     banner.
 22. **Maintenance cron:** source health and cost totals.
 23. **Pre-deploy checklist, production deploy, crons on, one-week burn-in.**
+    *Crons turned on early (owner, 2026-10-04, after step 16): fetch,
+    process, and maintenance run in production while the site stays locked.*

@@ -7,7 +7,6 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 
 | # | Item | Raised | Blocks |
 |---|---|---|---|
-| 14 | **Step 16 approval** (admin pages), branch `step-16-admin`. No migration needed. After it merges, decide the 2 pending proposals at https://479.guide/admin/proposals. | 2026-10-04 | Merging step 16; turning crons on |
 | 8 | **`.env.local` (optional):** `.env.production.local` now exists (a copy, made 2026-10-04). Local scripts and tests still refuse the production database by design; point `.env.local` at `postgresql://localhost:5432/agent479_dev` whenever you want to run them yourself. | 2026-10-04 | Running local scripts yourself |
 | 9 | **Vercel env vars.** Run `npx vercel login` and `npx vercel link` once, then approve the list in the 479 Guide report. Until `SITE_PREVIEW_USER`/`SITE_PREVIEW_PASSWORD` are set, the locked site returns 503 to everyone. | 2026-10-04 | Previewing the site |
 | 10 | **`.env.local`:** set `SITE_URL=https://479.guide` and `BOT_CONTACT_EMAIL=bot@479.guide`. Local fetches refuse to run until then. | 2026-10-04 | Local fetches, test fetches |
@@ -26,5 +25,6 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 - The Ramble typed `area` (2026-10-04).
 - Step 13 approved and merged (2026-10-04).
 - Step 14 approved and merged (2026-10-04).
+- Step 16 approved and merged; crons on in production (2026-10-04).
 - Step 15 approved and merged; migration 0016 applied to production (2026-10-04).
 - Production database: keep the existing Supabase project as production; development on local Postgres (2026-10-04).

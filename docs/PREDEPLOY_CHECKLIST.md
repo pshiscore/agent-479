@@ -84,10 +84,14 @@ marked (every deploy) each time.
 
 ## Jobs
 
-- [ ] `CRON_ENABLED=false` in Production until launch. Every cron route
+- [x] Crons on early (owner, 2026-10-04, Vercel Pro), before launch, so data
+      stays fresh while the site is still locked: `CRON_ENABLED=true`.
+      Previously: `CRON_ENABLED=false` in Production until launch. Every cron route
       answers "disabled" and runs nothing unless it's exactly `true`.
-- [ ] `vercel.json` crons match plan section 7 (today: none defined).
-- [ ] `/api/cron/maintenance` is scheduled daily. It is the only thing that
+- [x] `vercel.json` has fetch (every 15 min), process (every 15 min, offset
+      5), and maintenance (09:00 UTC) from plan section 7. The digest crons
+      come with steps 20 and 21.
+- [x] `/api/cron/maintenance` is scheduled daily. It is the only thing that
       purges stored source descriptions (AGENTS.md rule 4).
 - [ ] Each cron route rejects requests without the bearer secret (checked
       manually).
