@@ -82,6 +82,40 @@ imports it.
     (`agent479_dev`); production is migrated only with
     `MIGRATE_PRODUCTION=yes`.
 
+## Product references
+
+- **Front page and event experience:** `docs/product/front-page.md` (design
+  direction, front page sections, event card and page, tags, search, and
+  follows). Read it before building the homepage (step 18), the event page
+  (step 19), stories, or feeds.
+
+## Content rules (no editorial)
+
+These govern all generated text: descriptions, digests, stories, and
+anything else the model writes for readers. They're copied from section E of
+`docs/product/front-page.md`.
+
+- **We report what is out there.** No opinions, reviews, taste-based
+  recommendations, or rankings ("best", "must-see", "don't miss").
+- **Voice is allowed; evaluative claims are not.** The friendly digest
+  format, emoji, and puns are fine.
+- **Facts only from our records or a cited, permitted source.** Generated
+  text may state nothing else: no background facts from the model's own
+  knowledge (artist bios, awards, chart history, "Grammy-winning").
+- **Generated text is labeled.** Every generated story and summary shows its
+  sources and when it was generated, and is labeled as generated from public
+  listings.
+- **"Noteworthy" is decided by rules, never judgment.** Starting rules: newly
+  announced in the last 7 days; the first appearance of a performer or event
+  in our data; a returning annual event; a large-venue show (by venue
+  capacity tier); a high interest count. Rules and weights live in config,
+  and each feature choice is logged with the rule that selected it.
+- **Stories about real people stick to event facts:** who is performing,
+  where, when, and tickets.
+- **Images:** only from sources whose terms permit display, with the
+  permission recorded per source. Never take images from venue or artist
+  websites without permission.
+
 ## Fetching
 
 These apply to research and one-off scripts as well as to the app and pipeline.
