@@ -27,6 +27,8 @@ export const AGENT_ACTIONS = [
   "propose_category",
   // A needs_venue record whose detail page or text names a place we know.
   "propose_venue_match",
+  // An acronym expansion for the content glossary (src/config/glossary.ts).
+  "propose_glossary",
   "publish",
   "hold",
   "veto",

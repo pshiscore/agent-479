@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contentIssues, evaluativeTerms, ungrounded } from "./checks";
+import { contentIssues, evaluativeTerms, groundedExpansions, ungrounded, unknownExpansions } from "./checks";
 
 describe("evaluativeTerms", () => {
   it("flags evaluative words in our text, however hyphenated or apostrophized", () => {
@@ -41,5 +41,27 @@ describe("contentIssues", () => {
       evaluative: ["incredible"],
       ungrounded: ["Rolling", "Stones"],
     });
+  });
+});
+
+describe("glossary", () => {
+  const esl = "ESL for Beginner, Intermediate & Advanced Levels *";
+  it("grounds an expansion only when the acronym is in that event's facts", () => {
+    expect(ungrounded("Learn English in a class suited to your level.", esl)).toEqual([]);
+    expect(ungrounded("Attend an English as a Second Language class.", esl)).toEqual([]);
+    expect(ungrounded("An English-language class.", esl)).toEqual([]);
+    // No ESL in the facts: "English" is the model's own addition.
+    expect(ungrounded("Sing along in English.", "Choir Practice")).toEqual(["English"]);
+    // Lowercase "esl" in a URL or word isn't the acronym.
+    expect(groundedExpansions("https://example.org/esl-class")).toEqual([]);
+  });
+  it("finds expansions the glossary doesn't have, for the owner to approve", () => {
+    expect(unknownExpansions("Prepare for the Test of English as a Foreign Language exam.", "TOEFL Prep")).toEqual([
+      { acronym: "TOEFL", expansion: "Test of English as a Foreign Language" },
+    ]);
+    expect(unknownExpansions("Attend an English as a Second Language class.", "ESL Class")).toEqual([]);
+    expect(unknownExpansions("A class for everyone.", "TOEFL Prep")).toEqual([]);
+    // Already grounded by the venue's name: nothing to propose.
+    expect(unknownExpansions("Yoga at Fayetteville Public Library.", "Yoga @ FPL | Event Center, Fayetteville Public Library")).toEqual([]);
   });
 });

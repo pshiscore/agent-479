@@ -1,0 +1,2 @@
+ALTER TABLE "agent_actions" DROP CONSTRAINT "agent_actions_action_check";--> statement-breakpoint
+ALTER TABLE "agent_actions" ADD CONSTRAINT "agent_actions_action_check" CHECK (action in ('insert', 'update', 'merge', 'unmerge', 'disable', 'enable', 'propose_venue', 'propose_link', 'propose_category', 'propose_venue_match', 'propose_glossary', 'publish', 'hold', 'veto', 'recheck_drop', 'recheck_correct', 'rollback'));

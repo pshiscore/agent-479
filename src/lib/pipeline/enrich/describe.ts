@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { contentIssues, describeIssues } from "@/lib/text/checks";
+import type { GlossaryEntry } from "@/config/glossary";
+import { contentIssues, describeIssues, unknownExpansions } from "@/lib/text/checks";
 import { checkOriginalWording } from "@/lib/text/overlap";
 import type { Generate } from "./types";
 
@@ -43,8 +44,8 @@ export interface DescribeFacts {
 }
 
 export type DescribeResult =
-  | { status: "ok"; description: string; usedFacts: AddedFact[]; callId: string; model: string; attempts: number }
-  | { status: "held"; problem: string; callId: string; model: string; attempts: number }
+  | { status: "ok"; description: string; usedFacts: AddedFact[]; callId: string; model: string; attempts: number; glossaryCandidates: GlossaryEntry[] }
+  | { status: "held"; problem: string; callId: string; model: string; attempts: number; glossaryCandidates: GlossaryEntry[] }
   | { status: "none"; reason: string; callId: string | null; model: string | null; attempts: number };
 
 const norm = (s: string) =>
@@ -159,6 +160,8 @@ export async function describeEvent(
   let last: { callId: string; model: string } | null = null;
   let problem = "";
   const checkFacts = factsForChecks(facts);
+  // Expansions of the event's acronyms that the glossary doesn't have yet, from any draft.
+  const candidates = new Map<string, GlossaryEntry>();
   for (let attempt = 1; attempt <= 2; attempt++) {
     const result = await generate({
       task: "describe",
@@ -187,10 +190,11 @@ export async function describeEvent(
     if (!description || verified.length === 0) {
       return { status: "none", reason: "the model added no checkable fact", ...last, attempts: attempt };
     }
+    for (const c of unknownExpansions(description, checkFacts.text)) candidates.set(`${c.acronym}|${c.expansion.toLowerCase()}`, c);
     const wording = checkOriginalWording(description, sourceDescription);
     const issues = contentIssues(description, checkFacts);
-    if (wording.ok && !issues) return { status: "ok", description, usedFacts: verified, ...last, attempts: attempt };
+    if (wording.ok && !issues) return { status: "ok", description, usedFacts: verified, ...last, attempts: attempt, glossaryCandidates: [...candidates.values()] };
     problem = [wording.ok ? null : `shares "${wording.sharedRun ?? ""}" with the source`, issues ? describeIssues(issues) : null].filter(Boolean).join("; ");
   }
-  return { status: "held", problem, ...last!, attempts: 2 };
+  return { status: "held", problem, ...last!, attempts: 2, glossaryCandidates: [...candidates.values()] };
 }

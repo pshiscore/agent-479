@@ -68,6 +68,8 @@ export async function decideProposal(db: DbExecutor, proposalId: string, decisio
         }
       } else if (p.action === "propose_venue") {
         effect = "recorded: add the venue through the venue seed and sign-off";
+      } else if (p.action === "propose_glossary") {
+        effect = "recorded: add the entry to src/config/glossary.ts";
       } else if (p.action === "propose_category") {
         effect = "recorded: add the category in the taxonomy seed";
       }

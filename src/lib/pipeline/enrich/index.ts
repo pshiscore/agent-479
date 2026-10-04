@@ -12,6 +12,7 @@ import { classifyEvent } from "./classify";
 import { describeEvent, newAges, newPerformers } from "./describe";
 import { type Extraction, extractFacts } from "./extract";
 import { decideFree } from "./free";
+import { proposeGlossaryEntries } from "./glossary-proposals";
 import type { Generate } from "./types";
 
 /**
@@ -152,6 +153,9 @@ export async function enrichRecord(
       meta,
     },
   );
+  if (described.status !== "none" && described.glossaryCandidates.length) {
+    await proposeGlossaryEntries(db, described.glossaryCandidates, { actor: ACTOR, runId: deps.runId, eventTitle: facts.title });
+  }
   if (described.status === "held") {
     await recordAction(db, {
       runId: deps.runId,

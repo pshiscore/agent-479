@@ -143,7 +143,6 @@ export const events = pgTable(
     ),
     check("events_canonical_check", sql.raw(`canonical_event_id is null or canonical_event_id <> id`)),
     // Free and its basis go together (coalesce: NULL must not slip through).
-    check("events_description_generated_check", sql.raw(`(short_description is null) = (description_generated_at is null)`)),
     check("events_free_basis_check", sql.raw(`coalesce(is_free, false) = (free_basis is not null)`)),
     check(
       "events_free_basis_value_check",

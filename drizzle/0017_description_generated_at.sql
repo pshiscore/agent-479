@@ -6,5 +6,7 @@ UPDATE "events" e SET "description_generated_at" = coalesce(
     WHERE a.entity_type = 'event' AND a.entity_id = e.id AND a.action IN ('insert', 'update')
       AND a.after->>'shortDescription' = e.short_description),
   e.updated_at)
-WHERE e.short_description IS NOT NULL;--> statement-breakpoint
-ALTER TABLE "events" ADD CONSTRAINT "events_description_generated_check" CHECK ((short_description is null) = (description_generated_at is null));
+WHERE e.short_description IS NOT NULL;
+-- The check that ties the two together is added in 0019, after the code that
+-- sets description_generated_at is deployed (the code deployed before it
+-- writes descriptions without the timestamp).

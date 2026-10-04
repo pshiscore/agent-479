@@ -11,6 +11,7 @@ const WHAT_APPROVING_DOES: Record<string, string> = {
   propose_venue_match: "Approving pins this venue on the listing; the event is written on the next process run.",
   propose_venue: "Approving records your decision. The venue itself is added through the venue seed and sign-off.",
   propose_category: "Approving records your decision. The category is added in the taxonomy seed.",
+  propose_glossary: "Approving records your decision. The expansion is then added to the glossary config, so it counts as a fact for events with that acronym.",
 };
 
 const show = (v: unknown) => (typeof v === "string" ? v : JSON.stringify(v));

@@ -1,4 +1,5 @@
 import { EVALUATIVE_TERMS } from "@/config/content-rules";
+import { GLOSSARY, type GlossaryEntry } from "@/config/glossary";
 
 /**
  * Checks on text the model writes for readers (AGENTS.md, "Content rules").
@@ -52,8 +53,60 @@ const words = (s: string) => fold(s).split(/[^a-z0-9+]+/).filter(Boolean);
  * count: without a dictionary, "Grammy-winning" at the very start of a
  * sentence looks like any sentence opener). Numbers count as written in digits.
  */
-export function ungrounded(text: string, facts: string): string[] {
-  const known = new Set(words(facts));
+/** Acronyms written in capitals, as whole words, in the given text. */
+const acronymsIn = (s: string) => new Set(s.match(/\b[A-Z]{2,6}\b/g) ?? []);
+
+/** Glossary expansions whose acronym appears in the facts: their words count as known. */
+export function groundedExpansions(facts: string, glossary: readonly GlossaryEntry[] = GLOSSARY): GlossaryEntry[] {
+  const present = acronymsIn(facts);
+  return glossary.filter((g) => present.has(g.acronym));
+}
+
+const SMALL_WORDS = new Set(["a", "an", "as", "of", "the", "and", "for", "in", "on", "to", "with"]);
+
+/**
+ * Phrases in `text` that spell out an acronym from the facts, aren't in the
+ * glossary, and aren't grounded by other facts ("Test of English as a Foreign
+ * Language" for "TOEFL"): candidates for the owner to add. Initials of
+ * capitalized words; small words may supply a letter or be skipped.
+ */
+export function unknownExpansions(text: string, facts: string, glossary: readonly GlossaryEntry[] = GLOSSARY): GlossaryEntry[] {
+  const known = new Set(glossary.map((g) => g.acronym));
+  const wanted = [...acronymsIn(facts)].filter((a) => !known.has(a));
+  if (wanted.length === 0) return [];
+  const tokens = text.match(/[\p{L}][\p{L}'’-]*/gu) ?? [];
+  const out: GlossaryEntry[] = [];
+  // From token j, can the rest of the acronym be spelled? A capitalized word
+  // must supply the next letter; a small word ("of", "as") may supply it
+  // (TOEFL's "O") or be skipped (ESL's "as a").
+  const spell = (j: number, rest: string): number | null => {
+    if (rest === "") return j;
+    if (j >= tokens.length) return null;
+    const w = tokens[j];
+    if (SMALL_WORDS.has(w.toLowerCase())) {
+      if (w[0].toUpperCase() === rest[0]) {
+        const used = spell(j + 1, rest.slice(1));
+        if (used !== null) return used;
+      }
+      return spell(j + 1, rest);
+    }
+    if (!/^\p{Lu}/u.test(w) || w[0] !== rest[0]) return null;
+    return spell(j + 1, rest.slice(1));
+  };
+  for (const acronym of wanted) {
+    for (let i = 0; i < tokens.length; i++) {
+      if (!/^\p{Lu}/u.test(tokens[i]) || tokens[i][0] !== acronym[0] || SMALL_WORDS.has(tokens[i].toLowerCase())) continue;
+      const end = spell(i, acronym);
+      if (end !== null) out.push({ acronym, expansion: tokens.slice(i, end).join(" ") });
+    }
+  }
+  // Only expansions the grounding check would flag: one already grounded by
+  // other facts (a venue named "Fayetteville Public Library") isn't proposed.
+  return out.filter((c) => ungrounded(c.expansion, facts, glossary).length > 0);
+}
+
+export function ungrounded(text: string, facts: string, glossary: readonly GlossaryEntry[] = GLOSSARY): string[] {
+  const known = new Set([...words(facts), ...groundedExpansions(facts, glossary).flatMap((g) => words(g.expansion))]);
   const knownNumbers = new Set(fold(facts).match(/\d+/g) ?? []);
   const out = new Set<string>();
   for (const n of text.match(/\d+/g) ?? []) if (!knownNumbers.has(n)) out.add(n);
