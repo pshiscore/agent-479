@@ -6,7 +6,7 @@ import { placeById, publishBlockers, suggestVenues } from "@/lib/admin/places";
 import { getDb } from "@/lib/db/client";
 import { addableFacts, placeFacts } from "@/lib/places/describe";
 import { addressLine, openedLabel, PLACE_KIND_LABELS, PLACE_TYPE_LABELS, targetLabel } from "@/lib/places/format";
-import { confirmPlaceSource, editPlace, hidePlaceAction, linkPlaceVenue, publishPlaceAction, removePlaceDescriptionAction, writePlaceDescriptionAction } from "../../actions";
+import { editPlace, hidePlaceAction, linkPlaceVenue, removePlaceDescriptionAction, writePlaceDescriptionAction } from "../../actions";
 import { button, input, Notice, when } from "../../ui";
 import { PlaceForm } from "../form";
 
@@ -25,6 +25,11 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
   const blockers = publishBlockers(p);
   const live = p.status === "open" || p.status === "opening_soon";
   const facts = addableFacts(placeFacts(p));
+  const checks: [boolean, string][] = [
+    [p.openToPublic === true, "Open to the public, confirmed by you"],
+    [Boolean(p.openedOn || p.targetOn), "A stated opening date (or a target date for opening soon)"],
+    [p.sources.some((s) => s.verifiedBy === "owner"), "A page you checked in your browser"],
+  ];
 
   return (
     <div className="grid gap-8">
@@ -47,6 +52,52 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
         </p>
       </div>
 
+      {!live && p.status !== "hidden" && (
+        <section className="rounded border border-zinc-300 p-3 dark:border-zinc-700">
+          <h2 className="mb-1 text-base font-semibold">To publish</h2>
+          <ul className="grid gap-0.5">
+            {checks.map(([ok, text]) => (
+              <li key={text} className={ok ? "text-green-700 dark:text-green-400" : ""}>
+                {ok ? "✓" : "✗"} {text}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1 text-zinc-500">
+            {blockers.length ? "Fill in what's missing in the form below, then choose Save and publish." : "Ready: choose Save and publish below."}
+          </p>
+        </section>
+      )}
+
+      <section>
+        <h2 className="mb-2 text-base font-semibold">Edit</h2>
+        {/* Keyed on the last save, so the form starts fresh after each one (no stale "what it says"). */}
+        <PlaceForm
+          key={p.updatedAt.toISOString()}
+          action={editPlace}
+          hidden={{ id: p.id, openToPublicCurrent: String(p.openToPublic) }}
+          cities={cities}
+          submit="Save"
+          withSource={false}
+          verify={{ canPublish: !live, leads: p.sources.filter((s) => s.verifiedBy !== "owner").map((s) => s.url) }}
+          values={{
+            name: p.name,
+            placeType: p.placeType,
+            kind: p.kind,
+            address: p.address,
+            addressKind: p.addressKind === "home_base" ? "street" : p.addressKind,
+            city: p.city,
+            postalCode: p.postalCode,
+            opened: monthOrDay(p.openedOn, p.openedPrecision),
+            openedQualifier: p.openedQualifier,
+            target: monthOrDay(p.targetOn, p.targetPrecision),
+            targetQualifier: p.targetQualifier,
+            website: p.website,
+            notes: p.notes,
+            openToPublic: p.openToPublic,
+          }}
+        />
+      </section>
+
       <section>
         <h2 className="mb-2 text-base font-semibold">Sources</h2>
         <ul className="grid gap-1 text-sm">
@@ -67,24 +118,6 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
           ))}
           {p.sources.length === 0 && <li className="text-zinc-500">No source yet.</li>}
         </ul>
-        <form action={confirmPlaceSource} className="mt-3 grid max-w-3xl gap-2 rounded border border-zinc-200 p-3 dark:border-zinc-800">
-          <input type="hidden" name="id" value={p.id} />
-          <p className="font-semibold">I checked a source in my browser</p>
-          <input name="url" type="url" required placeholder="Source URL" defaultValue={p.sources.find((s) => s.verifiedBy !== "owner")?.url ?? ""} className={input} />
-          <input name="confirmed" required minLength={3} placeholder="What I saw: name, address, opening date" className={input} />
-          <textarea
-            name="facts"
-            rows={3}
-            placeholder={"Other facts this source states, in your own words, one per line (optional; used for the description).\nFor example: serves breakfast and lunch"}
-            className={input}
-          />
-          <label className="flex items-center gap-2">
-            <input type="checkbox" name="openToPublic" value="1" defaultChecked={p.openToPublic === true} /> Open to the public
-          </label>
-          <div>
-            <button className={button}>Record as owner-verified</button>
-          </div>
-        </form>
       </section>
 
       <section>
@@ -116,19 +149,13 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
       </section>
 
       <section>
-        <h2 className="mb-2 text-base font-semibold">Publish</h2>
+        <h2 className="mb-2 text-base font-semibold">Status</h2>
         {live ? (
           <p>
             Public since {when(p.publishedAt)} as {p.status === "open" ? "now open" : "opening soon"}.
           </p>
-        ) : blockers.length ? (
-          <p className="text-zinc-500">Can&apos;t publish yet: {blockers.join("; ")}.</p>
         ) : (
-          <form action={publishPlaceAction} className="flex flex-wrap gap-2">
-            <input type="hidden" name="id" value={p.id} />
-            <input name="note" placeholder="Note (optional)" className={`${input} min-w-64 flex-1`} />
-            <button className={button}>Publish</button>
-          </form>
+          <p className="text-zinc-500">Not public yet. Use Save and publish above.</p>
         )}
         {p.status !== "hidden" && (
           <form action={hidePlaceAction} className="mt-3 flex flex-wrap gap-2">
@@ -169,31 +196,6 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
         )}
       </section>
 
-      <section>
-        <h2 className="mb-2 text-base font-semibold">Edit</h2>
-        <PlaceForm
-          action={editPlace}
-          hidden={{ id: p.id, openToPublicCurrent: String(p.openToPublic) }}
-          cities={cities}
-          submit="Save changes"
-          withSource={false}
-          values={{
-            name: p.name,
-            placeType: p.placeType,
-            kind: p.kind,
-            address: p.address,
-            addressKind: p.addressKind === "home_base" ? "street" : p.addressKind,
-            city: p.city,
-            postalCode: p.postalCode,
-            opened: monthOrDay(p.openedOn, p.openedPrecision),
-            openedQualifier: p.openedQualifier,
-            target: monthOrDay(p.targetOn, p.targetPrecision),
-            targetQualifier: p.targetQualifier,
-            website: p.website,
-            notes: p.notes,
-          }}
-        />
-      </section>
     </div>
   );
 }

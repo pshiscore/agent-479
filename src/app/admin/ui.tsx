@@ -6,6 +6,13 @@ export const when = (d: Date | string | null | undefined) =>
   d ? formatInChicago(new Date(d), { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
 
 export function Notice({ msg, error }: { msg?: string; error?: string }) {
+  if (error && msg)
+    return (
+      <>
+        <Notice msg={msg} />
+        <Notice error={error} />
+      </>
+    );
   if (error) return <p className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">{error}</p>;
   if (msg) return <p className="mb-4 rounded border border-green-300 bg-green-50 p-3 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">{msg}</p>;
   return null;

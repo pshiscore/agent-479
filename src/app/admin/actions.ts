@@ -113,19 +113,44 @@ export async function addPlace(formData: FormData) {
   redirect(target);
 }
 
+/**
+ * The place page's one form: saves the facts, records the page the owner
+ * checked (with "open to the public" and any stated facts) when given, and
+ * publishes on "Save and publish". Each step is its own logged action; if a
+ * later step can't happen, the earlier ones still stand and the page says why.
+ */
 export async function editPlace(formData: FormData) {
   const actor = await requireAdmin();
   const id = uuid.safeParse(formData.get("id"));
+  if (!id.success) redirect(back("/admin/places", { error: "bad place id" }));
+  const page = `/admin/places/${id.data}`;
+  const done: string[] = [];
   let target: string;
   try {
-    if (!id.success) throw new Error("bad place id");
-    const before = placeInput(formData);
-    // The edit form carries no source fields; keep openToPublic as it is (confirmed separately).
+    const db = getDb();
     const keep = formData.get("openToPublicCurrent");
-    await updatePlace(getDb(), id.data, { ...before, sourceUrl: undefined, openToPublic: keep === "true" ? true : keep === "false" ? false : null }, { actor, reason: "Edited by the owner" });
-    target = back(`/admin/places/${id.data}`, { msg: "Saved." });
+    const current = keep === "true" ? true : keep === "false" ? false : null;
+    await updatePlace(db, id.data, { ...placeInput(formData), sourceUrl: undefined, openToPublic: current }, { actor, reason: "Edited by the owner" });
+    done.push("Saved.");
+
+    const url = str(formData, "sourceUrl").trim();
+    const confirmed = str(formData, "confirmed").trim();
+    const openToPublic = formData.get("openToPublic") === "1";
+    if (url || confirmed) {
+      if (!url || !confirmed) throw new Error("to record what you checked, give both the page and what it says");
+      await confirmSource(db, id.data, { actor, url, confirmed, openToPublic, facts: parseFacts(str(formData, "facts")) });
+      done.push(`Recorded ${url} as checked by you${openToPublic ? ", open to the public" : ""}.`);
+    } else if (openToPublic !== (current === true)) {
+      throw new Error("open to the public is recorded with the page you checked (or your visit): fill in the page and what it says");
+    }
+
+    if (str(formData, "intent") === "publish") {
+      const p = await publishPlace(db, id.data, { actor, note: confirmed || "Published by the owner" });
+      done.push(`Published (${p.status === "open" ? "now open" : "opening soon"}).`);
+    }
+    target = back(page, { msg: done.join(" ") });
   } catch (err) {
-    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not saved: ${message(err)}` });
+    target = back(page, { ...(done.length ? { msg: done.join(" ") } : {}), error: `${done.length ? "Not finished" : "Not saved"}: ${message(err)}` });
   }
   redirect(target);
 }

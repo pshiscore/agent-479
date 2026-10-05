@@ -18,6 +18,8 @@ export interface PlaceFormValues {
   website?: string | null;
   sourceUrl?: string;
   notes?: string | null;
+  // Edit mode: what the owner checked (prefilled), recorded with the save.
+  openToPublic?: boolean | null;
 }
 
 const field = "grid gap-1";
@@ -31,6 +33,7 @@ export function PlaceForm({
   submit,
   withSource,
   hidden = {},
+  verify,
 }: {
   action: (f: FormData) => Promise<void>;
   values?: PlaceFormValues;
@@ -38,6 +41,8 @@ export function PlaceForm({
   submit: string;
   withSource: boolean;
   hidden?: Record<string, string>;
+  /** Edit mode: record a checked source with the save, and offer "Save and publish". */
+  verify?: { canPublish: boolean; leads?: string[] };
 }) {
   return (
     <form action={action} className="grid max-w-3xl gap-4">
@@ -135,13 +140,57 @@ export function PlaceForm({
             </label>
           </>
         )}
+        {verify && (
+          <fieldset className="grid gap-3 rounded border border-zinc-300 p-3 sm:col-span-2 dark:border-zinc-700">
+            <legend className="px-1 font-semibold">What you checked (optional with each save)</legend>
+            <label className={field}>
+              <span className={label}>Page you checked in your browser</span>
+              <input name="sourceUrl" type="url" defaultValue={values.sourceUrl} placeholder="Official site, Instagram or Facebook post, article" className={input} />
+              <span className={hint}>Recorded as owner-verified with today&apos;s date. Instagram and Facebook are fine when you read them yourself. Google reviews aren&apos;t a source.</span>
+              {verify.leads && verify.leads.length > 0 && (
+                <span className={hint}>
+                  Research leads (not checked yet):{" "}
+                  {verify.leads.map((u, i) => (
+                    <span key={u}>
+                      {i > 0 ? ", " : ""}
+                      <a href={u} target="_blank" rel="noreferrer" className="underline">
+                        {u.replace(/^https?:\/\/(www\.)?/, "").slice(0, 60)}
+                      </a>
+                    </span>
+                  ))}
+                </span>
+              )}
+            </label>
+            <label className={field}>
+              <span className={label}>What it says</span>
+              <input name="confirmed" placeholder="e.g. Grand opening Aug 18, 2026. Or: I visited Oct 2; open to the public" className={input} />
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" name="openToPublic" value="1" defaultChecked={values.openToPublic === true} />
+              <span className={label}>Open to the public</span>
+              <span className={hint}>(required before publishing; your own visit counts)</span>
+            </label>
+            <label className={field}>
+              <span className={label}>Other facts this page states (optional, one per line)</span>
+              <textarea name="facts" rows={2} placeholder="e.g. serves breakfast and lunch" className={input} />
+              <span className={hint}>In your own words; used for the description.</span>
+            </label>
+          </fieldset>
+        )}
         <label className={`${field} sm:col-span-2`}>
           <span className={label}>Notes (internal)</span>
           <textarea name="notes" rows={2} defaultValue={values.notes ?? ""} className={input} />
         </label>
       </div>
-      <div>
-        <button className={button}>{submit}</button>
+      <div className="flex flex-wrap gap-2">
+        <button name="intent" value="save" className={verify ? "rounded border border-zinc-400 px-3 py-1" : button}>
+          {submit}
+        </button>
+        {verify && (
+          <button name="intent" value="publish" className={button}>
+            Save and publish
+          </button>
+        )}
       </div>
     </form>
   );
