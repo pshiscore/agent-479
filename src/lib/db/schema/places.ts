@@ -23,6 +23,7 @@ export interface PlaceSource {
   checkedAt?: string; // YYYY-MM-DD
   verifiedBy?: "owner";
   confirmed?: string; // what the owner saw
+  facts?: string[]; // other facts this source states, in the owner's words (for the description)
   note?: string;
 }
 

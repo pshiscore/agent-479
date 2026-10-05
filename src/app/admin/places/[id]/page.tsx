@@ -4,8 +4,9 @@ import { sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { placeById, publishBlockers, suggestVenues } from "@/lib/admin/places";
 import { getDb } from "@/lib/db/client";
+import { addableFacts, placeFacts } from "@/lib/places/describe";
 import { addressLine, openedLabel, PLACE_KIND_LABELS, PLACE_TYPE_LABELS, targetLabel } from "@/lib/places/format";
-import { confirmPlaceSource, editPlace, hidePlaceAction, linkPlaceVenue, publishPlaceAction } from "../../actions";
+import { confirmPlaceSource, editPlace, hidePlaceAction, linkPlaceVenue, publishPlaceAction, removePlaceDescriptionAction, writePlaceDescriptionAction } from "../../actions";
 import { button, input, Notice, when } from "../../ui";
 import { PlaceForm } from "../form";
 
@@ -23,6 +24,7 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
   const cities = ((await db.execute(sql`select distinct city from venues where active order by 1`)) as unknown as { city: string }[]).map((r) => r.city);
   const blockers = publishBlockers(p);
   const live = p.status === "open" || p.status === "opening_soon";
+  const facts = addableFacts(placeFacts(p));
 
   return (
     <div className="grid gap-8">
@@ -56,6 +58,7 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
               {s.verifiedBy === "owner" ? (
                 <span className="text-green-700 dark:text-green-400">
                   owner-verified {s.checkedAt}: {s.confirmed}
+                  {s.facts?.length ? ` · stated facts: ${s.facts.join("; ")}` : ""}
                 </span>
               ) : (
                 <span className="text-amber-700 dark:text-amber-400">not verified{s.note ? ` (${s.note})` : ""}</span>
@@ -69,6 +72,12 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
           <p className="font-semibold">I checked a source in my browser</p>
           <input name="url" type="url" required placeholder="Source URL" defaultValue={p.sources.find((s) => s.verifiedBy !== "owner")?.url ?? ""} className={input} />
           <input name="confirmed" required minLength={3} placeholder="What I saw: name, address, opening date" className={input} />
+          <textarea
+            name="facts"
+            rows={3}
+            placeholder={"Other facts this source states, in your own words, one per line (optional; used for the description).\nFor example: serves breakfast and lunch"}
+            className={input}
+          />
           <label className="flex items-center gap-2">
             <input type="checkbox" name="openToPublic" value="1" defaultChecked={p.openToPublic === true} /> Open to the public
           </label>
@@ -76,6 +85,34 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
             <button className={button}>Record as owner-verified</button>
           </div>
         </form>
+      </section>
+
+      <section>
+        <h2 className="mb-2 text-base font-semibold">Description</h2>
+        {p.description ? (
+          <>
+            <p className="max-w-3xl">{p.description}</p>
+            <p className="text-sm text-zinc-500">Generated {when(p.descriptionGeneratedAt)} from the stated facts.</p>
+          </>
+        ) : (
+          <p className="text-zinc-500">
+            {facts.length ? "None yet." : "None: no stated fact beyond the name and type. Add facts when you record a source you checked."}
+          </p>
+        )}
+        <div className="mt-2 flex flex-wrap gap-2">
+          {facts.length > 0 && (
+            <form action={writePlaceDescriptionAction}>
+              <input type="hidden" name="id" value={p.id} />
+              <button className={button}>{p.description ? "Rewrite description" : "Write description"}</button>
+            </form>
+          )}
+          {p.description && (
+            <form action={removePlaceDescriptionAction}>
+              <input type="hidden" name="id" value={p.id} />
+              <button className="rounded border border-zinc-400 px-3 py-1">Remove</button>
+            </form>
+          )}
+        </div>
       </section>
 
       <section>

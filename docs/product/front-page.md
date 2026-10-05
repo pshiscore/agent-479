@@ -284,6 +284,21 @@ Whenever something new opens, it gets a factual card and its own page.
     checked".
   - Maps queries are "<name>, <address>, <city>, AR". schema.org markup has
     a street address only when the address is a street address.
+- **Built (step 3, 2026-10-05): descriptions** (`src/lib/places/describe.ts`).
+  - The facts come from the owner: when recording a source they checked,
+    the owner may add "other facts this source states", in their own words
+    (stored on that source, so each fact cites it).
+  - A fact counts only if it says something the name and type don't. With
+    none, there's no model call and no description.
+  - The owner asks for it ("Write description" on the admin page). The write
+    is a logged agent action with the model and LLM call. The checks are
+    evaluative words, grounding (names and numbers must be in the facts),
+    and each claimed fact must appear in the text. A failure is regenerated
+    once, then held (logged, nothing stored).
+  - Changing a source's stated facts removes a description written from the
+    old ones, in the same logged update. The owner can also remove one.
+  - Shown only on the place page, with "Summary generated <date> from the
+    sources below."
 
 ## G. Open questions for later
 

@@ -5,9 +5,11 @@ import { z } from "zod";
 import { rollbackAction } from "@/lib/actions/rollback";
 import { requireAdmin } from "@/lib/admin/auth";
 import { labelPair } from "@/lib/admin/dedup-review";
-import { confirmSource, createPlace, hidePlace, linkVenue, type PlaceInput, publishPlace, updatePlace } from "@/lib/admin/places";
+import { confirmSource, createPlace, hidePlace, linkVenue, parseFacts, type PlaceInput, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
 import { getDb } from "@/lib/db/client";
+import { generateStructured } from "@/lib/llm";
+import type { Generate } from "@/lib/pipeline/enrich/types";
 
 /**
  * Admin Server Actions. Each is its own POST entry point, so each re-checks
@@ -132,7 +134,7 @@ export async function confirmPlaceSource(formData: FormData) {
   let target: string;
   try {
     if (!id.success) throw new Error("bad place id");
-    await confirmSource(getDb(), id.data, { actor, url: str(formData, "url"), confirmed: str(formData, "confirmed"), openToPublic: formData.get("openToPublic") === "1" });
+    await confirmSource(getDb(), id.data, { actor, url: str(formData, "url"), confirmed: str(formData, "confirmed"), openToPublic: formData.get("openToPublic") === "1", facts: parseFacts(str(formData, "facts")) });
     target = back(`/admin/places/${id.data}`, { msg: "Source recorded as owner-verified." });
   } catch (err) {
     target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not saved: ${message(err)}` });
@@ -179,6 +181,38 @@ export async function linkPlaceVenue(formData: FormData) {
     target = back(`/admin/places/${id.data}`, { msg: venueId ? "Venue linked." : "Venue link removed." });
   } catch (err) {
     target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function writePlaceDescriptionAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad place id");
+    const db = getDb();
+    const generate = ((req) => generateStructured(req, { db })) as Generate;
+    const r = await writePlaceDescription(db, id.data, { requestedBy: actor, generate });
+    const msg =
+      r.status === "ok" ? "Description written." : r.status === "held" ? `Held after two drafts (${r.problem}). Nothing was saved.` : `No description: ${r.reason}.`;
+    target = back(`/admin/places/${id.data}`, r.status === "ok" ? { msg } : { error: msg });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not written: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function removePlaceDescriptionAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad place id");
+    await removePlaceDescription(getDb(), id.data, { actor, reason: str(formData, "reason") || "Removed by the owner" });
+    target = back(`/admin/places/${id.data}`, { msg: "Description removed." });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not removed: ${message(err)}` });
   }
   redirect(target);
 }

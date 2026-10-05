@@ -1,9 +1,11 @@
 import { and, desc, eq, like } from "drizzle-orm";
 import { z } from "zod";
-import { recordAction } from "@/lib/actions/record";
+import { agentActor, recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { ADDRESS_KINDS, PLACE_KINDS, PLACE_TYPES, type PlaceSource, places, venues } from "@/lib/db/schema";
+import { describePlace, placeFacts } from "@/lib/places/describe";
 import { categoryForType } from "@/lib/places/format";
+import type { Generate } from "@/lib/pipeline/enrich/types";
 import { slugify } from "@/lib/slug";
 import { namesMatchClosely } from "@/lib/venues/normalize";
 import { sameStreetAddress } from "@/lib/venues/street";
@@ -132,20 +134,85 @@ export async function updatePlace(db: DbExecutor, id: string, input: PlaceInput,
   });
 }
 
-/** The owner checked a source in the browser: record it as owner-verified, with what they saw. */
-export async function confirmSource(db: DbExecutor, id: string, opts: { actor: string; url: string; confirmed: string; openToPublic: boolean; now?: Date }) {
+/** Stated facts, one per line, in the owner's words: at most 6, each 3 to 200 characters. */
+const statedFacts = z.array(z.string().trim().min(3).max(200)).max(6);
+export const parseFacts = (text: string) => text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+const factsKey = (sources: PlaceSource[]) => JSON.stringify(sources.filter((s) => s.verifiedBy === "owner").flatMap((s) => s.facts ?? []).sort());
+
+/**
+ * The owner checked a source in the browser: record it as owner-verified,
+ * with what they saw and any other facts it states (for the description).
+ * If the stated facts change, a description written from the old ones is
+ * removed in the same logged update.
+ */
+export async function confirmSource(
+  db: DbExecutor,
+  id: string,
+  opts: { actor: string; url: string; confirmed: string; openToPublic: boolean; facts?: string[]; now?: Date },
+) {
   if (!opts.actor.startsWith("human:")) throw new PlaceError("only the owner verifies a source");
   const url = https.parse(opts.url);
   const confirmed = z.string().trim().min(3).max(500).parse(opts.confirmed);
+  const facts = statedFacts.parse(opts.facts ?? []);
   return db.transaction(async (tx) => {
     const before = await load(tx, id);
     const others = before.sources.filter((s) => s.url !== url);
-    const sources: PlaceSource[] = [...others, { url, checkedAt: today(opts.now), verifiedBy: "owner", confirmed }];
-    return change(tx, before, { sources, openToPublic: opts.openToPublic }, {
+    const sources: PlaceSource[] = [...others, { url, checkedAt: today(opts.now), verifiedBy: "owner", confirmed, ...(facts.length ? { facts } : {}) }];
+    const stale = before.description !== null && factsKey(sources) !== factsKey(before.sources);
+    return change(tx, before, { sources, openToPublic: opts.openToPublic, ...(stale ? { description: null, descriptionGeneratedAt: null } : {}) }, {
       actor: opts.actor,
       action: "update",
-      reason: `Owner verified ${url}: ${confirmed}${opts.openToPublic ? "; open to the public" : "; NOT confirmed open to the public"}`,
+      reason: `Owner verified ${url}: ${confirmed}${facts.length ? `; stated facts: ${facts.join("; ")}` : ""}${opts.openToPublic ? "; open to the public" : "; NOT confirmed open to the public"}${stale ? "; description removed (facts changed)" : ""}`,
     });
+  });
+}
+
+/**
+ * Writes the description from the stated facts, at the owner's request. The
+ * write is an agent action (it carries the model and LLM call), with the
+ * owner's request in the reason. Held drafts are logged and never stored.
+ */
+export async function writePlaceDescription(db: DbExecutor, id: string, opts: { requestedBy: string; generate: Generate; now?: Date }) {
+  if (!opts.requestedBy.startsWith("human:")) throw new PlaceError("only the owner asks for a place description");
+  const actor = agentActor("place-describe");
+  const place = await load(db, id);
+  const r = await describePlace(opts.generate, placeFacts(place));
+  return db.transaction(async (tx) => {
+    const before = await load(tx, id);
+    if (r.status === "ok") {
+      const [after] = await tx
+        .update(places)
+        .set({ description: r.description, descriptionGeneratedAt: opts.now ?? new Date(), updatedAt: new Date() })
+        .where(eq(places.id, id))
+        .returning();
+      await recordAction(tx, {
+        actor,
+        action: "update",
+        entityType: "place",
+        entityId: id,
+        before,
+        after,
+        reason: `Description written at ${opts.requestedBy}'s request from stated facts: ${r.usedFacts.join("; ")}`,
+        model: r.model,
+        llmCallId: r.callId,
+      });
+      return r;
+    }
+    if (r.status === "held") {
+      await recordAction(tx, { actor, action: "hold", entityType: "place", entityId: id, reason: `Description held after ${r.attempts} drafts: ${r.problem}`, model: r.model, llmCallId: r.callId });
+    }
+    return r;
+  });
+}
+
+/** The owner removes a description. */
+export async function removePlaceDescription(db: DbExecutor, id: string, opts: { actor: string; reason: string }) {
+  if (!opts.actor.startsWith("human:")) throw new PlaceError("only the owner removes a description");
+  return db.transaction(async (tx) => {
+    const before = await load(tx, id);
+    if (!before.description) throw new PlaceError("no description to remove");
+    return change(tx, before, { description: null, descriptionGeneratedAt: null }, { actor: opts.actor, action: "update", reason: `Description removed: ${opts.reason}` });
   });
 }
 
