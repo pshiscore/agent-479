@@ -80,6 +80,10 @@ export const seedVenueSchema = z
       notes: z.array(provenanceSchema).optional(),
     }),
     notes: z.string().optional(),
+    // Inactive venues stay in the file (and the database) but are never matched;
+    // deactivating one is an explicit, signed-off change with a reason.
+    active: z.boolean().optional(),
+    inactiveReason: z.string().min(3).optional(),
     // What a person checked to accept a warning, shown next to it in the report.
     // Hand checks explain warnings; they never clear an error.
     handChecks: z.array(handCheckSchema).default([]),
@@ -100,6 +104,8 @@ export const seedVenueSchema = z
       issue(["verification", "website"], "website needs provenance");
     }
     if (v.parent === v.slug) issue(["parent"], "a venue can't be its own parent");
+    if (v.active === false && !v.inactiveReason) issue(["inactiveReason"], "an inactive venue needs a reason");
+    if (v.active !== false && v.inactiveReason) issue(["inactiveReason"], "only inactive venues have an inactive reason");
   });
 
 export const seedFileSchema = z.strictObject({

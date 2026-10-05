@@ -130,7 +130,7 @@ async function main() {
       return `| ${[
         v.slug,
         cell(v.name),
-        v.venueType,
+        v.active === false ? `${v.venueType}<br>**inactive:** ${cell(v.inactiveReason)}` : v.venueType,
         cell(oneLine(v)) + (v.formerAddresses.length ? `<br>formerly: ${cell(v.formerAddresses.join("; "))}` : ""),
         osm(v),
         delta,

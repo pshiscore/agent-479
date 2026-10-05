@@ -7,6 +7,8 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { labelPair } from "@/lib/admin/dedup-review";
 import { confirmSource, createPlace, hidePlace, linkVenue, parseFacts, type PlaceInput, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
+import { changedFields, type EventFormValues, parseEventForm } from "@/lib/review/form";
+import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal } from "@/lib/review/proposals";
 import { getDb } from "@/lib/db/client";
 import { generateStructured } from "@/lib/llm";
 import type { Generate } from "@/lib/pipeline/enrich/types";
@@ -213,6 +215,117 @@ export async function removePlaceDescriptionAction(formData: FormData) {
     target = back(`/admin/places/${id.data}`, { msg: "Description removed." });
   } catch (err) {
     target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not removed: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+// ---- Review queue (festivals step 1) ----
+
+const formValues = (f: FormData): EventFormValues => {
+  const out: EventFormValues = {};
+  for (const k of new Set(f.keys())) {
+    const all = f.getAll(k).filter((v): v is string => typeof v === "string");
+    out[k] = k === "tags" ? all : all[0];
+  }
+  return out;
+};
+const reviewBack = (params: Record<string, string>) => back("/admin/review", params);
+
+/** "Add event": an owner-verified proposal; "Add and publish" approves it at once. Both steps are logged. */
+export async function addEventAction(formData: FormData) {
+  const actor = await requireAdmin();
+  let target: string;
+  try {
+    const facts = parseEventForm(formValues(formData));
+    const confirmed = str(formData, "confirmed").trim();
+    const today = new Date().toISOString().slice(0, 10);
+    const p = await createProposal(
+      getDb(),
+      { facts, sources: [{ url: facts.moreInfoUrl, checkedAt: today, verifiedBy: "owner", confirmed: confirmed || "Checked by the owner" }], origin: "owner_form", reasons: ["owner_draft"] },
+      { actor },
+    );
+    if (str(formData, "intent") === "publish") {
+      const { event } = await approveProposal(getDb(), p.id, { actor, note: "Added and published by the owner" });
+      target = reviewBack({ msg: `Published "${event.title}".` });
+    } else {
+      target = reviewBack({ msg: `Saved "${facts.title}" for review.` });
+    }
+  } catch (err) {
+    target = back("/admin/review/new", { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function approveProposalAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad item id");
+    const { event } = await approveProposal(getDb(), id.data, { actor, note: str(formData, "note") });
+    target = reviewBack({ msg: `Approved and published "${event.title}".` });
+  } catch (err) {
+    target = reviewBack({ error: `Not approved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function editApproveAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad item id");
+    const p = await proposalById(getDb(), id.data);
+    if (!p) throw new Error("no such item");
+    const edits = changedFields(p.facts, parseEventForm(formValues(formData)));
+    const { event } = await approveProposal(getDb(), id.data, { actor, note: str(formData, "note"), edits });
+    target = reviewBack({ msg: `Approved "${event.title}" with ${Object.keys(edits).length} edit(s).` });
+  } catch (err) {
+    target = back(`/admin/review/${id.success ? id.data : ""}`, { error: `Not approved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function rejectProposalAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad item id");
+    await rejectProposal(getDb(), id.data, { actor, reason: str(formData, "reason") });
+    target = reviewBack({ msg: "Rejected." });
+  } catch (err) {
+    target = reviewBack({ error: `Not rejected: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function mergeProposalAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  const eventId = uuid.safeParse(formData.get("eventId"));
+  let target: string;
+  try {
+    if (!id.success || !eventId.success) throw new Error("choose the event to merge into");
+    const { event } = await mergeProposal(getDb(), id.data, eventId.data, { actor, note: str(formData, "note") });
+    target = reviewBack({ msg: `Merged into "${event.title}".` });
+  } catch (err) {
+    target = reviewBack({ error: `Not merged: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function addProposalSourceAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad item id");
+    await addCheckedSource(getDb(), id.data, { actor, url: str(formData, "url"), confirmed: str(formData, "confirmed") });
+    target = reviewBack({ msg: "Source recorded as owner-verified." });
+  } catch (err) {
+    target = reviewBack({ error: `Not saved: ${message(err)}` });
   }
   redirect(target);
 }

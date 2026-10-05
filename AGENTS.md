@@ -83,9 +83,17 @@ imports it.
     only; development, scripts, and tests use local Postgres
     (`agent479_dev`); production is migrated only with
     `MIGRATE_PRODUCTION=yes`.
+11. **Back up production before every migration** (owner, 2026-10-05).
+    `MIGRATE_PRODUCTION=yes npm run db:backup:prod -- --before <migration>`
+    writes a pg_dump to the gitignored `backups/` folder (outside the
+    database) and logs it in `docs/BACKUPS.md`; commit the log. A production
+    migration refuses to run without a logged backup from the last 2 hours
+    that's still on disk with a matching checksum (`src/lib/db/backups.ts`).
 
 ## Product references
 
+- **Festivals and the review queue:** `docs/product/festivals.md` (decisions
+  and build order, owner 2026-10-05).
 - **Front page and event experience:** `docs/product/front-page.md` (design
   direction, front page sections, event card and page, tags, search, and
   follows). Entity pages live under `/city`, `/venue`, `/category`, and
@@ -197,6 +205,11 @@ These apply to research and one-off scripts as well as to the app and pipeline.
 
 ## Data
 
+- **Coverage area: Benton and Washington counties** (owner, 2026-10-05). The
+  incorporated places are listed in `src/config/coverage.ts` (Pea Ridge and
+  Prairie Grove are in; Eureka Springs, in Carroll County, is out). An active
+  venue outside the area is an error in the venue report. Events outside the
+  area never auto-publish: they go to review flagged "outside coverage area".
 - **Physical address over mailing address** when a venue lists both.
   Exception: campus-type venues use the institution's official address, since
   a campus has no single physical address. The location point is the campus
@@ -241,7 +254,9 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   (`needs_venue_expired`); the admin page shows the current needs_venue count.
 - **Events are written only by the enrich stage**, from a mapped record with a
   resolved venue and a classified category, logged row by row with the model
-  and LLM call ids. A generated description that still reuses source wording
+  and LLM call ids, **or by the owner** in `/admin/review` (approving a
+  proposal, or the "Add event" form), logged with the owner as the actor and
+  an owner-verified source. A generated description that still reuses source wording
   after one retry is held: the event is written without one, with a logged
   `hold`.
 - **Series are detected in code, never by a model.** Same source, venue, and
@@ -265,6 +280,26 @@ These apply to research and one-off scripts as well as to the app and pipeline.
 - **ZIP codes:** fill a missing ZIP from the Census geocoder's match and cite
   it. Leave it empty only when the geocoder has no match. Don't overwrite a
   sourced ZIP; a disagreement is flagged as a warning in the report.
+
+## Festivals and the review queue
+
+Owner decisions, 2026-10-05 (terms in `docs/sources-terms.md`, festivals
+review; open decisions in `docs/OPEN_ITEMS.md`).
+
+- **Fail closed.** Anything in `/admin/review` stays unpublished until the
+  owner approves it.
+- **Aggregator dates alone always go to review** (Visit Bentonville and any
+  other calendar listing other organizers' events) unless they match the
+  organizer's official page.
+- **Eventbrite is on hold.** No requests to it of any kind.
+- **Registry official sites are sources.** Each domain gets a source row,
+  enabled only through a passing test fetch. Walton Arts Center pages are
+  never fetched (Artosphere is cited from city or tourism pages).
+- **Aliases never merge different festivals** (the War Eagle Fair and the War
+  Eagle Mill fair are separate entries).
+- **"Search the web" is a link, never a fetch.** On review items it opens an
+  ordinary search in the owner's browser; a URL the owner pastes back is
+  recorded as owner-verified.
 
 ## Venue verification
 

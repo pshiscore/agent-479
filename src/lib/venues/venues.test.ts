@@ -165,6 +165,7 @@ describe("checkVenues", () => {
   it("warns on a city outside the list", () => {
     expect(messages([venue({ city: "Fort Smith" })])).toEqual([
       'warning: city "Fort Smith" is not in the NWA city list',
+      'error: "Fort Smith" is outside the coverage area (Benton and Washington counties); deactivate it with a reason',
     ]);
   });
 
@@ -314,5 +315,26 @@ describe("botUserAgent", () => {
     // The contact is published in other sites' logs: only an address on the site's domain.
     expect(() => botUserAgent("someone@gmail.com", "https://479.guide")).toThrow(/at 479.guide/);
     expect(botUserAgent("Bot@479.guide", "https://www.479.guide")).toBe("Agent479Bot/1.0 (+https://www.479.guide/bot; Bot@479.guide)");
+  });
+});
+
+describe("coverage area (Benton and Washington counties)", () => {
+  // Eureka Springs is inside NWA_BOUNDS, so only the coverage check catches it.
+  const eureka = { city: "Eureka Springs", lat: 36.401061, lng: -93.738206 };
+
+  it("is an error for an active venue outside the area", () => {
+    expect(messages([venue(eureka)])).toContainEqual(expect.stringMatching(/^error: "Eureka Springs" is outside the coverage area/));
+  });
+
+  it("exempts an inactive venue, which needs a reason", () => {
+    expect(messages([venue({ ...eureka, active: false, inactiveReason: "Outside the coverage area" })]).filter((m) => m.startsWith("error"))).toEqual([]);
+    expect(() => venue({ ...eureka, active: false })).toThrow(/needs a reason/);
+    expect(() => venue({ inactiveReason: "no" + "pe" })).toThrow();
+  });
+
+  it("includes Pea Ridge and Prairie Grove", () => {
+    for (const city of ["Pea Ridge", "Prairie Grove"]) {
+      expect(messages([venue({ city })]).filter((m) => m.includes("coverage"))).toEqual([]);
+    }
   });
 });

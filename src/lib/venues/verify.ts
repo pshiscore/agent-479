@@ -1,3 +1,4 @@
+import { inCoverageArea } from "@/config/coverage";
 import type { SeedVenue } from "./seed-file";
 import { venueNameKeys } from "./normalize";
 import { streetDifference } from "./street";
@@ -15,6 +16,7 @@ export interface VenueIssue {
 }
 
 /** Benton and Washington counties, out to Eureka Springs and Huntsville. */
+
 export const NWA_BOUNDS = { minLat: 35.7, maxLat: 36.5, minLng: -94.62, maxLng: -93.45 } as const;
 
 export const NWA_CITIES = new Set([
@@ -109,6 +111,10 @@ export function checkVenues(venues: readonly SeedVenue[], today: Date): VenueIss
     }
     if (v.state !== "AR") add(v.slug, "error", `state is ${v.state}, expected AR`);
     if (!NWA_CITIES.has(v.city)) add(v.slug, "warning", `city "${v.city}" is not in the NWA city list`);
+    // Coverage area: Benton and Washington counties (AGENTS.md, Data). Inactive venues are exempt.
+    if (v.active !== false && !inCoverageArea(v.city)) {
+      add(v.slug, "error", `"${v.city}" is outside the coverage area (Benton and Washington counties); deactivate it with a reason`);
+    }
 
     if (v.parent) {
       if (!bySlug.has(v.parent)) {

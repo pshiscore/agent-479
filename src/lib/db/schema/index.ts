@@ -9,3 +9,4 @@ export * from "./events";
 export * from "./dedup";
 export * from "./front-page";
 export * from "./places";
+export * from "./review";

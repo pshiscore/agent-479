@@ -5,6 +5,7 @@ export const metadata: Metadata = { title: "Admin | 479 Guide", robots: { index:
 
 const NAV = [
   ["/admin", "Overview"],
+  ["/admin/review", "Review"],
   ["/admin/proposals", "Proposals"],
   ["/admin/places", "Places"],
   ["/admin/dedup-review", "Dedup review"],

@@ -21,6 +21,7 @@ const COMPARED = [
   "website",
   "parentVenueId",
   "verification",
+  "active",
 ] as const;
 
 export class SeedRefusedError extends Error {}
@@ -96,6 +97,7 @@ export async function seedVenues(
       website: v.website,
       parentVenueId: v.parent ? ids.get(v.parent) : null,
       verification,
+      active: v.active ?? true,
     };
     const existing = existingBySlug.get(v.slug);
 
@@ -135,7 +137,7 @@ export async function seedVenues(
       entityId: existing.id,
       before: existing,
       after,
-      reason: `Seed update for ${v.slug}: ${Object.keys(changes).join(", ")}`,
+      reason: `Seed update for ${v.slug}: ${Object.keys(changes).join(", ")}${"active" in changes ? (row.active ? " (reactivated)" : ` (deactivated: ${v.inactiveReason})`) : ""}`,
     });
     updated++;
   }

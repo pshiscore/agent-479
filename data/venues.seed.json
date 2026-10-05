@@ -1983,7 +1983,9 @@
           "note": "US Census geocoder match: 36 S MAIN ST, EUREKA SPRINGS, AR, 72632"
         }
       },
-      "notes": "theaud.org showed a maintenance page on 2026-10-03, so no website is set."
+      "notes": "theaud.org showed a maintenance page on 2026-10-03, so no website is set.",
+    "active": false,
+    "inactiveReason": "Outside the coverage area: Eureka Springs is in Carroll County, and the area is Benton and Washington counties (owner decision, 2026-10-05)."
     },
     {
       "slug": "pea-ridge-national-military-park",

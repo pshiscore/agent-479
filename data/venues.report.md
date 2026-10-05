@@ -1,11 +1,11 @@
 # Venue verification report
 
-Generated 2026-10-04T16:30:50.248Z from `data/venues.seed.json`.
+Generated 2026-10-05T11:11:59.861Z from `data/venues.seed.json`.
 
 - Venues: 56
 - Errors: 0, warnings: 1
 - Geocoder cross-check: **not run** (use --geocode)
-- Contents sha256: `b5d305690175db1602ac9ee6827d84b32ab4d9689c7c6b5f7e1fe9bc1ce27fb9`
+- Contents sha256: `4be52c875ae4444e3ab17cf38b96e9545af6abad751498b30b5fea8c076ee41c`
 - **Changed since sign-off** by Vlad on 2026-10-04. Review again.
 
 ## Issues
@@ -70,7 +70,7 @@ Generated 2026-10-04T16:30:50.248Z from `data/venues.seed.json`.
 | springdale-public-library | Springdale Public Library | library | 405 S Pleasant St, Springdale, AR 72764 | [36.180908, -94.14241](https://www.openstreetmap.org/?mlat=36.180908&mlon=-94.14241#map=18/36.180908/-94.14241) | – |  |  | [name](https://www.springdalelibrary.org/) 2026-10-03<br>[address](https://www.springdalelibrary.org/) 2026-10-03<br>[location](https://www.openstreetmap.org/way/796282852) 2026-10-03<br>[website](https://www.springdalelibrary.org/) 2026-10-03 |
 | luther-george-park | Luther George Park | park | 300 Park St, Springdale, AR 72764 | [36.182743, -94.126296](https://www.openstreetmap.org/?mlat=36.182743&mlon=-94.126296#map=18/36.182743/-94.126296) | – |  |  | [name](https://www.downtownspringdale.org/luther-george-park) 2026-10-03<br>[address](https://www.downtownspringdale.org/luther-george-park) 2026-10-03<br>[location](https://www.openstreetmap.org/way/506568507) 2026-10-03<br>[notes](https://www.waltonfamilyfoundation.org/our-work/home-region/downtown-springdale-alliance) 2026-10-04<br>[notes](https://www.downtownspringdale.org/news-stories/spackman-mossop-michaels-and-trahan-architects-reveal-design-for-luther-george-park-masterplan-and-performance-pavilion) 2026-10-04 |
 | bella-vista-public-library | Bella Vista Public Library | library | 11 Dickens Pl, Bella Vista, AR 72714 | [36.473498, -94.242864](https://www.openstreetmap.org/?mlat=36.473498&mlon=-94.242864#map=18/36.473498/-94.242864) | – |  |  | [name](https://www.bvpl.org/) 2026-10-03<br>[address](https://www.bvpl.org/) 2026-10-03<br>[location](https://www.openstreetmap.org/way/246406845) 2026-10-03<br>[website](https://www.bvpl.org/) 2026-10-03 |
-| eureka-springs-auditorium | The Auditorium | theater | 36 S Main St, Eureka Springs, AR 72632 | [36.401061, -93.738206](https://www.openstreetmap.org/?mlat=36.401061&mlon=-93.738206#map=18/36.401061/-93.738206) | – |  | Eureka Springs City Auditorium, The Aud | [name](https://www.eurekaspringschamber.com/events/details/eureka-springs-music-awards-ceremony-10278) 2026-10-03<br>[address](https://www.eurekaspringschamber.com/events/details/eureka-springs-music-awards-ceremony-10278) 2026-10-03<br>[postalCode](https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=36+S+Main+St%2C+Eureka+Springs%2C+AR&benchmark=Public_AR_Current&format=json) 2026-10-03<br>[location](https://www.openstreetmap.org/way/160171808) 2026-10-03 |
+| eureka-springs-auditorium | The Auditorium | theater<br>**inactive:** Outside the coverage area: Eureka Springs is in Carroll County, and the area is Benton and Washington counties (owner decision, 2026-10-05). | 36 S Main St, Eureka Springs, AR 72632 | [36.401061, -93.738206](https://www.openstreetmap.org/?mlat=36.401061&mlon=-93.738206#map=18/36.401061/-93.738206) | – |  | Eureka Springs City Auditorium, The Aud | [name](https://www.eurekaspringschamber.com/events/details/eureka-springs-music-awards-ceremony-10278) 2026-10-03<br>[address](https://www.eurekaspringschamber.com/events/details/eureka-springs-music-awards-ceremony-10278) 2026-10-03<br>[postalCode](https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=36+S+Main+St%2C+Eureka+Springs%2C+AR&benchmark=Public_AR_Current&format=json) 2026-10-03<br>[location](https://www.openstreetmap.org/way/160171808) 2026-10-03 |
 | pea-ridge-national-military-park | Pea Ridge National Military Park | park | 15930 National Park Dr, Garfield, AR 72732 | [36.443852, -94.025467](https://www.openstreetmap.org/?mlat=36.443852&mlon=-94.025467#map=18/36.443852/-94.025467) | – |  | Pea Ridge Battlefield | [name](https://www.nps.gov/peri/planyourvisit/directions.htm) 2026-10-03<br>[address](https://www.nps.gov/peri/planyourvisit/directions.htm) 2026-10-03<br>[location](https://www.openstreetmap.org/way/541689611) 2026-10-03<br>[website](https://www.nps.gov/peri/planyourvisit/directions.htm) 2026-10-03 |
 | prairie-grove-battlefield-state-park | Prairie Grove Battlefield State Park | park | 506 E Douglas St, Prairie Grove, AR 72753 | [35.986167, -94.304103](https://www.openstreetmap.org/?mlat=35.986167&mlon=-94.304103#map=18/35.986167/-94.304103) | – |  | Prairie Grove Battlefield | [name](https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park) 2026-10-03<br>[address](https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park) 2026-10-03<br>[location](https://www.openstreetmap.org/way/302181096) 2026-10-03<br>[website](https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park) 2026-10-03 |
 
@@ -79,5 +79,5 @@ Generated 2026-10-04T16:30:50.248Z from `data/venues.seed.json`.
 After reviewing, set this in the seed file, then run `npm run venues:seed`:
 
 ```json
-"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "b5d305690175db1602ac9ee6827d84b32ab4d9689c7c6b5f7e1fe9bc1ce27fb9" }
+"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "4be52c875ae4444e3ab17cf38b96e9545af6abad751498b30b5fea8c076ee41c" }
 ```

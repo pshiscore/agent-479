@@ -15,6 +15,7 @@
     "db:check": "drizzle-kit check",
     "db:studio": "drizzle-kit studio",
     "db:verify": "tsx scripts/db-verify.ts",
+    "db:backup:prod": "tsx scripts/db-backup-prod.ts",
     "test:db": "vitest run --config vitest.db.config.mts",
     "db:seed:llm": "tsx scripts/seed-llm-models.ts",
     "llm:smoke": "tsx scripts/llm-smoke.ts",
