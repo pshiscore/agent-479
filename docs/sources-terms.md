@@ -165,7 +165,7 @@ open" needs a source confirming the opening.
 - No single permitted source gives enough confirmed openings at launch. The
   public records (ABC list, health department, Fayetteville permits) are
   leads with no opening dates, so on their own they can't put a card up.
-- Build What's new as a lead-and-confirm flow: leads from the ABC weekly
+- Build New in Town as a lead-and-confirm flow: leads from the ABC weekly
   list (names and addresses only, never applicants' names), the health
   department's pre-opening inspections, and Fayetteville commercial permits
   become owner proposals; a card appears only when a confirming source
