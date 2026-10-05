@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { humanActor } from "@/lib/actions/record";
 import { type DbTx, getDb } from "@/lib/db/client";
-import { agentActions, categories, eventSources, eventTags, events, type ProposedEvent, sources, tags, venues } from "@/lib/db/schema";
+import { agentActions, categories, eventDays, eventSources, eventTags, events, type ProposedEvent, sources, tags, venues } from "@/lib/db/schema";
 import { addCheckedSource, approveProposal, createProposal, likelyMatches, mergeProposal, rejectProposal, ReviewError } from "@/lib/review/proposals";
 import { listEvents } from "@/lib/site/queries";
 import { inRollback } from "./helpers";
@@ -37,6 +37,7 @@ async function setup(tx: DbTx) {
     tagSlugs: ["family-friendly"],
     ticketUrl: null,
     moreInfoUrl: "https://fair.example/2027",
+    dailyHours: [],
   };
   const source = { url: "https://fair.example/2027", checkedAt: "2027-09-01", verifiedBy: "owner" as const, confirmed: "Oct 15-18, 2027, free" };
   return { venue, category, facts, source };
@@ -112,6 +113,26 @@ describe("review queue", () => {
       expect(await rejectProposal(tx, r.id, { actor: OWNER, reason: "duplicate" })).toMatchObject({ status: "rejected", decisionNote: "duplicate" });
       const logs = await tx.select().from(agentActions).where(and(eq(agentActions.entityType, "event_proposal"), eq(agentActions.entityId, r.id)));
       expect(logs.map((l) => l.action).sort()).toEqual(["insert", "update"]);
+    });
+  });
+
+  it("stores per-day hours in UTC on approval, and refuses days outside the event", async () => {
+    await inRollback(async (tx) => {
+      const { facts, source } = await setup(tx);
+      const dailyHours = [
+        { day: "2027-10-15", opens: "08:00", closes: "17:00" },
+        { day: "2027-10-18", opens: "08:00", closes: "16:00" },
+      ];
+      const p = await createProposal(tx, { facts: { ...facts, dailyHours }, sources: [source], origin: "owner_form", reasons: ["owner_draft"] }, { actor: OWNER });
+      const { event } = await approveProposal(tx, p.id, { actor: OWNER });
+      const days = await tx.select().from(eventDays).where(eq(eventDays.eventId, event.id));
+      expect(days.map((d) => [d.day, d.opensAt?.toISOString(), d.closesAt?.toISOString()]).sort()).toEqual([
+        ["2027-10-15", "2027-10-15T13:00:00.000Z", "2027-10-15T22:00:00.000Z"],
+        ["2027-10-18", "2027-10-18T13:00:00.000Z", "2027-10-18T21:00:00.000Z"],
+      ]);
+      const [log] = await tx.select().from(agentActions).where(eq(agentActions.entityId, event.id));
+      expect((log.after as { days: unknown[] }).days).toHaveLength(2);
+      await expect(createProposal(tx, { facts: { ...facts, dailyHours: [{ day: "2027-10-20", opens: "08:00", closes: "17:00" }] }, sources: [source], origin: "owner_form", reasons: ["owner_draft"] }, { actor: OWNER })).rejects.toThrow(/outside the event's dates/);
     });
   });
 

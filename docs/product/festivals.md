@@ -48,12 +48,19 @@ anything uncertain waits in `/admin/review`, unpublished (fail closed).
    Built 2026-10-05: `/admin/review` (approve, edit and approve, reject with
    a reason, merge into an existing event, record a checked source, "Search
    the web"), `/admin/review/new` ("Add and publish" or "Save for review").
-   Approved events come from the never-fetched `owner` source.
+   Approved events come from the never-fetched `owner` source. The form
+   stores the end date and time and, when the page states them, per-day
+   hours (migration 0023, `event_days`; "same hours every day" or one line
+   per day), so festivals entered now need no re-entry when step 2 shows them.
 2. **Multi-day events:** parent and child events, per-day hours, range
    labels ("Oct 15–18", "Through Jan 1"), and weekend lists showing a
    festival once with "Day 2 of 4".
 3. **Annual events registry** with a verification report for sign-off,
-   including the season rule and the War Eagle pair test.
+   including the season rule and the War Eagle pair test. **County from
+   coordinates** (owner, 2026-10-05): each venue's county comes from the
+   Census geocoder's geographies lookup on its coordinates and is stored on
+   the venue; the town list is only a fallback. Backfill every existing
+   venue and report any outside Benton and Washington counties.
 4. **Publish gate**, organizers, and the "outside coverage area" flag.
 5. **Registry checker:** weekly official-page checks from 120 days before,
    "expected, not found yet" at 30 days, re-checks 7 days and 1 day before.

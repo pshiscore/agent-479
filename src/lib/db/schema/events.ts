@@ -3,6 +3,7 @@ import {
   type AnyPgColumn,
   boolean,
   check,
+  date,
   integer,
   index,
   numeric,
@@ -202,4 +203,27 @@ export const eventTags = pgTable(
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.eventId, t.tagId] }), index("event_tags_tag_idx").on(t.tagId)],
+).enableRLS();
+
+/**
+ * Per-day hours of a multi-day event, when its page states them (festivals
+ * step 1; shown from step 2). Times are UTC like every timestamp; the day is
+ * the Chicago calendar day.
+ */
+export const eventDays = pgTable(
+  "event_days",
+  {
+    id: id(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "restrict" }),
+    day: date("day").notNull(),
+    opensAt: timestamp("opens_at", { withTimezone: true }),
+    closesAt: timestamp("closes_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("event_days_event_day_uniq").on(t.eventId, t.day),
+    check("event_days_hours_check", sql.raw(`closes_at is null or opens_at is null or closes_at > opens_at`)),
+  ],
 ).enableRLS();

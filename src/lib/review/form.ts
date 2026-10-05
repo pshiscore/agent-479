@@ -1,4 +1,4 @@
-import type { ProposedEvent } from "@/lib/db/schema";
+import type { DailyHours, ProposedEvent } from "@/lib/db/schema";
 import { chicagoParts, chicagoToUtc, parseDate } from "@/lib/time";
 
 /**
@@ -6,6 +6,10 @@ import { chicagoParts, chicagoToUtc, parseDate } from "@/lib/time";
  * and times are entered in Chicago time (AGENTS.md rule 5) and stored in UTC.
  * No start time means an all-day event; an all-day event's end is the end of
  * its last day.
+ *
+ * Per-day hours, when the page states them: one line per day
+ * ("2026-10-15 08:00-17:00"), or "Same hours every day", which uses the start
+ * and end times for every day from the start date to the end date.
  */
 
 export type EventFormValues = Record<string, string | string[] | undefined>;
@@ -28,6 +32,27 @@ function at(date: string, time: string): Date {
 
 export class FormError extends Error {}
 
+const pad = (hm: string) => (hm.length === 4 ? `0${hm}` : hm);
+
+/** "2026-10-15 08:00-17:00" per line (an en dash or "to" works too). */
+export function parseDailyHours(text: string): DailyHours[] {
+  return text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const m = /^(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*(?:-|–|to)\s*(\d{1,2}:\d{2})$/.exec(line);
+      if (!m) throw new FormError(`daily hours: "${line}" should look like 2026-10-15 08:00-17:00`);
+      return { day: m[1], opens: pad(m[2]), closes: pad(m[3]) };
+    });
+}
+
+function eachDay(from: string, to: string): string[] {
+  const out: string[] = [];
+  for (let t = Date.parse(`${from}T12:00:00Z`); t <= Date.parse(`${to}T12:00:00Z`); t += 86_400_000) out.push(new Date(t).toISOString().slice(0, 10));
+  return out;
+}
+
 export function parseEventForm(v: EventFormValues): ProposedEvent {
   const startDate = one(v, "startDate");
   const startTime = one(v, "startTime");
@@ -43,6 +68,11 @@ export function parseEventForm(v: EventFormValues): ProposedEvent {
     endAt = at(endDate || startDate, endTime || "23:59");
   }
   const free = checked(v, "free");
+  let dailyHours = parseDailyHours(one(v, "dailyHours"));
+  if (checked(v, "sameHours")) {
+    if (allDay || !endTime || !endDate) throw new FormError("same hours every day needs a start time, an end date, and an end time");
+    dailyHours = eachDay(startDate, endDate).map((day) => ({ day, opens: startTime, closes: endTime }));
+  }
   return {
     title: one(v, "title"),
     startAt: at(startDate, startTime).toISOString(),
@@ -61,6 +91,7 @@ export function parseEventForm(v: EventFormValues): ProposedEvent {
     tagSlugs: many(v, "tags"),
     ticketUrl: one(v, "ticketUrl") || null,
     moreInfoUrl: one(v, "moreInfoUrl"),
+    dailyHours,
   };
 }
 
@@ -96,6 +127,7 @@ export function formValues(f: ProposedEvent): Record<string, string | string[]> 
     tags: f.tagSlugs,
     ticketUrl: f.ticketUrl ?? "",
     moreInfoUrl: f.moreInfoUrl,
+    dailyHours: (f.dailyHours ?? []).map((h) => `${h.day} ${h.opens ?? ""}-${h.closes ?? ""}`).join("\n"),
   };
 }
 

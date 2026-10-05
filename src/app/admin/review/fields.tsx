@@ -37,6 +37,13 @@ export function EventFields({ options, values = {} }: { options: EventFormOption
         </span>
         <span className={hint}>A multi-day festival: its last day (and closing time).</span>
       </label>
+      <div className={`${field} sm:col-span-2`}>
+        <span className={label}>Daily hours (optional, when the page states them)</span>
+        <label className="flex items-center gap-1.5">
+          <input type="checkbox" name="sameHours" value="1" /> Same hours every day (the start time to the end time, each day)
+        </label>
+        <textarea name="dailyHours" rows={3} defaultValue={val(values, "dailyHours")} placeholder={"Or one line per day:\n2026-10-15 08:00-17:00\n2026-10-18 08:00-16:00"} className={input} />
+      </div>
       <label className={field}>
         <span className={label}>Venue</span>
         <select name="venueId" required defaultValue={val(values, "venueId")} className={input}>

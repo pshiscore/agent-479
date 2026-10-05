@@ -47,6 +47,14 @@ export interface ProposedEvent {
   ticketUrl: string | null;
   // Where readers go for details: the official page.
   moreInfoUrl: string;
+  // Per-day hours when the page states them (Chicago wall times, "HH:MM").
+  dailyHours: DailyHours[];
+}
+
+export interface DailyHours {
+  day: string; // YYYY-MM-DD
+  opens: string | null;
+  closes: string | null;
 }
 
 /** A source behind a proposal: fetched by the agent (fetchedAt), or checked by the owner in the browser (verifiedBy). */

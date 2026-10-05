@@ -26,3 +26,27 @@ describe("event form", () => {
     expect(changedFields(f, { ...f, title: "War Eagle Fair 2026" })).toEqual({ title: "War Eagle Fair 2026" });
   });
 });
+
+describe("daily hours", () => {
+  const fair = { ...base, startDate: "2026-10-15", startTime: "08:00", endDate: "2026-10-18", endTime: "17:00" };
+
+  it("reads one line per day", () => {
+    expect(parseEventForm({ ...fair, dailyHours: "2026-10-15 08:00-17:00\n2026-10-18 8:00 – 16:00" }).dailyHours).toEqual([
+      { day: "2026-10-15", opens: "08:00", closes: "17:00" },
+      { day: "2026-10-18", opens: "08:00", closes: "16:00" },
+    ]);
+    expect(() => parseEventForm({ ...fair, dailyHours: "Thursday 8 to 5" })).toThrow(FormError);
+  });
+
+  it("fills every day with 'same hours every day'", () => {
+    const f = parseEventForm({ ...fair, sameHours: "1" });
+    expect(f.dailyHours.map((h) => h.day)).toEqual(["2026-10-15", "2026-10-16", "2026-10-17", "2026-10-18"]);
+    expect(f.dailyHours[0]).toEqual({ day: "2026-10-15", opens: "08:00", closes: "17:00" });
+    expect(() => parseEventForm({ ...fair, endTime: "", sameHours: "1" })).toThrow(/same hours/);
+  });
+
+  it("round-trips through formValues", () => {
+    const f = parseEventForm({ ...fair, dailyHours: "2026-10-16 09:00-17:00" });
+    expect(parseEventForm(formValues(f))).toEqual(f);
+  });
+});

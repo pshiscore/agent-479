@@ -9,6 +9,7 @@ import {
   type ProposedEvent,
   PROPOSAL_ORIGINS,
   REVIEW_REASONS,
+  eventDays,
   eventSources,
   events,
   eventTags,
@@ -20,6 +21,7 @@ import { priceText } from "@/lib/pipeline/enrich";
 import { CODE_SET_TAGS } from "@/lib/pipeline/enrich/classify";
 import { tokenSetRatio, trigramSimilarity } from "@/lib/pipeline/dedup/score";
 import { slugify } from "@/lib/slug";
+import { chicagoDate, chicagoToUtc, formatDate, parseDate } from "@/lib/time";
 import { isTicketingUrl } from "@/lib/ticketing";
 import { normalizeVenueName } from "@/lib/venues/normalize";
 
@@ -48,6 +50,8 @@ const url = z
   .url()
   .refine((u) => /^https?:\/\//.test(u), "must be a web address");
 const iso = z.iso.datetime({ offset: true });
+const chicagoDay = (d: Date) => formatDate(chicagoDate(d));
+const wall = (day: string, hm: string | null) => (hm ? chicagoToUtc(parseDate(day), { hour: Number(hm.slice(0, 2)), minute: Number(hm.slice(3)) }) : null);
 
 /** The facts an approved event needs. A proposal may lack venue or category until the owner fills them in. */
 export const proposedEventSchema = z
@@ -69,12 +73,31 @@ export const proposedEventSchema = z
     tagSlugs: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(10),
     ticketUrl: url.nullable(),
     moreInfoUrl: url,
+    dailyHours: z
+      .array(
+        z.object({
+          day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          opens: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+          closes: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+        }),
+      )
+      .max(60)
+      .default([]),
   })
   .superRefine((f, ctx) => {
     if (f.endAt && Date.parse(f.endAt) < Date.parse(f.startAt)) ctx.addIssue({ code: "custom", path: ["endAt"], message: "the end is before the start" });
     if (f.ageMin !== null && f.ageMax !== null && f.ageMax < f.ageMin) ctx.addIssue({ code: "custom", path: ["ageMax"], message: "age range is backwards" });
     if (f.priceMin !== null && f.priceMax !== null && f.priceMax < f.priceMin) ctx.addIssue({ code: "custom", path: ["priceMax"], message: "price range is backwards" });
     if (f.isFree && (f.priceMin ?? 0) > 0) ctx.addIssue({ code: "custom", path: ["isFree"], message: "free, but with a price" });
+    const first = chicagoDay(new Date(f.startAt));
+    const last = f.endAt ? chicagoDay(new Date(f.endAt)) : first;
+    const seen = new Set<string>();
+    for (const h of f.dailyHours) {
+      if (seen.has(h.day)) ctx.addIssue({ code: "custom", path: ["dailyHours"], message: `${h.day} is listed twice` });
+      seen.add(h.day);
+      if (h.day < first || h.day > last) ctx.addIssue({ code: "custom", path: ["dailyHours"], message: `${h.day} is outside the event's dates (${first} to ${last})` });
+      if (h.opens && h.closes && h.closes <= h.opens) ctx.addIssue({ code: "custom", path: ["dailyHours"], message: `${h.day} closes before it opens` });
+    }
     for (const t of f.tagSlugs) if (CODE_SET_TAGS.has(t)) ctx.addIssue({ code: "custom", path: ["tagSlugs"], message: `"${t}" is set from the facts, not picked` });
   });
 
@@ -236,6 +259,12 @@ export async function approveProposal(db: DbExecutor, id: string, opts: { actor:
       .returning();
     const tagIds = await tagIdsFor(tx, f);
     if (tagIds.length) await tx.insert(eventTags).values(tagIds.map((tagId) => ({ eventId: event.id, tagId })));
+    const days = f.dailyHours.length
+      ? await tx
+          .insert(eventDays)
+          .values(f.dailyHours.map((h) => ({ eventId: event.id, day: h.day, opensAt: wall(h.day, h.opens), closesAt: wall(h.day, h.closes) })))
+          .returning()
+      : [];
     await tx.insert(eventSources).values({ eventId: event.id, sourceId, externalId: `proposal:${id}`, sourceUrl: f.moreInfoUrl, ticketUrl: f.ticketUrl, isPrimary: true, firstSeenAt: now, lastSeenAt: now });
     const edited = opts.edits && Object.keys(opts.edits).length > 0;
     await recordAction(tx, {
@@ -243,7 +272,7 @@ export async function approveProposal(db: DbExecutor, id: string, opts: { actor:
       action: "insert",
       entityType: "event",
       entityId: event.id,
-      after: { ...event, tagIds, _meta: { proposalId: id, sources: before.sources } },
+      after: { ...event, tagIds, days, _meta: { proposalId: id, sources: before.sources } },
       reason: `Approved from review${edited ? " with edits" : ""}: ${opts.note || "no note"}`,
     });
     const proposal = await decide(tx, before, { status: "approved", eventId: event.id, facts: f, decisionNote: opts.note || null }, {
