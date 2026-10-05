@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeSwitch } from "./theme-switch";
 
 /** Site header and footer (docs/product/front-page.md, A2). */
 
@@ -31,6 +32,9 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        <div className="ml-auto">
+          <ThemeSwitch />
+        </div>
       </div>
     </header>
   );

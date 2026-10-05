@@ -74,8 +74,10 @@ imports it.
    convention is deprecated).
 10. **Production stays locked and quiet until launch.** `SITE_LOCKED`
     (production is locked unless it's exactly "false"): every page needs the
-    preview login except `/bot` and `/robots.txt`, `/admin` always needs the
-    admin login, and responses are noindex. `CRON_ENABLED` must be exactly
+    preview login except `/bot` and `/robots.txt`, and `/admin` always needs
+    the admin login. Search engines are a separate switch: noindex (and a
+    Disallow-all robots.txt) stays unless the site is unlocked, in
+    production, and `SITE_INDEXING` is exactly "true". `CRON_ENABLED` must be exactly
     "true" for any scheduled job to run. Development and production databases
     never cross (`src/lib/db/target.ts`): the Supabase project is production
     only; development, scripts, and tests use local Postgres

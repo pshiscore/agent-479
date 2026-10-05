@@ -28,8 +28,24 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
   page, with a short summary of the weekend (for example how many events, a
   few highlights by rule) and a link to the full digest. Email sign-up and
   delivery come later.
-- **Filter bar** under the header: City, Category, Free, Family-friendly,
-  21+, En español, and "Show recurring".
+- **Filter chips** under the header (owner, 2026-10-04; replaces the filter
+  bar). The logic and URL parameters are unchanged; only the look and the
+  interaction changed.
+  - Dropdown chips: City, Category, Venue type. Selected, a chip turns green
+    and shows the value with an x to clear it.
+  - Toggle chips: Free, Family-friendly, 21+, En español, with a check when
+    on.
+  - A "Show recurring" switch at the right.
+  - "<n> events" on listing pages; "Clear all" only when a filter is on.
+  - Every chip is a link to the filtered URL. Chips apply at once with a soft
+    navigation that keeps the scroll position, and they work without
+    JavaScript. Menus are `<details>` with keyboard support (arrows, Escape
+    returns focus).
+  - On phones the chips sit behind a sticky "Filters (n)" button that drops
+    them down, and menus open as bottom sheets.
+  - One component: `FilterChips` (`src/app/(site)/_components/filter-chips.tsx`).
+- **Theme switch** in the header: Auto (follows the device), Light, or Dark,
+  remembered in the browser.
 - **Main column:** "This weekend" as a day-by-day timeline (a dot and line
   per day; time, title, venue and city links, category and up to 3 tags,
   "More info", and an interested star).

@@ -8,7 +8,7 @@ import { byDay, type EventItem, eventById, filterOptions, foldRecurring, listEve
 import { chicagoToUtc, parseDate, weekendWindow } from "@/lib/time";
 import { SectionTitle } from "./_components/chrome";
 import { Actions, Chips, DayTimeline, Place } from "./_components/events";
-import { FilterBar } from "./_components/filter-bar";
+import { FilterChips } from "./_components/filter-chips";
 import { agesLine, isoDay, longWhen, shortDate, timeOf } from "./_components/format";
 
 /** The front page (docs/product/front-page.md, layout A2, sections B). */
@@ -102,7 +102,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <>
-      <FilterBar action="/upcoming" filters={{}} options={options} />
+      <FilterChips base="/upcoming" filters={{}} options={{ cities: options.cities.map((c) => ({ value: c.slug, label: c.name })), categories: options.categories.map((c) => ({ value: c.slug, label: c.name })) }} />
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section aria-labelledby="this-weekend">
           {/* On phones the feature leads the page; on wide screens it sits in the right column. */}

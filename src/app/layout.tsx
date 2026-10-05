@@ -13,9 +13,16 @@ export const metadata: Metadata = {
   description: "Things to do in Northwest Arkansas: Bentonville, Rogers, Springdale, Fayetteville, and Bella Vista.",
 };
 
+// Applies a saved Light/Dark choice before the first paint (ThemeSwitch sets it).
+const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} ${anton.variable} h-full antialiased`}>
+    // The theme script may set data-theme before React hydrates.
+    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} ${anton.variable} h-full antialiased`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

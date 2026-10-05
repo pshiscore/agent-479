@@ -15,7 +15,7 @@ export default defineConfig({
   ...sharedConfig,
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
     exclude: ["tests/db/**", "node_modules/**"],
     // Every date/time test must pass regardless of the machine's local zone.
     env: { TZ: "UTC" },

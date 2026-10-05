@@ -13,8 +13,11 @@ import { createHash, timingSafeEqual } from "node:crypto";
  *   cron routes (they check CRON_SECRET themselves), Next's static build
  *   files, and the site icons (so even the locked site and /bot show them).
  * - Production is locked unless SITE_LOCKED is exactly "false"; everywhere
- *   else it's locked only when SITE_LOCKED is "true". While locked, and on
- *   every non-production deployment, responses carry X-Robots-Tag: noindex.
+ *   else it's locked only when SITE_LOCKED is "true".
+ * - Search engines are a separate switch (owner, 2026-10-04): responses carry
+ *   X-Robots-Tag: noindex unless the site is unlocked, in production, and
+ *   SITE_INDEXING is exactly "true". Unlocking alone shares the site without
+ *   inviting search engines.
  */
 
 export interface AccessEnv {
@@ -25,6 +28,7 @@ export interface AccessEnv {
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD?: string;
   VERCEL_ENV?: string;
+  SITE_INDEXING?: string;
 }
 
 export type AccessDecision =
@@ -40,6 +44,11 @@ const ADMIN_PATHS = [/^\/admin(\/|$)/, /^\/api\/admin(\/|$)/];
 
 export function isProduction(env: AccessEnv): boolean {
   return env.VERCEL_ENV === "production";
+}
+
+/** Search engines may index only an unlocked production site with SITE_INDEXING=true. */
+export function isIndexable(env: AccessEnv): boolean {
+  return isProduction(env) && !isSiteLocked(env) && env.SITE_INDEXING === "true";
 }
 
 export function isSiteLocked(env: AccessEnv): boolean {
@@ -73,7 +82,7 @@ export function isAdminAuthorization(authorization: string | null, env: AccessEn
 
 export function decideAccess(pathname: string, authorization: string | null, env: AccessEnv): AccessDecision {
   const locked = isSiteLocked(env);
-  const noindex = locked || !isProduction(env);
+  const noindex = !isIndexable(env);
   const creds = parseBasicAuth(authorization);
   const admin = matches(creds, env.ADMIN_USERNAME, env.ADMIN_PASSWORD);
 

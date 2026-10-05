@@ -58,8 +58,10 @@ describe("decideAccess", () => {
     expect(decideAccess("/", basic("", ""), { ...PROD, SITE_PREVIEW_USER: "", SITE_PREVIEW_PASSWORD: "" })).toMatchObject({ allow: false, status: 503 });
   });
 
-  it("opens the site once unlocked, indexable in production only", () => {
-    expect(decideAccess("/", null, { ...PROD, SITE_LOCKED: "false" })).toEqual({ allow: true, noindex: false });
+  it("opens the site once unlocked, but keeps search engines out until SITE_INDEXING=true", () => {
+    expect(decideAccess("/", null, { ...PROD, SITE_LOCKED: "false" })).toEqual({ allow: true, noindex: true });
+    expect(decideAccess("/", null, { ...PROD, SITE_LOCKED: "false", SITE_INDEXING: "true" })).toEqual({ allow: true, noindex: false });
+    expect(decideAccess("/", null, { ...PROD, SITE_INDEXING: "true" })).toMatchObject({ noindex: true }); // still locked
     expect(decideAccess("/", null, { VERCEL_ENV: "preview" })).toEqual({ allow: true, noindex: true });
     expect(decideAccess("/", null, {})).toEqual({ allow: true, noindex: true });
   });

@@ -4,7 +4,7 @@ import { filterQuery, parseFilters } from "@/lib/site/filters";
 import { byDay, type Filters, filterOptions, foldRecurring, listEvents } from "@/lib/site/queries";
 import { chicagoToUtc, parseDate } from "@/lib/time";
 import { DayTimeline, SeriesRows } from "./events";
-import { FilterBar } from "./filter-bar";
+import { FilterChips } from "./filter-chips";
 import { isoDay, shortDate } from "./format";
 
 /**
@@ -55,7 +55,14 @@ export async function Listing({
 
   return (
     <>
-      <FilterBar action={path} filters={userFilters} options={options} hide={hide} />
+      <FilterChips
+        base={path}
+        filters={userFilters}
+        keep={{ from: one(params.from), days: one(params.days) }}
+        hide={hide}
+        count={items.length}
+        options={{ cities: options.cities.map((c) => ({ value: c.slug, label: c.name })), categories: options.categories.map((c) => ({ value: c.slug, label: c.name })) }}
+      />
       <div className="mx-auto w-full max-w-6xl px-4 py-8">
         <h1 className="font-display text-4xl font-extrabold text-brand">{heading}</h1>
         {subheading && <div className="mt-2 text-muted">{subheading}</div>}
