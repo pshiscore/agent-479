@@ -32,6 +32,9 @@ export const FEATURE_RULES = {
 /** "This weekend" variety (section B2): at most this many per venue, and in all. */
 export const WEEKEND_LIMITS = { perVenue: 2, total: 14 } as const;
 
+/** "This week" (owner, 2026-10-04): today and the next 6 days, with the same kind of caps. */
+export const WEEK_LIMITS = { perVenue: 3, total: 24 } as const;
+
 /** Lists (section B4): rule-based collections, each a filtered view. */
 export const LISTS = [
   { slug: "free", name: "Free", blurb: "Events whose own listing says they're free.", tag: "free", days: null },

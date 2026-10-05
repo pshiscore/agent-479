@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { LISTS, WEEKEND_LIMITS } from "@/config/front-page";
+import { LISTS, WEEK_LIMITS, WEEKEND_LIMITS } from "@/config/front-page";
 import { getDb } from "@/lib/db/client";
 import { currentFeatureEventId } from "@/lib/pipeline/feature";
 import { venuePath } from "@/lib/routes";
 import { byDay, type EventItem, eventById, filterOptions, foldRecurring, listEvents, weekendVariety } from "@/lib/site/queries";
-import { weekendWindow } from "@/lib/time";
+import { chicagoToUtc, parseDate, weekendWindow } from "@/lib/time";
 import { SectionTitle } from "./_components/chrome";
 import { Actions, Chips, DayTimeline, Place } from "./_components/events";
 import { FilterBar } from "./_components/filter-bar";
@@ -51,8 +51,9 @@ function shelf(items: EventItem[]) {
   return cards;
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: PageProps<"/">) {
   await connection();
+  const when = (await searchParams).when === "week" ? "week" : "weekend";
   const db = getDb();
   const now = new Date();
   const all = await listEvents(db, { from: now, to: new Date(now.getTime() + 180 * DAY) });
@@ -61,10 +62,15 @@ export default async function Home() {
   // This weekend: the current one while anything in it is still ahead, else the coming one.
   let weekend = weekendWindow(now);
   if (!all.some((e) => e.startAt < weekend.endUtc)) weekend = weekendWindow(weekend.endUtc);
-  const from = new Date(Math.max(now.getTime(), weekend.startUtc.getTime()));
-  const weekendAll = all.filter((e) => e.startAt >= from && e.startAt < weekend.endUtc);
-  const { events: weekendEvents, series: weekendSeries } = foldRecurring(weekendAll, false);
-  const { shown, hidden } = weekendVariety(weekendEvents, WEEKEND_LIMITS);
+  // This week: today and the next 6 days (Chicago days).
+  const todayStart = chicagoToUtc(parseDate(isoDay(now)));
+  const week = { startUtc: todayStart, endUtc: new Date(todayStart.getTime() + 7 * DAY) };
+  const range = when === "week" ? week : weekend;
+  const from = new Date(Math.max(now.getTime(), range.startUtc.getTime()));
+  const rangeAll = all.filter((e) => e.startAt >= from && e.startAt < range.endUtc);
+  const { events: rangeEvents, series: rangeSeries } = foldRecurring(rangeAll, false);
+  const { shown, hidden } = weekendVariety(rangeEvents, when === "week" ? WEEK_LIMITS : WEEKEND_LIMITS);
+  const seeAll = when === "week" ? `/upcoming?from=${isoDay(now)}&days=7` : `/upcoming?from=${weekend.periodStart}&days=3`;
 
   // Feature: the current choice from the process job, if it's still upcoming and visible.
   const featureId = await currentFeatureEventId(db);
@@ -105,24 +111,43 @@ export default async function Home() {
               <Feature e={feature} />
             </div>
           )}
-          <SectionTitle id="this-weekend">This weekend</SectionTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <SectionTitle id="this-weekend">{when === "week" ? "This week" : "This weekend"}</SectionTitle>
+            <nav aria-label="When" className="flex rounded-md border border-line p-0.5 text-sm font-semibold">
+              {(
+                [
+                  ["weekend", "This weekend", "/#this-weekend"],
+                  ["week", "This week", "/?when=week#this-weekend"],
+                ] as const
+              ).map(([key, label, href]) => (
+                <Link
+                  key={key}
+                  href={href}
+                  aria-current={when === key ? "page" : undefined}
+                  className={`rounded px-3 py-1 ${when === key ? "bg-accent text-accent-ink" : "hover:text-accent"}`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
           <p className="mt-2 text-sm text-muted">
-            {shortDate(weekend.startUtc)} to {shortDate(new Date(weekend.endUtc.getTime() - DAY))}
+            {shortDate(range.startUtc)} to {shortDate(new Date(range.endUtc.getTime() - DAY))}
           </p>
-          {shown.length === 0 && <p className="mt-6 text-muted">Nothing listed for this weekend yet.</p>}
+          {shown.length === 0 && <p className="mt-6 text-muted">Nothing listed for {when === "week" ? "this week" : "this weekend"} yet.</p>}
           {byDay(shown).map((d) => (
             <DayTimeline key={d.day} date={d.date} items={d.items} />
           ))}
           <p className="mt-4 text-sm">
-            <Link href={`/upcoming?from=${weekend.periodStart}&days=3${weekendSeries.length ? "&recurring=1" : ""}`} className="font-semibold underline underline-offset-4">
-              See everything this weekend
+            <Link href={`${seeAll}${rangeSeries.length ? "&recurring=1" : ""}`} className="font-semibold underline underline-offset-4">
+              See everything {when === "week" ? "this week" : "this weekend"}
             </Link>
-            {hidden + weekendSeries.length > 0 ? (
+            {hidden + rangeSeries.length > 0 ? (
               <span className="text-muted">
                 {" "}
                 ({hidden > 0 ? `${hidden} more` : ""}
-                {hidden > 0 && weekendSeries.length > 0 ? ", " : ""}
-                {weekendSeries.length > 0 ? `${weekendSeries.length} weekly programs` : ""})
+                {hidden > 0 && rangeSeries.length > 0 ? ", " : ""}
+                {rangeSeries.length > 0 ? `${rangeSeries.length} weekly programs` : ""})
               </span>
             ) : null}
           </p>

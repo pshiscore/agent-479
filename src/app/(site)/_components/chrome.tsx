@@ -13,6 +13,7 @@ export function Logo() {
 
 const NAV = [
   ["/#this-weekend", "This weekend"],
+  ["/?when=week#this-weekend", "This week"],
   ["/upcoming", "Upcoming"],
   ["/venues", "Venues"],
   ["/#lists", "Lists"],

@@ -54,8 +54,11 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
      newly announced in the last 7 days, then the large-venue tier.
    - It shows event facts only, with no generated story text.
    - Each choice is logged with the rule that selected it.
-2. **This weekend:** a scannable Friday-to-Sunday list, with variety rules:
-   at most 2 per venue, spread across cities and categories.
+2. **This weekend / This week** (owner, 2026-10-04: both): a switch at the
+   top of the section. "This weekend" is Friday to Sunday (the coming one
+   once the current one is over); "This week" is today and the next 6 days.
+   Variety rules: at most 2 per venue on the weekend (3 for the week),
+   spread across cities and categories.
 3. **Just announced:** generated stories about newly announced events.
    *Moved to Phase 1b (owner, 2026-10-04); not part of step 18.*
 4. **Lists:** rule-based collections such as "Free this weekend",
