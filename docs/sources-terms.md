@@ -176,3 +176,21 @@ open" needs a source confirming the opening.
   Arkansas Business. Springdale permits need a request (bot challenge).
 - Expect a thin section at launch (a handful of items a month), so keep the
   hide-when-empty rule.
+
+---
+
+## Festivals: discovery calendars (review 2026-10-05)
+
+Research only; nothing is built. robots.txt and pages were read once with
+the honest user agent; terms were found through web search or the site.
+Two sites blocked us, and we stopped at the first refusal (a block means
+stop): no retry with another tool, user agent, or route.
+
+| Source | Finding | Status |
+|---|---|---|
+| Experience Fayetteville (`experiencefayetteville.com`) | robots.txt allows (only system folders disallowed). The `/calendar` page is still a Vibemap embed (`vibemap.com/fayetteville-events`), a third-party aggregator. No terms of use; the privacy policy is the only legal page. Its own festival pages (it presents Lights of the Ozarks) are first-party. | Calendar: skip (aggregator). Its own festival pages: usable as registry official pages after a test fetch. |
+| Visit Bentonville (`visitbentonville.com`) | robots.txt allows, Crawl-delay 2. Simpleview RSS at `/event/rss/` (200). No terms page (`/terms-of-use/` is 404); privacy policy only. An aggregator of other organizers' events. | Unchanged from 2026-10-03: ask first. |
+| Destination Rogers (`visitrogersarkansas.com` redirects to `destinationrogers.com`) | **Blocked:** robots.txt returned 403 with a Cloudflare bot challenge page. | Blocked. Stopped; ask for a feed or permission. |
+| Fayetteville Flyer (`fayettevilleflyer.com`) | robots.txt allows (200), but **every page returned 403** to our user agent, including the terms, privacy, and calendar URLs. | Blocked. Stopped; ask for permission. |
+| Eventbrite | Public event search was removed in February 2020; only organizer, venue, and event-by-ID endpoints remain (OAuth token, 1,000 calls an hour). API Terms of Use: show the event title and a direct, crawlable Eventbrite link (no `nofollow`); say we aren't affiliated with Eventbrite; store content for future events only (delete it once the event has passed); no use "in a product or service that competes with" Eventbrite. The site terms bar commercial use of site content. | Not approved. Organizer-level only, and only if the owner accepts the "competes" risk. |
+| Facebook | Meta's terms prohibit automated collection. | Excluded. Owner-verified entries only. |

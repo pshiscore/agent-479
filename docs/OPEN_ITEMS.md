@@ -7,6 +7,7 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 
 | # | Item | Raised | Blocks |
 |---|---|---|---|
+| 21 | **Festivals plan:** decisions on the plan of 2026-10-05 (blocked: Destination Rogers and the Fayetteville Flyer; Visit Bentonville permission; Eventbrite; coverage area for Eureka Springs). See `docs/sources-terms.md`, festivals review. | 2026-10-05 | Festivals build |
 | 20 | **Step 18 review:** look at https://479.guide (preview login) on a phone and a computer; tell me what to change. Also confirm the **large-venue list** for the feature rule (`src/config/front-page.ts`: Walmart AMP, Bud Walton Arena, Razorback Stadium, Baum-Walker Stadium, Arvest Ballpark, Barnhill Arena, Walton Arts Center, Ozark Music Hall); it's my proposal, since we have no capacity data. | 2026-10-04 | Step 18 approval |
 | 19 | **New in Town (to do):** permission emails to Talk Business & Politics, the Rogers-Lowell, Fayetteville, and Greater Bentonville chambers (ribbon-cutting list or feed), and Arkansas Business; a feed request to Springdale for permits. Then build the lead-and-confirm flow (`docs/sources-terms.md`, openings review). | 2026-10-04 | New in Town content |
 | 18 | **Step 17:** approve deploying the dedup review page (branch `step-17-dedup-review`, no migration). Then label the ~30 pairs at https://479.guide/admin/dedup-review. After that I export the labels, run `eval:dedup`, propose thresholds, and you decide which sources go live. | 2026-10-04 | Dedup thresholds; merging in live mode |
