@@ -8,3 +8,4 @@ export * from "./raw-records";
 export * from "./events";
 export * from "./dedup";
 export * from "./front-page";
+export * from "./places";

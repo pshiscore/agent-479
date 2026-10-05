@@ -5,6 +5,7 @@ import { z } from "zod";
 import { rollbackAction } from "@/lib/actions/rollback";
 import { requireAdmin } from "@/lib/admin/auth";
 import { labelPair } from "@/lib/admin/dedup-review";
+import { confirmSource, createPlace, hidePlace, linkVenue, type PlaceInput, publishPlace, updatePlace } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
 import { getDb } from "@/lib/db/client";
 
@@ -64,6 +65,120 @@ export async function labelDedupPair(formData: FormData) {
     target = back("/admin/dedup-review", { msg: `Labeled ${label}.` });
   } catch (err) {
     target = back("/admin/dedup-review", { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+// ---- New in Town (places) ----
+
+const str = (f: FormData, k: string) => {
+  const v = f.get(k);
+  return typeof v === "string" ? v : "";
+};
+
+function placeInput(f: FormData): PlaceInput {
+  return {
+    name: str(f, "name"),
+    placeType: str(f, "placeType") as PlaceInput["placeType"],
+    kind: str(f, "kind") as PlaceInput["kind"],
+    address: str(f, "address"),
+    addressKind: (str(f, "addressKind") || "street") as PlaceInput["addressKind"],
+    city: str(f, "city"),
+    postalCode: str(f, "postalCode"),
+    opened: str(f, "opened"),
+    openedQualifier: str(f, "openedQualifier"),
+    target: str(f, "target"),
+    targetQualifier: str(f, "targetQualifier"),
+    website: str(f, "website"),
+    sourceUrl: str(f, "sourceUrl"),
+    confirmed: str(f, "confirmed"),
+    notes: str(f, "notes"),
+    openToPublic: f.get("openToPublic") === "1" ? true : null,
+  };
+}
+
+export async function addPlace(formData: FormData) {
+  const actor = await requireAdmin();
+  let target: string;
+  try {
+    const row = await createPlace(getDb(), placeInput(formData), { actor, ownerVerified: true, reason: "Added by the owner (owner-verified source)" });
+    target = back(`/admin/places/${row.id}`, { msg: "Saved as a draft." });
+  } catch (err) {
+    target = back("/admin/places/new", { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function editPlace(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad place id");
+    const before = placeInput(formData);
+    // The edit form carries no source fields; keep openToPublic as it is (confirmed separately).
+    const keep = formData.get("openToPublicCurrent");
+    await updatePlace(getDb(), id.data, { ...before, sourceUrl: undefined, openToPublic: keep === "true" ? true : keep === "false" ? false : null }, { actor, reason: "Edited by the owner" });
+    target = back(`/admin/places/${id.data}`, { msg: "Saved." });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function confirmPlaceSource(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad place id");
+    await confirmSource(getDb(), id.data, { actor, url: str(formData, "url"), confirmed: str(formData, "confirmed"), openToPublic: formData.get("openToPublic") === "1" });
+    target = back(`/admin/places/${id.data}`, { msg: "Source recorded as owner-verified." });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function publishPlaceAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad place id");
+    const p = await publishPlace(getDb(), id.data, { actor, note: str(formData, "note") || "Published by the owner" });
+    target = back(`/admin/places/${id.data}`, { msg: `Published (${p.status === "open" ? "now open" : "opening soon"}).` });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: message(err) });
+  }
+  redirect(target);
+}
+
+export async function hidePlaceAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad place id");
+    await hidePlace(getDb(), id.data, { actor, reason: str(formData, "reason") });
+    target = back(`/admin/places/${id.data}`, { msg: "Hidden." });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function linkPlaceVenue(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  const venueId = formData.get("venueId") ? uuid.safeParse(formData.get("venueId")) : null;
+  let target: string;
+  try {
+    if (!id.success || (venueId && !venueId.success)) throw new Error("bad request");
+    await linkVenue(getDb(), id.data, venueId?.data ?? null, { actor, reason: str(formData, "reason") || "Owner confirmed the match" });
+    target = back(`/admin/places/${id.data}`, { msg: venueId ? "Venue linked." : "Venue link removed." });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not saved: ${message(err)}` });
   }
   redirect(target);
 }

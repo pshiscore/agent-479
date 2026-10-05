@@ -22,6 +22,7 @@ describe("schema", () => {
         "homepage_features",
         "events",
         "link_policies",
+        "places",
         "llm_calls",
         "llm_models",
         "raw_records",

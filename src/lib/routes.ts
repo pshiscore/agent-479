@@ -27,6 +27,7 @@ export const RESERVED_ROOT_SEGMENTS = [
   "venues",
   "lists",
   "new",
+  "place",
   "feeds",
   "tags",
   "series",

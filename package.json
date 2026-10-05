@@ -31,7 +31,8 @@
     "eval:blind-export": "tsx scripts/eval-blind-export.ts",
     "check:descriptions": "tsx scripts/check-descriptions.ts",
     "dedup:export-labels": "tsx scripts/dedup-export-labels.ts",
-    "eval:dedup": "tsx scripts/eval-dedup.ts"
+    "eval:dedup": "tsx scripts/eval-dedup.ts",
+    "places:seed-drafts": "tsx scripts/seed-place-drafts.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",
