@@ -20,6 +20,11 @@ const REQUIRED_KEYS = [
   "SITE_PREVIEW_PASSWORD",
   "SITE_INDEXING",
   "CRON_ENABLED",
+  "BACKUP_AGE_RECIPIENT",
+  "R2_ACCOUNT_ID",
+  "R2_ACCESS_KEY_ID",
+  "R2_SECRET_ACCESS_KEY",
+  "R2_BUCKET",
 ];
 
 function parseKeys(contents: string): Map<string, string> {

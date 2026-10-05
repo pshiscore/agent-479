@@ -6,11 +6,13 @@ import { existsSync, readFileSync } from "node:fs";
  * pg_dump file in the gitignored `backups/` folder, logged as one row in
  * docs/BACKUPS.md (committed). A production migration refuses to run unless
  * a logged backup from the last BACKUP_MAX_AGE_MINUTES exists on disk with a
- * matching checksum.
+ * matching checksum, and has a verified off-site copy (src/lib/db/offsite.ts;
+ * the row's note says "off-site: r2:<bucket>/<key> sha256 <hex>").
  */
 
 export const BACKUP_LOG = "docs/BACKUPS.md";
 export const BACKUP_MAX_AGE_MINUTES = 120;
+export const PRUNE_LOG = "docs/BACKUPS-PRUNED.md";
 
 export interface BackupRow {
   takenAt: Date;
@@ -18,14 +20,17 @@ export interface BackupRow {
   bytes: number;
   sha256: string;
   before: string;
+  /** "r2:<bucket>/<key>" once the encrypted copy was uploaded and read back. */
+  offsite: string | null;
 }
 
 /** Log rows look like: | 2026-10-04T22:36Z | backups/x.dump | 1284176 | <sha256> | 0017 | note | */
 export function parseBackupLog(text: string): BackupRow[] {
   const rows: BackupRow[] = [];
   for (const line of text.split("\n")) {
-    const m = /^\|\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z)\s*\|\s*(backups\/\S+)\s*\|\s*(\d+)\s*\|\s*([0-9a-f]{64})\s*\|\s*([^|]+?)\s*\|/.exec(line);
-    if (m) rows.push({ takenAt: new Date(m[1].replace("Z", ":00Z")), file: m[2], bytes: Number(m[3]), sha256: m[4], before: m[5] });
+    const m = /^\|\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z)\s*\|\s*(backups\/\S+)\s*\|\s*(\d+)\s*\|\s*([0-9a-f]{64})\s*\|\s*([^|]+?)\s*\|([^|]*)\|/.exec(line);
+    const offsite = m ? (/off-site: (r2:\S+) sha256 [0-9a-f]{64}/.exec(m[6])?.[1] ?? null) : null;
+    if (m) rows.push({ takenAt: new Date(m[1].replace("Z", ":00Z")), file: m[2], bytes: Number(m[3]), sha256: m[4], before: m[5], offsite });
   }
   return rows;
 }
@@ -41,6 +46,7 @@ export function recentBackup(
   const fresh = rows.filter((r) => now.getTime() - r.takenAt.getTime() <= BACKUP_MAX_AGE_MINUTES * 60_000 && r.takenAt <= now);
   if (fresh.length === 0) return { ok: false, reason: `no backup logged in ${BACKUP_LOG} in the last ${BACKUP_MAX_AGE_MINUTES} minutes; run npm run db:backup:prod -- --before <migration>` };
   const row = fresh.sort((a, b) => b.takenAt.getTime() - a.takenAt.getTime())[0];
+  if (!row.offsite) return { ok: false, reason: `${row.file} has no verified off-site copy; rerun npm run db:backup:prod` };
   if (!check.exists(row.file)) return { ok: false, reason: `${row.file} is logged but missing on disk` };
   if (check.sha256(row.file) !== row.sha256) return { ok: false, reason: `${row.file} doesn't match its logged checksum` };
   return { ok: true, row };

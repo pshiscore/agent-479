@@ -7,8 +7,19 @@ with `pg_restore --list`), and a row is appended here; commit it. A production
 migration refuses to run without a logged backup from the last 2 hours whose
 file is still on disk with a matching checksum (`src/lib/db/backups.ts`).
 
+Off-site (from 2026-10-06): the script also encrypts the dump with age to
+`BACKUP_AGE_RECIPIENT` (the owner's public key; the private key is in the
+owner's password manager), uploads it to the private R2 bucket under
+`prod/`, reads it back and compares SHA-256, deletes copies older than 30
+days (logged in `docs/BACKUPS-PRUNED.md`), and only then appends the row
+below, with `off-site: r2:<bucket>/<key> sha256 <encrypted hash>` in the
+note. Without a verified off-site copy, a production migration refuses.
+
 Restore (into a scratch database first):
-`pg_restore --no-owner --dbname <url> backups/<file>.dump`
+- From this machine: `pg_restore --no-owner --dbname <url> backups/<file>.dump`
+- From R2: `MIGRATE_PRODUCTION=yes npm run db:backup:fetch -- --key prod/<file>.dump.age --identity-file <key file>`,
+  then `pg_restore` as above. (Or with the age tool:
+  `age -d -i <key file> <file>.age > <file>.dump`.)
 
 ## History before the rule (2026-10-05)
 

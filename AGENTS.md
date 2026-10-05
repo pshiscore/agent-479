@@ -86,9 +86,14 @@ imports it.
 11. **Back up production before every migration** (owner, 2026-10-05).
     `MIGRATE_PRODUCTION=yes npm run db:backup:prod -- --before <migration>`
     writes a pg_dump to the gitignored `backups/` folder (outside the
-    database) and logs it in `docs/BACKUPS.md`; commit the log. A production
-    migration refuses to run without a logged backup from the last 2 hours
-    that's still on disk with a matching checksum (`src/lib/db/backups.ts`).
+    database), encrypts it with age to the owner's public key, uploads it to
+    a private Cloudflare R2 bucket, and reads it back to verify before
+    logging it in `docs/BACKUPS.md`; commit the log. Off-site copies older
+    than 30 days are deleted, logged in `docs/BACKUPS-PRUNED.md`. The private
+    key is never in the repo or env. A production migration refuses to run
+    without a logged backup from the last 2 hours that's still on disk with a
+    matching checksum and has a verified off-site copy
+    (`src/lib/db/backups.ts`, `src/lib/db/offsite.ts`).
 
 ## Product references
 

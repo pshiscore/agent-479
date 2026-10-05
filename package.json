@@ -16,6 +16,8 @@
     "db:studio": "drizzle-kit studio",
     "db:verify": "tsx scripts/db-verify.ts",
     "db:backup:prod": "tsx scripts/db-backup-prod.ts",
+    "db:backup:fetch": "tsx scripts/db-backup-fetch.ts",
+    "backup:keygen": "tsx scripts/backup-keygen.ts",
     "test:db": "vitest run --config vitest.db.config.mts",
     "db:seed:llm": "tsx scripts/seed-llm-models.ts",
     "llm:smoke": "tsx scripts/llm-smoke.ts",
@@ -45,10 +47,12 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1146.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.19.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "age-encryption": "^0.3.1",
     "dotenv": "^18.0.5",
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
