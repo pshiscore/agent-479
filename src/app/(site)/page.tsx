@@ -3,12 +3,14 @@ import { connection } from "next/server";
 import { LISTS, WEEK_LIMITS, WEEKEND_LIMITS } from "@/config/front-page";
 import { getDb } from "@/lib/db/client";
 import { currentFeatureEventId } from "@/lib/pipeline/feature";
-import { venuePath } from "@/lib/routes";
+import { recentOpenings } from "@/lib/places/public";
+import { newInTownPath, venuePath } from "@/lib/routes";
 import { byDay, type EventItem, eventById, filterOptions, foldRecurring, listEvents, weekendVariety } from "@/lib/site/queries";
 import { chicagoToUtc, parseDate, weekendWindow } from "@/lib/time";
 import { SectionTitle } from "./_components/chrome";
 import { Actions, Chips, DayTimeline, Place } from "./_components/events";
 import { FilterChips } from "./_components/filter-chips";
+import { PlaceRow } from "./_components/places";
 import { agesLine, isoDay, longWhen, shortDate, timeOf } from "./_components/format";
 
 /** The front page (docs/product/front-page.md, layout A2, sections B). */
@@ -34,6 +36,27 @@ function Feature({ e }: { e: EventItem }) {
       <div className="mt-4 [&_a]:border-white [&_a]:text-brand-ink [&_a:hover]:bg-white/10">
         <Actions e={e} />
       </div>
+    </section>
+  );
+}
+
+/** New in Town: the 5 most recent openings (section H). Hidden while there are none. */
+function NewInTown({ places }: { places: Awaited<ReturnType<typeof recentOpenings>> }) {
+  return (
+    <section aria-labelledby="new-in-town">
+      <h2 id="new-in-town" className="scroll-mt-6 font-display text-2xl font-extrabold text-brand">
+        New in Town
+      </h2>
+      <ul className="mt-2 divide-y divide-line border-y border-line">
+        {places.map((p) => (
+          <PlaceRow key={p.id} p={p} />
+        ))}
+      </ul>
+      <p className="mt-3 text-sm">
+        <Link href={newInTownPath()} className="font-semibold underline underline-offset-4">
+          See all new places
+        </Link>
+      </p>
     </section>
   );
 }
@@ -82,6 +105,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     const n = all.filter((e) => e.startAt.getTime() < until && e.tags.some((t) => t.slug === l.tag)).length;
     return { ...l, n, href: `/upcoming?tags=${l.tag}&recurring=1${l.days ? `&days=${l.days}` : "&days=31"}` };
   }).filter((l) => l.n > 0);
+
+  const openings = await recentOpenings(db, now, { limit: 5 });
 
   // At the library this week.
   const weekAhead = all.filter((e) => e.venue.type === "library" && e.startAt.getTime() < now.getTime() + 7 * DAY);
@@ -151,6 +176,12 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               </span>
             ) : null}
           </p>
+          {/* On phones and narrow screens New in Town follows the weekend list; on wide screens it sits in the right column. */}
+          {openings.length > 0 && (
+            <div className="mt-10 lg:hidden">
+              <NewInTown places={openings} />
+            </div>
+          )}
         </section>
 
         <aside className="grid content-start gap-8">
@@ -179,7 +210,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               </ul>
             </section>
           )}
-          {/* New in Town (section H) goes here once places are published; it hides while empty. */}
+          {openings.length > 0 && (
+            <div className="hidden lg:block">
+              <NewInTown places={openings} />
+            </div>
+          )}
         </aside>
       </div>
 

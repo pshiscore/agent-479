@@ -16,6 +16,7 @@ const NAV = [
   ["/#this-weekend", "This weekend"],
   ["/?when=week#this-weekend", "This week"],
   ["/upcoming", "Upcoming"],
+  ["/new", "New in Town"],
   ["/venues", "Venues"],
   ["/#lists", "Lists"],
 ] as const;

@@ -232,6 +232,12 @@ export async function cityBySlug(db: DbExecutor, slug: string) {
   return c ? { slug, name: c.city } : null;
 }
 
+/** Slugs of cities with a city page (cities that have venues), so other pages link only to ones that exist. */
+export async function citySlugs(db: DbExecutor): Promise<Set<string>> {
+  const rows = (await db.execute(sql`select distinct city from venues where active`)) as unknown as { city: string }[];
+  return new Set(rows.map((r) => slugify(r.city)));
+}
+
 export async function venuesByCity(db: DbExecutor, now: Date) {
   const rows = (await db.execute(sql`
     select v.slug, v.name, v.city, v.venue_type,

@@ -270,6 +270,20 @@ Whenever something new opens, it gets a factual card and its own page.
   owner-verified or approved source.
 - **Venue matching:** the admin form suggests matching venues by address and
   name; the owner confirms. Never linked automatically.
+- **Built (step 2, 2026-10-05):** `/new`, `/new/<category>`,
+  `/place/<slug>`, the homepage module, and the menu link
+  (`src/lib/places/public.ts`, `src/app/(site)/_components/places.tsx`).
+  Details settled in the build:
+  - The 6-month window starts on the 1st of the month 6 months back
+    (Chicago time), so "opened since April 2026" also holds for
+    month-precision dates.
+  - "Just opened" needs a stated day; a month-only date never qualifies.
+  - "Opening soon" places are listed in their own block on `/new` and on
+    each category page, never mixed into the openings.
+  - A place page lists only owner-checked sources, each with "Last
+    checked".
+  - Maps queries are "<name>, <address>, <city>, AR". schema.org markup has
+    a street address only when the address is a street address.
 
 ## G. Open questions for later
 

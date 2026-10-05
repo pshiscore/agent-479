@@ -45,3 +45,5 @@ export const cityPath = (slug: string) => `/${ENTITY_PREFIXES.city}/${slug}`;
 export const venuePath = (slug: string) => `/${ENTITY_PREFIXES.venue}/${slug}`;
 export const categoryPath = (slug: string) => `/${ENTITY_PREFIXES.category}/${slug}`;
 export const eventPath = (slug: string) => `/${ENTITY_PREFIXES.event}/${slug}`;
+export const placePath = (slug: string) => `/place/${slug}`;
+export const newInTownPath = (category?: string) => (category ? `/new/${category}` : "/new");
