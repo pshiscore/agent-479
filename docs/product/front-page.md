@@ -186,8 +186,9 @@ Whenever something new opens, it gets a factual card and its own page.
   - `/new/<category>` (e.g. `/new/restaurants`): places that opened in the
     last **6 months**, newest first. The heading is computed, never written:
     "Restaurants opened since <month>" with the count.
-  - `/place/<slug>`: each place's own page (entity namespace rule), opening
-    as an overlay from a list, the same way event pages will (step 19).
+  - `/place/<slug>`: each place's own page (entity namespace rule). Full
+    pages first; the overlay comes for events and places together in step
+    19 (owner, 2026-10-04).
   - **Homepage:** the sidebar module "New in Town" shows the 5 most recent
     openings from the same 6-month window (replacing the earlier 30-day
     homepage and 90-day /new rules).
@@ -198,7 +199,13 @@ Whenever something new opens, it gets a factual card and its own page.
   - Name, type (Bakery, Brewery, Coffee shop, ...), address, and city (links
     to `/city/<slug>`).
   - The opening date exactly as the source states it: "Opened Aug 10, 2026"
-    or "Opened June 2026" (day or month precision).
+    or "Opened June 2026" (day or month precision), with the source's own
+    qualifier in brackets when it has one: "Opened June 2026 (soft
+    opening)", "Opened Aug 18, 2026 (grand opening)".
+  - **Addresses:** a street address, or an intersection ("W McMillan Dr at W
+    Wedington Dr"), flagged internally as "street number unconfirmed" until
+    the owner supplies it. Food trucks are listed only when the source
+    states a home base, shown as "Based at <location>".
   - A label from the place's `kind`: New, New location (an existing business
     in a new spot), Moved (relocation), Reopened; plus "Just opened" when
     the opening date is within 30 days.
@@ -207,10 +214,17 @@ Whenever something new opens, it gets a factual card and its own page.
     generated-at timestamp). No menu items, ingredients, or features unless
     the source states them. Nothing beyond name and type stated: no
     description.
-  - Links: the official website; Directions (as for events, no map API);
-    "Reviews on Google Maps" (a plain link to the place on Google Maps: no
-    API calls, nothing stored); and the source link with a "Last checked"
-    date.
+  - Links: the official website; Directions; "Reviews on Google Maps" (a
+    plain link in Google's documented Maps URL format, searching by name and
+    address: no API, no key, nothing stored); and the source link with a
+    "Last checked" date. For intersection addresses, Directions and Maps
+    links search for the business name plus the intersection and city, so
+    Maps resolves to the business.
+  - **Directions, for places and events alike:** the link's default is a
+    Google Maps URL, which works on every device without JavaScript; a small
+    client-side enhancement switches it to Apple Maps on Apple devices.
+    Never decided by user agent on the server, so pages stay statically
+    cacheable.
   - schema.org markup (LocalBusiness and its food types) on place pages,
     with no ratings or reviews.
 - **No review content anywhere.** No Google or Yelp reviews, ratings, or
@@ -233,9 +247,13 @@ Whenever something new opens, it gets a factual card and its own page.
   venues, the two are linked.
 - **Every add, edit, publish, and hide is logged** like other agent actions.
 - **Admin:** an "Add a place" form (name, type, kind, address, city, opening
-  date exact or month, website, source URL, notes); owner entries are
-  owner-verified. Places can be saved as drafts (not public) and published
-  later.
+  date exact or month, website, source URL, notes, and a required "Open to
+  the public" checkbox); owner entries are owner-verified. Places can be
+  saved as drafts (not public) and published later. **A place can't be
+  published unless it's open to the public** and has a stated date and an
+  owner-verified or approved source.
+- **Venue matching:** the admin form suggests matching venues by address and
+  name; the owner confirms. Never linked automatically.
 
 ## G. Open questions for later
 

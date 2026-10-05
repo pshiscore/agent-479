@@ -123,6 +123,9 @@ anything else the model writes for readers. They're copied from section E of
 - **Images:** only from sources whose terms permit display, with the
   permission recorded per source. Never take images from venue or artist
   websites without permission.
+- **No review content anywhere** (owner, 2026-10-04). No Google, Yelp, or
+  other reviews, ratings, or review summaries are fetched, stored, shown, or
+  summarized. A plain "Reviews on Google Maps" link is the most we do.
 
 ## Fetching
 
