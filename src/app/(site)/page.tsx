@@ -179,7 +179,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               </ul>
             </section>
           )}
-          {/* What's new (section H) appears here once openings are collected; it hides while empty. */}
+          {/* New in Town (section H) goes here once places are published; it hides while empty. */}
         </aside>
       </div>
 

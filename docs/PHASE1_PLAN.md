@@ -656,7 +656,7 @@ See `.env.example`. Model names are deliberately not env vars.
     into series rows unless "Show recurring". "More info" links to the
     official listing until the event page (step 19). Ticketmaster events stay
     off public pages once unlocked until `TICKETMASTER_DISPLAY_APPROVED`.
-    Not yet: What's new (no sources), the digest banner (step 20), search and
+    Not yet: New in Town (planned separately), the digest banner (step 20), search and
     the interested star (Phase 1b).
     *Owner, 2026-10-04: add a venue-type filter (e.g. "At the library").
     Categories stay about what an event is, not where.*

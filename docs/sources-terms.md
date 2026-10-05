@@ -136,7 +136,7 @@ requests.
 
 ---
 
-## What's new (openings): candidate sources (review 2026-10-04)
+## New in Town (openings): candidate sources (review 2026-10-04)
 
 Research only, nothing built or fetched by the bot. Checked with web search
 and by reading robots.txt and terms pages; springdalear.gov (bot challenge)

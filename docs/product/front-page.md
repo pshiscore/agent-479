@@ -20,7 +20,8 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
 
 ## A2. Chosen layout (owner, 2026-10-04: option 2 of the mockups)
 
-- **Header:** the 479 Guide wordmark; This weekend, Upcoming, Venues, Lists;
+- **Header:** the 479 Guide wordmark; This weekend, This week, Upcoming,
+  New in Town, Venues, Lists;
   a search box. (No digest sign-up button: email delivery is for later.)
 - **Friday digest hero banner** (owner, 2026-10-04): the digest is posted
   every Friday morning and shown as a hero banner at the top of the front
@@ -33,10 +34,10 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
   per day; time, title, venue and city links, category and up to 3 tags,
   "More info", and an interested star).
 - **Right column:** the Feature card (date, title, venue and city, tags,
-  "More info", "Get tickets"); Lists (name and count); What's new (at most 5
-  items and a "See all new places" link to /new). Without a right column,
-  What's new goes directly after "This weekend"; on phones it follows the
-  weekend list.
+  "More info", "Get tickets"); Lists (name and count); New in Town (the 5
+  most recent openings and a "See all new places" link to /new). Without a
+  right column, New in Town goes directly after "This weekend"; on phones it
+  follows the weekend list.
 - **Full width below:** "At the library this week",
   "Further out" (date, title, time, venue, and a "See all upcoming" link to
   the full Upcoming view), then the footer ("479 Guide lists events from
@@ -65,7 +66,7 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
    "Family-friendly this week", and "New venues". No taste-based rankings.
 5. **At the library this week:** a collapsed shelf, so library programs don't
    crowd out everything else.
-6. **What's new:** factual cards for places that just opened or are about
+6. **New in Town:** factual cards for places that just opened or are about
    to (section H), in the right column under Lists, with a link to /new.
 7. **Upcoming:** all events by day, filterable by city, category, tag, and
    venue type.
@@ -170,29 +171,50 @@ These rules are also standing rules in `AGENTS.md`.
   assistants. Design URLs and filters with this in mind now.
 - **Search** covers events, venues, and stories, with tag and entity filters.
 
-## H. What's new (openings)
+## H. New in Town (openings)
 
-Owner, 2026-10-04: whenever something new opens, such as a restaurant or an
-attraction, it gets a factual card, and a longer "What's new" view lists
-openings over a longer period.
+Owner, 2026-10-04: "New in Town" replaces the name "What's new" everywhere.
+Whenever something new opens, it gets a factual card and its own page.
 
-- **Openings are places, not events.** They need their own records: name,
-  kind (restaurant, bar or brewery, attraction, shop, park, venue), address
-  and city, the date it opened, and the link to the source that says so.
-- **Facts only** (section E): "Opened October 2" is a fact; "a must-try new
-  spot" is not. No descriptions copied from the business, no reviews, no
-  ratings, and images only under the image rule.
-- **Every opening needs the owner's approval** before it appears: the agent
-  finds a candidate in a permitted source and logs a proposal; the owner
-  approves or rejects it in /admin/proposals.
-- **Sources need a terms review first,** like any source. Candidates:
-  chamber of commerce ribbon-cutting calendars, city and downtown
-  association announcements, and tourism sites' "new" listings. News sites
-  are out unless their terms allow it.
-- **Windows (owner, 2026-10-04):** 30 days on the homepage, 90 days on
-  `/new`, both counted from the opening date, not the date we found it.
-  The homepage shows at most 5 items; `/new` filters by city and kind. The
-  section hides when there's nothing new.
+- **Navigation:** This weekend, This week, Upcoming, **New in Town**, Venues,
+  Lists.
+- **Pages:**
+  - `/new`: the landing page, one block per category. Start with
+    **Restaurants** (cafes, bakeries, bars, breweries, and food trucks
+    included); later Shops, Venues, Outdoors. A category with no items is
+    hidden.
+  - `/new/<category>` (e.g. `/new/restaurants`): places that opened in the
+    last **6 months**, newest first. The heading is computed, never written:
+    "Restaurants opened since <month>" with the count.
+  - `/place/<slug>`: each place's own page (entity namespace rule), opening
+    as an overlay from a list, the same way event pages will (step 19).
+  - **Homepage:** the sidebar module "New in Town" shows the 5 most recent
+    openings from the same 6-month window (replacing the earlier 30-day
+    homepage and 90-day /new rules).
+- **Windows** count from the opening date, never the date we found it.
+- **A place appears only with a stated opening date from a source.** No
+  date, no listing.
+- **Place card and page:**
+  - Name, type (Bakery, Brewery, Coffee shop, ...), address, and city (links
+    to `/city/<slug>`).
+  - The opening date exactly as the source states it: "Opened Aug 10, 2026"
+    or "Opened June 2026" (day or month precision).
+  - A label from the place's `kind`: New, New location (an existing business
+    in a new spot), Moved (relocation), Reopened; plus "Just opened" when
+    the opening date is within 30 days.
+  - An optional short description in our own words, only from facts the
+    source states; all section E rules apply (evaluative words, grounding,
+    generated-at timestamp). No menu items, ingredients, or features unless
+    the source states them. Nothing beyond name and type stated: no
+    description.
+  - Links: the official website; Directions (as for events, no map API);
+    "Reviews on Google Maps" (a plain link to the place on Google Maps: no
+    API calls, nothing stored); and the source link with a "Last checked"
+    date.
+  - schema.org markup (LocalBusiness and its food types) on place pages,
+    with no ratings or reviews.
+- **No review content anywhere.** No Google or Yelp reviews, ratings, or
+  summaries are stored, shown, or summarized. Link only.
 - **"Opening soon" and "Now open" are kept separate:**
   - "Opening soon" only when a source states a target date or month, shown
     as the source states it ("Opening in November").
@@ -201,8 +223,19 @@ openings over a longer period.
   - If a stated opening date passes by 30 days with no confirmation, the item
     is hidden and flagged for a re-check. Stale "opening soon" items never
     stay up.
-- **A new venue that hosts events** also appears in the "New venues" list
-  (section B4) once it's in our venues.
+- **Facts only** (section E): name, type, address, opening date, source
+  link. No descriptions copied from the business, no reviews, no ratings,
+  and images only under the image rule.
+- **Sources:** only those approved in the opening-sources terms review
+  (`docs/sources-terms.md`). Places the owner adds or confirms in the
+  browser are recorded as owner-verified.
+- **Places are separate from venues.** When a place is also one of our
+  venues, the two are linked.
+- **Every add, edit, publish, and hide is logged** like other agent actions.
+- **Admin:** an "Add a place" form (name, type, kind, address, city, opening
+  date exact or month, website, source URL, notes); owner entries are
+  owner-verified. Places can be saved as drafts (not public) and published
+  later.
 
 ## G. Open questions for later
 
