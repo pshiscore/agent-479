@@ -32,6 +32,7 @@ export const RESERVED_ROOT_SEGMENTS = [
   "tags",
   "series",
   "about",
+  "privacy",
   "digest",
 ] as const;
 

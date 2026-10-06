@@ -43,6 +43,20 @@ marked (every deploy) each time.
       from local ones.
 - [ ] `LLM_DAILY_BUDGET_USD` is set.
 
+## Privacy
+
+- [ ] **`/privacy` approved by the owner and live**, linked from the footer,
+  and literally accurate (owner, 2026-10-06).
+- [ ] **Vercel Web Analytics and Speed Insights are off** (Vercel → project
+  → Analytics, and Speed Insights). As of 2026-10-06 Speed Insights was
+  enabled on the project (Vercel serves `/_vercel/speed-insights/script.js`
+  for our domain), though no page loads it, so nothing was collected.
+- [ ] **If analytics, ads, cookies, or any third-party script is ever
+  added,** update `/privacy` first. `tests/privacy-guard.test.ts` fails if
+  an analytics package or script appears in the code.
+- [ ] The Google paragraph on `/privacy` shows only while
+  `GOOGLE_PLACES_WIDGET` is `true`.
+
 ## Sources
 
 - [ ] Every enabled source has `commercial_use_ok` and `terms_notes` filled in.

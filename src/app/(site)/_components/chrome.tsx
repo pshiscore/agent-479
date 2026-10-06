@@ -52,6 +52,7 @@ export function Footer() {
           <Link href="/bot">About Agent 479</Link>
           <a href="mailto:bot@479.guide?subject=Issue%20on%20479%20Guide">Report an issue</a>
           <Link href="/bot">For site owners</Link>
+          <Link href="/privacy">Privacy</Link>
         </nav>
       </div>
     </footer>
