@@ -15,6 +15,7 @@ export interface FeatureCandidate {
   startAt: Date;
   firstSeenAt: Date;
   venueSlug: string;
+  categorySlug: string;
   inRecurringSeries: boolean;
 }
 
@@ -31,12 +32,13 @@ const DAY = 86_400_000;
 export function pickFeature(candidates: readonly FeatureCandidate[], now: Date, rules = FEATURE_RULES): ScoredCandidate | null {
   const horizon = now.getTime() + rules.horizonDays * DAY;
   const large = new Set<string>(rules.largeVenue.venues);
+  const excluded = new Set<string>(rules.largeVenue.excludeCategories);
   const scored = candidates
     .filter((c) => !c.inRecurringSeries && c.startAt.getTime() > now.getTime() && c.startAt.getTime() <= horizon)
     .map((c) => {
       const r = {
         newlyAnnounced: now.getTime() - c.firstSeenAt.getTime() <= rules.newlyAnnounced.days * DAY,
-        largeVenue: large.has(c.venueSlug),
+        largeVenue: large.has(c.venueSlug) && !excluded.has(c.categorySlug),
       };
       return { id: c.id, startAt: c.startAt, rules: r, score: (r.newlyAnnounced ? rules.newlyAnnounced.weight : 0) + (r.largeVenue ? rules.largeVenue.weight : 0) };
     })
@@ -47,20 +49,21 @@ export function pickFeature(candidates: readonly FeatureCandidate[], now: Date, 
 
 export async function selectFeature(db: DbExecutor, opts: { now: Date; actor: string; runId?: string | null; publicFilter?: (sourceSlug: string) => boolean }) {
   const rows = (await db.execute(sql`
-    select e.id, e.start_at, e.first_seen_at, v.slug venue_slug, s.slug source_slug,
+    select e.id, e.start_at, e.first_seen_at, v.slug venue_slug, c.slug category_slug, s.slug source_slug,
       coalesce(es2.kind = 'recurring' and es2.active, false) in_series
     from events e
     join venues v on v.id = e.venue_id
+    join categories c on c.id = e.category_id
     join event_sources es on es.event_id = e.id and es.is_primary
     join sources s on s.id = es.source_id
     left join event_series es2 on es2.id = e.series_id
     where e.status = 'scheduled' and e.start_at > ${opts.now.toISOString()}::timestamptz`)) as unknown as {
-    id: string; start_at: string; first_seen_at: string; venue_slug: string; source_slug: string; in_series: boolean;
+    id: string; start_at: string; first_seen_at: string; venue_slug: string; category_slug: string; source_slug: string; in_series: boolean;
   }[];
   const winner = pickFeature(
     rows
       .filter((r) => !opts.publicFilter || opts.publicFilter(r.source_slug))
-      .map((r) => ({ id: r.id, startAt: new Date(r.start_at), firstSeenAt: new Date(r.first_seen_at), venueSlug: r.venue_slug, inRecurringSeries: r.in_series })),
+      .map((r) => ({ id: r.id, startAt: new Date(r.start_at), firstSeenAt: new Date(r.first_seen_at), venueSlug: r.venue_slug, categorySlug: r.category_slug, inRecurringSeries: r.in_series })),
     opts.now,
   );
   if (!winner) return { changed: false, eventId: null };

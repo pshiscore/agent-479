@@ -14,8 +14,10 @@ export const FEATURE_RULES = {
   newlyAnnounced: { days: 7, weight: 2 },
   largeVenue: {
     weight: 1,
-    // PROPOSED tier (2026-10-04), pending the owner's confirmation: we have no
-    // venue capacity data, so this is the owner's list, by venue slug.
+    // The owner's list, by venue slug (approved 2026-10-06; we have no
+    // capacity data). Sports events don't get this point (owner, 2026-10-06):
+    // they still appear in lists and can feature as newly announced.
+    excludeCategories: ["sports"],
     venues: [
       "walmart-amp",
       "bud-walton-arena",
@@ -25,6 +27,7 @@ export const FEATURE_RULES = {
       "barnhill-arena",
       "walton-arts-center",
       "ozark-music-hall",
+      "butterfield-stage",
     ],
   },
 } as const;

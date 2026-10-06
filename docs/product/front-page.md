@@ -244,8 +244,12 @@ Whenever something new opens, it gets a factual card and its own page.
     cacheable.
   - schema.org markup (LocalBusiness and its food types) on place pages,
     with no ratings or reviews.
-- **No review content anywhere.** No Google or Yelp reviews, ratings, or
-  summaries are stored, shown, or summarized. Link only.
+- **Google ratings and reviews** (owner, 2026-10-06; replaces "no review
+  content anywhere"): only inside Google's own Place Details element on the
+  place page, loaded when the visitor taps "Show Google ratings and
+  reviews"; nothing from Google is stored except the owner-confirmed place
+  ID. The "Reviews on Google Maps" link stays visible. Rules in AGENTS.md
+  (Content rules). Google is never a source for our facts.
 - **"Opening soon" and "Now open" are kept separate:**
   - "Opening soon" only when a source states a target date or month, shown
     as the source states it ("Opening in November").
@@ -255,8 +259,9 @@ Whenever something new opens, it gets a factual card and its own page.
     is hidden and flagged for a re-check. Stale "opening soon" items never
     stay up.
 - **Facts only** (section E): name, type, address, opening date, source
-  link. No descriptions copied from the business, no reviews, no ratings,
-  and images only under the image rule.
+  link. No descriptions copied from the business, no reviews or ratings in
+  our own text (Google's appear only in Google's component), and images only
+  under the image rule.
 - **Sources:** only those approved in the opening-sources terms review
   (`docs/sources-terms.md`). Places the owner adds or confirms in the
   browser are recorded as owner-verified.

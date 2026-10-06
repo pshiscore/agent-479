@@ -138,9 +138,23 @@ anything else the model writes for readers. They're copied from section E of
 - **Images:** only from sources whose terms permit display, with the
   permission recorded per source. Never take images from venue or artist
   websites without permission.
-- **No review content anywhere** (owner, 2026-10-04). No Google, Yelp, or
-  other reviews, ratings, or review summaries are fetched, stored, shown, or
-  summarized. A plain "Reviews on Google Maps" link is the most we do.
+- **Google ratings and reviews appear only inside Google's own component**
+  (owner, 2026-10-06; replaces the 2026-10-04 no-review-content rule):
+  - Only in the Places UI Kit Place Details element, rendered live in the
+    visitor's browser, on New in Town place pages, and only after the
+    visitor taps "Show Google ratings and reviews".
+  - We never store, cache, copy, summarize, or send to any LLM any Google
+    Places content. The only thing we store is the Google place ID, matched
+    by the owner (never automatically).
+  - No Google data in the digest, feeds, JSON-LD, our descriptions, or any
+    non-Google map.
+  - Never restyle or hide the component's Google attribution.
+  - No other reviews or ratings (Yelp or anyone else) anywhere, and our own
+    text never reviews or rates.
+- **Google is never a source for our facts** (owner, 2026-10-06), including
+  "open to the public": a listing or its reviews can hint where to look, but
+  what we record comes from the business's own page or post, a permitted
+  source, or the owner's visit.
 
 ## Fetching
 

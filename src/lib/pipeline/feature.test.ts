@@ -3,8 +3,8 @@ import { pickFeature } from "./feature";
 
 const NOW = new Date("2026-10-05T15:00:00Z");
 const day = (n: number) => new Date(NOW.getTime() + n * 86_400_000);
-const c = (id: string, startDays: number, seenDaysAgo: number, venueSlug = "library", inRecurringSeries = false) => ({
-  id, startAt: day(startDays), firstSeenAt: day(-seenDaysAgo), venueSlug, inRecurringSeries,
+const c = (id: string, startDays: number, seenDaysAgo: number, venueSlug = "library", inRecurringSeries = false, categorySlug = "music") => ({
+  id, startAt: day(startDays), firstSeenAt: day(-seenDaysAgo), venueSlug, categorySlug, inRecurringSeries,
 });
 
 describe("pickFeature", () => {
@@ -18,5 +18,12 @@ describe("pickFeature", () => {
     expect(pickFeature([c("past", -1, 1, "walmart-amp")], NOW)).toBeNull();
     expect(pickFeature([c("far", 60, 1, "walmart-amp")], NOW)).toBeNull();
     expect(pickFeature([c("stale", 3, 30)], NOW)).toBeNull();
+  });
+
+  it("gives Butterfield Stage the large-venue point, but never to a Sports event", () => {
+    expect(pickFeature([c("stage", 5, 30, "butterfield-stage")], NOW)?.rules.largeVenue).toBe(true);
+    expect(pickFeature([c("game", 5, 30, "bud-walton-arena", false, "sports")], NOW)).toBeNull();
+    // A newly announced Sports event can still feature, on that rule alone.
+    expect(pickFeature([c("game", 5, 2, "bud-walton-arena", false, "sports")], NOW)).toMatchObject({ rules: { newlyAnnounced: true, largeVenue: false }, score: 2 });
   });
 });
