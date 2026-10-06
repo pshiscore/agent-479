@@ -57,6 +57,51 @@ Build step 11 (the museum fetchers) waits until permission is granted.
   showing Ticketmaster-sourced listings on monetized pages. Added to the
   pre-deploy checklist.
 
+#### Display terms review (2026-10-06, before unlocking the site)
+
+Read once with our user agent: the API Terms of Use (developer site, "Last
+Updated: June 27, 2023", unchanged since our 2026-10-03 review). The
+consumer Terms of Use that the API terms incorporate
+(`legal.ticketmaster.com/terms-of-use/`) render client-side, so our reader
+saw no text: not a block, but it needs the owner's browser check.
+
+What the API terms require of a site that shows Event Content, quoted:
+- "Comply with the Ticketmaster Terms of Use at www.ticketmaster.com."
+- "Remove from your application within 24 hours any Event Content or other
+  information or tickets that the owner asks you to remove."
+- "Disclose in your application through a privacy policy or otherwise
+  displayed in the footer of each page, how you collect, use, store, and
+  disclose data collected from visitors …"
+- Don't "replicate or attempt to replace the unique essential user
+  experience of Ticketmaster.com"; don't "cache or store any Event Content
+  other than for reasonable periods"; don't use Ticketmaster "as a generic
+  image hosting service"; don't "derive revenues from the use or provision
+  of the Ticketmaster API".
+- No attribution, logo, or "Powered by" requirement appears in the API
+  terms, and they grant no rights to Ticketmaster trademarks: name them in
+  plain text only ("Get tickets (Ticketmaster)"), never their logo.
+
+Open question: Ticketmaster's consumer terms in other countries (UK,
+Ireland, Australia, Spain, found by web search) say users may not
+"deep-link to Ticketmaster sites for any purpose, unless specifically
+authorized", and treat "unauthorized framing of or linking to the Site" as
+unauthorized use. The Discovery API returns each event's ticketmaster.com
+URL, which reads as the authorization for linking, but the US text is
+unread. Owner to check the US terms in the browser, or ask Ticketmaster.
+
+Where we stand:
+| Requirement | Status |
+|---|---|
+| Privacy disclosure in the footer | `/privacy` drafted (branch `privacy-page`), awaiting approval |
+| Remove an event within 24 hours of the owner's request | **Gap:** hiding today means a rollback in the agent log, and the next fetch rewrites the event as scheduled (`write-event.ts` sets `status` from the source), so it reappears. Needs a "Remove event" admin action with a suppression that later fetches respect. |
+| Not replicating Ticketmaster | Met: facts and a link out; no checkout, seat maps, or availability |
+| Reasonable storage | Raw payloads purged after 30 days; event rows kept. Proposal: Ticketmaster-only events are hidden and their ticket links and prices cleared 30 days after they end (logged). |
+| Images | Met: we show none |
+| No revenue | Met while unmonetized (`commercial_use_ok = no`); checklist item stands |
+| Trademarks | Met: plain-text name, no logo |
+| Linking (deep links) | **Open:** see above |
+
+
 ### City of Bentonville, Rogers, and Fayetteville (CivicPlus)
 - **Terms:** none beyond a footer copyright notice ("All content © … All
   rights reserved"). The `/site/copyright` pages contain only that notice.
