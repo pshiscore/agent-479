@@ -12,9 +12,8 @@ export function Logo() {
   );
 }
 
+// This weekend and This week live on the homepage's switch (owner, 2026-10-06: not in the header).
 const NAV = [
-  ["/#this-weekend", "This weekend"],
-  ["/?when=week#this-weekend", "This week"],
   ["/upcoming", "Upcoming"],
   ["/new", "New in Town"],
   ["/venues", "Venues"],
@@ -26,7 +25,8 @@ export function Header() {
     <header className="border-b border-line">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4">
         <Logo />
-        <nav aria-label="Main" className="flex flex-wrap gap-x-5 gap-y-1 text-sm font-semibold">
+        {/* Phones: logo and theme switch share the first row, the links take the second. */}
+        <nav aria-label="Main" className="order-last flex w-full flex-wrap gap-x-5 gap-y-1 text-sm font-semibold sm:order-none sm:w-auto">
           {NAV.map(([href, label]) => (
             <Link key={href} href={href} className="hover:text-accent">
               {label}

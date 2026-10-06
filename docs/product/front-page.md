@@ -20,8 +20,9 @@ also standing rules in `AGENTS.md`, because they govern all generated text.
 
 ## A2. Chosen layout (owner, 2026-10-04: option 2 of the mockups)
 
-- **Header:** the 479 Guide wordmark; This weekend, This week, Upcoming,
-  New in Town, Venues, Lists;
+- **Header:** the 479 Guide wordmark; Upcoming, New in Town, Venues, Lists
+  (owner, 2026-10-06: This weekend and This week are left to the
+  homepage's switch);
   a search box. (No digest sign-up button: email delivery is for later.)
 - **Friday digest hero banner** (owner, 2026-10-04): the digest is posted
   every Friday morning and shown as a hero banner at the top of the front
