@@ -45,7 +45,7 @@ marked (every deploy) each time.
 
 ## Privacy
 
-- [ ] **`/privacy` approved by the owner and live**, linked from the footer,
+- [x] **`/privacy` approved by the owner** (2026-10-06) **and live**, linked from the footer,
   and literally accurate (owner, 2026-10-06).
 - [ ] **Vercel Web Analytics and Speed Insights are off** (Vercel → project
   → Analytics, and Speed Insights). As of 2026-10-06 Speed Insights was
