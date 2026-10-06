@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { getDb } from "@/lib/db/client";
 import { filterQuery, parseFilters } from "@/lib/site/filters";
+import { placeInView } from "@/lib/site/multiday";
 import { byDay, type Filters, filterOptions, foldRecurring, listEvents } from "@/lib/site/queries";
 import { chicagoToUtc, parseDate } from "@/lib/time";
-import { DayTimeline, SeriesRows } from "./events";
+import { DayTimeline, OngoingStrip, SeriesRows } from "./events";
 import { FilterChips } from "./filter-chips";
 import { isoDay, shortDate } from "./format";
 
@@ -51,6 +52,8 @@ export async function Listing({
   const { fromDay, days, from, to } = rangeFrom(params, now);
   const [items, options] = [await listEvents(db, { from, to }, filters), await filterOptions(db)];
   const { events, series } = foldRecurring(items, Boolean(filters.showRecurring));
+  // Multi-day events once, on their first day in view; long runs in "Ongoing" (festivals 2a).
+  const { timeline, ongoing } = placeInView(events, from);
   const nextFrom = isoDay(to);
 
   return (
@@ -70,9 +73,10 @@ export async function Listing({
           {shortDate(from)} to {shortDate(new Date(to.getTime() - DAY))} · {items.length} event{items.length === 1 ? "" : "s"}
           {!filters.showRecurring && series.length > 0 ? ` (${series.length} weekly or recurring programs shown once)` : ""}
         </p>
+        <OngoingStrip items={ongoing} asOf={from} />
         <SeriesRows series={series} />
         {events.length === 0 && series.length === 0 && <p className="mt-8 text-muted">Nothing listed for these dates and filters.</p>}
-        {byDay(events).map((d) => (
+        {byDay(timeline).map((d) => (
           <DayTimeline key={d.day} date={d.date} items={d.items} />
         ))}
         <nav className="mt-8 flex gap-4 text-sm font-semibold">

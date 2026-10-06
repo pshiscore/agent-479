@@ -3,6 +3,7 @@ import { TAG_ORDER } from "@/config/front-page";
 import type { DbExecutor } from "@/lib/db/client";
 import { applyLinkPolicy, type LinkPolicy, loadLinkPolicies } from "@/lib/links";
 import { slugify } from "@/lib/slug";
+import { chicagoDate, chicagoToUtc, formatDate, parseDate } from "@/lib/time";
 import { sourceVisible } from "./visibility";
 
 /**
@@ -45,6 +46,8 @@ export interface EventItem {
   ticketUrl: string | null;
   source: string;
   series: { id: string; kind: string; label: string; title: string } | null;
+  // Per-day hours of a multi-day event, when stated (event_days).
+  days: { day: string; opensAt: Date | null; closesAt: Date | null }[];
 }
 
 export interface SeriesRow {
@@ -66,7 +69,10 @@ interface Row {
   primary_source_url: string | null; ticket_url: string | null; source: string;
   series_id: string | null; series_kind: string | null; series_label: string | null; series_title: string | null; series_active: boolean | null;
   tags: { slug: string; name: string }[] | null;
+  days: { day: string; opens_at: string | null; closes_at: string | null }[] | null;
 }
+
+const chicagoDay = (d: Date) => formatDate(chicagoDate(d));
 
 const tagRank = (slug: string) => {
   const i = (TAG_ORDER as readonly string[]).indexOf(slug);
@@ -99,10 +105,15 @@ function toItem(r: Row, policies: LinkPolicy[]): EventItem {
     ticketUrl: tickets && tickets !== more ? tickets : r.source === "ticketmaster" ? tickets : null,
     source: r.source,
     series: r.series_id && r.series_active ? { id: r.series_id, kind: r.series_kind!, label: r.series_label!, title: r.series_title! } : null,
+    days: (r.days ?? []).map((d) => ({ day: d.day, opensAt: d.opens_at ? new Date(d.opens_at) : null, closesAt: d.closes_at ? new Date(d.closes_at) : null })),
   };
 }
 
-/** Upcoming scheduled events in [from, to), filtered, soonest first. Recurring-series occurrences included. */
+/**
+ * Scheduled events running at any point in [from, to) (a festival that
+ * started yesterday is still listed), filtered, soonest first.
+ * Recurring-series occurrences included.
+ */
 export async function listEvents(db: DbExecutor, range: { from: Date; to: Date }, f: Filters = {}): Promise<EventItem[]> {
   const tagSlugs = f.tags?.filter(Boolean) ?? [];
   const rows = (await db.execute(sql`
@@ -112,7 +123,9 @@ export async function listEvents(db: DbExecutor, range: { from: Date; to: Date }
       e.age_min, e.age_max, e.grade_min, e.grade_max, e.primary_source_url, e.ticket_url, s.slug source,
       e.series_id, ser.kind series_kind, ser.recurrence_label series_label, ser.title series_title, ser.active series_active,
       (select json_agg(json_build_object('slug', t.slug, 'name', t.name)) from event_tags et join tags t on t.id = et.tag_id
-        where et.event_id = e.id and t.active) tags
+        where et.event_id = e.id and t.active) tags,
+      (select json_agg(json_build_object('day', d.day, 'opens_at', d.opens_at, 'closes_at', d.closes_at) order by d.day) from event_days d
+        where d.event_id = e.id) days
     from events e
     join venues v on v.id = e.venue_id
     join categories c on c.id = e.category_id
@@ -120,7 +133,7 @@ export async function listEvents(db: DbExecutor, range: { from: Date; to: Date }
     join sources s on s.id = es.source_id
     left join event_series ser on ser.id = e.series_id
     where e.status = 'scheduled'
-      and e.start_at >= ${range.from.toISOString()}::timestamptz and e.start_at < ${range.to.toISOString()}::timestamptz
+      and e.start_at < ${range.to.toISOString()}::timestamptz and coalesce(e.end_at, e.start_at) >= ${range.from.toISOString()}::timestamptz
       ${f.id ? sql`and e.id = ${f.id}::uuid` : sql``}
       ${f.category ? sql`and c.slug = ${f.category}` : sql``}
       ${f.venue ? sql`and v.slug = ${f.venue}` : sql``}
@@ -155,20 +168,20 @@ export function foldRecurring(items: EventItem[], showRecurring: boolean): { eve
   return { events, series: [...byId.values()] };
 }
 
-/** Groups events by Chicago calendar day, in order. */
-export function byDay(items: EventItem[]): { day: string; date: Date; items: EventItem[] }[] {
-  const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" });
-  const out = new Map<string, { day: string; date: Date; items: EventItem[] }>();
+/** Groups events by Chicago calendar day (a placed multi-day event by its listed day), in order. */
+export function byDay<T extends EventItem & { placement?: { day: string } }>(items: T[]): { day: string; date: Date; items: T[] }[] {
+  const out = new Map<string, { day: string; date: Date; items: T[] }>();
   for (const e of items) {
-    const key = fmt.format(e.startAt);
-    if (!out.has(key)) out.set(key, { day: key, date: e.startAt, items: [] });
+    const key = e.placement?.day ?? chicagoDay(e.startAt);
+    // Noon Chicago time names the day safely for headings.
+    if (!out.has(key)) out.set(key, { day: key, date: chicagoToUtc(parseDate(key), { hour: 12 }), items: [] });
     out.get(key)!.items.push(e);
   }
-  return [...out.values()];
+  return [...out.values()].sort((a, b) => a.day.localeCompare(b.day));
 }
 
 /** "This weekend" variety (B2): at most `perVenue` per venue and `total` overall, keeping a spread of categories. */
-export function weekendVariety(items: EventItem[], limits: { perVenue: number; total: number }): { shown: EventItem[]; hidden: number } {
+export function weekendVariety<T extends EventItem>(items: T[], limits: { perVenue: number; total: number }): { shown: T[]; hidden: number } {
   const perVenue = new Map<string, number>();
   const capped = items.filter((e) => {
     const n = (perVenue.get(e.venue.slug) ?? 0) + 1;
@@ -177,9 +190,9 @@ export function weekendVariety(items: EventItem[], limits: { perVenue: number; t
   });
   if (capped.length <= limits.total) return { shown: capped, hidden: items.length - capped.length };
   // Round-robin over categories, so one busy category can't fill the list.
-  const queues = new Map<string, EventItem[]>();
+  const queues = new Map<string, T[]>();
   for (const e of capped) queues.set(e.category.slug, [...(queues.get(e.category.slug) ?? []), e]);
-  const picked: EventItem[] = [];
+  const picked: T[] = [];
   while (picked.length < limits.total) {
     let took = false;
     for (const q of queues.values()) {
@@ -191,7 +204,8 @@ export function weekendVariety(items: EventItem[], limits: { perVenue: number; t
     }
     if (!took) break;
   }
-  picked.sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
+  // Keep the incoming order (placeInView sorts a continuing festival by the day it's listed under).
+  picked.sort((a, b) => items.indexOf(a) - items.indexOf(b));
   return { shown: picked, hidden: items.length - picked.length };
 }
 

@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { agentActor } from "@/lib/actions/record";
 import { type DbTx, getDb } from "@/lib/db/client";
-import { agentActions, categories, eventSources, events, homepageFeatures, sources, venues } from "@/lib/db/schema";
+import { agentActions, categories, eventDays, eventSources, events, homepageFeatures, sources, venues } from "@/lib/db/schema";
 import { selectFeature } from "@/lib/pipeline/feature";
 import { listEvents } from "@/lib/site/queries";
 import { inRollback } from "./helpers";
@@ -35,6 +35,22 @@ describe("public lists", () => {
       const ids = (await listEvents(tx, { from: new Date("2027-09-03T00:00:00Z"), to: new Date("2027-09-04T12:00:00Z") })).map((e) => e.id);
       expect(ids).toContain(city.id);
       expect(ids).not.toContain(tm.id); // tests run unlocked, outside production
+    });
+  });
+});
+
+describe("multi-day events", () => {
+  it("lists a festival that started before the view, with its stated hours; not one that already ended", async () => {
+    await inRollback(async (tx) => {
+      // Thu Sep 2 8 am to Sun Sep 5 5 pm (Chicago), viewed from Saturday.
+      const fair = await add(tx, "city-rogers", "rogers-historical-museum", `Fair ${tag}`, "2027-09-02T13:00:00Z");
+      await tx.update(events).set({ endAt: new Date("2027-09-05T22:00:00Z") }).where(eq(events.id, fair.id));
+      await tx.insert(eventDays).values({ eventId: fair.id, day: "2027-09-04", opensAt: new Date("2027-09-04T13:00:00Z"), closesAt: new Date("2027-09-04T22:00:00Z") });
+      const past = await add(tx, "city-rogers", "rogers-historical-museum", `Done ${tag}`, "2027-09-01T13:00:00Z");
+      const items = await listEvents(tx, { from: new Date("2027-09-04T05:00:00Z"), to: new Date("2027-09-06T05:00:00Z") });
+      const listed = items.find((e) => e.id === fair.id);
+      expect(listed?.days).toEqual([{ day: "2027-09-04", opensAt: new Date("2027-09-04T13:00:00Z"), closesAt: new Date("2027-09-04T22:00:00Z") }]);
+      expect(items.map((e) => e.id)).not.toContain(past.id);
     });
   });
 });

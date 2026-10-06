@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { LISTS, WEEK_LIMITS, WEEKEND_LIMITS } from "@/config/front-page";
+import { LISTS, ONGOING_MIN_DAYS, WEEK_LIMITS, WEEKEND_LIMITS } from "@/config/front-page";
 import { getDb } from "@/lib/db/client";
 import { currentFeatureEventId } from "@/lib/pipeline/feature";
 import { recentOpenings } from "@/lib/places/public";
 import { newInTownPath, venuePath } from "@/lib/routes";
+import { overlaps, placeInView, spanDays } from "@/lib/site/multiday";
 import { byDay, type EventItem, eventById, filterOptions, foldRecurring, listEvents, weekendVariety } from "@/lib/site/queries";
 import { chicagoToUtc, parseDate, weekendWindow } from "@/lib/time";
 import { SectionTitle } from "./_components/chrome";
-import { Actions, Chips, DayTimeline, Place } from "./_components/events";
+import { Actions, Chips, DayTimeline, OngoingStrip, Place } from "./_components/events";
 import { FilterChips } from "./_components/filter-chips";
 import { PlaceRow } from "./_components/places";
-import { agesLine, isoDay, longWhen, shortDate, timeOf } from "./_components/format";
+import { agesLine, isoDay, longWhen, rangeLabel, shortDate, timeOf } from "./_components/format";
 
 /** The front page (docs/product/front-page.md, layout A2, sections B). */
 
@@ -20,7 +21,7 @@ const DAY = 86_400_000;
 function Feature({ e }: { e: EventItem }) {
   return (
     <section aria-label="Featured" className="rounded-xl bg-brand p-5 text-brand-ink">
-      <p className="text-sm font-semibold">{longWhen(e)}</p>
+      <p className="text-sm font-semibold">{e.endAt && spanDays(e) > 1 ? `${rangeLabel(e.startAt, e.endAt)}${e.allDay ? "" : ` · starts ${timeOf(e)}`}` : longWhen(e)}</p>
       <h2 className="mt-1 font-display text-4xl font-extrabold leading-none">{e.title}</h2>
       <div className="mt-3 [&_a]:text-brand-ink">
         <Place e={e} />
@@ -84,15 +85,18 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   // This weekend: the current one while anything in it is still ahead, else the coming one.
   let weekend = weekendWindow(now);
-  if (!all.some((e) => e.startAt < weekend.endUtc)) weekend = weekendWindow(weekend.endUtc);
+  // Long runs ("Ongoing") don't count: a six-week light display mustn't hold the page on a finished weekend.
+  if (!all.some((e) => spanDays(e) < ONGOING_MIN_DAYS && e.startAt < weekend.endUtc)) weekend = weekendWindow(weekend.endUtc);
   // This week: today and the next 6 days (Chicago days).
   const todayStart = chicagoToUtc(parseDate(isoDay(now)));
   const week = { startUtc: todayStart, endUtc: new Date(todayStart.getTime() + 7 * DAY) };
   const range = when === "week" ? week : weekend;
   const from = new Date(Math.max(now.getTime(), range.startUtc.getTime()));
-  const rangeAll = all.filter((e) => e.startAt >= from && e.startAt < range.endUtc);
+  const rangeAll = all.filter((e) => overlaps(e, from, range.endUtc));
   const { events: rangeEvents, series: rangeSeries } = foldRecurring(rangeAll, false);
-  const { shown, hidden } = weekendVariety(rangeEvents, when === "week" ? WEEK_LIMITS : WEEKEND_LIMITS);
+  // Multi-day events once, on their first day in view; long runs in "Ongoing" (festivals 2a).
+  const { timeline, ongoing } = placeInView(rangeEvents, from);
+  const { shown, hidden } = weekendVariety(timeline, when === "week" ? WEEK_LIMITS : WEEKEND_LIMITS);
   const seeAll = when === "week" ? `/upcoming?from=${isoDay(now)}&days=7` : `/upcoming?from=${weekend.periodStart}&days=3`;
 
   // Feature: the current choice from the process job, if it's still upcoming and visible.
@@ -160,6 +164,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             {shortDate(range.startUtc)} to {shortDate(new Date(range.endUtc.getTime() - DAY))}
           </p>
           {shown.length === 0 && <p className="mt-6 text-muted">Nothing listed for {when === "week" ? "this week" : "this weekend"} yet.</p>}
+          <OngoingStrip items={ongoing} asOf={from} />
           {byDay(shown).map((d) => (
             <DayTimeline key={d.day} date={d.date} items={d.items} />
           ))}

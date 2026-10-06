@@ -25,3 +25,22 @@ export function agesLine(e: Pick<EventItem, "ageMin" | "ageMax" | "gradeMin" | "
 
 /** A Chicago calendar date ("2026-10-16") for URLs. */
 export const isoDay = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+
+const md = (d: Date) => fmt(d, { month: "short", day: "numeric" });
+const yr = (d: Date) => fmt(d, { year: "numeric" });
+
+/** "Oct 15–18", "Oct 30 – Nov 2", "Dec 30, 2026 – Jan 2, 2027" (festivals 2a). */
+export function rangeLabel(start: Date, end: Date): string {
+  if (yr(start) !== yr(end)) return `${md(start)}, ${yr(start)} – ${md(end)}, ${yr(end)}`;
+  const [sm, sd] = md(start).split(" ");
+  const [em, ed] = md(end).split(" ");
+  return sm === em ? `${sm} ${sd}–${ed}` : `${md(start)} – ${md(end)}`;
+}
+
+/** "Through Jan 1" once it has started; the full range before that. */
+export const ongoingLabel = (e: Pick<EventItem, "startAt" | "endAt">, now: Date) =>
+  e.endAt ? (e.startAt <= now ? `Through ${md(e.endAt)}` : rangeLabel(e.startAt, e.endAt)) : shortDate(e.startAt);
+
+/** "8:00 AM–5:00 PM", a day's stated hours. */
+export const hoursLabel = (h: { opensAt: Date | null; closesAt: Date | null }) =>
+  [h.opensAt, h.closesAt].map((d) => (d ? fmt(d, { hour: "numeric", minute: "2-digit" }) : null)).filter(Boolean).join("–");

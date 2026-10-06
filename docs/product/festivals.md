@@ -52,9 +52,19 @@ anything uncertain waits in `/admin/review`, unpublished (fail closed).
    stores the end date and time and, when the page states them, per-day
    hours (migration 0023, `event_days`; "same hours every day" or one line
    per day), so festivals entered now need no re-entry when step 2 shows them.
-2. **Multi-day events:** parent and child events, per-day hours, range
-   labels ("Oct 15–18", "Through Jan 1"), and weekend lists showing a
-   festival once with "Day 2 of 4".
+2. **Multi-day events.**
+   - **2a, built 2026-10-06 (no migration):** lists match by overlap, so a
+     festival that started earlier still appears; a multi-day event (all
+     day, 24+ hours, or stated hours on 2+ days, so a late show isn't) is
+     listed once, on its first day in view, with its range ("Oct 15–18"),
+     "Day 3 of 4" when the view starts mid-run, and that day's stated
+     hours; runs of 8+ days (`ONGOING_MIN_DAYS`) go to an "Ongoing" strip
+     ("Through Jan 1") instead of the timeline, and don't hold the homepage
+     on a finished weekend. Counts once toward the caps. Code:
+     `src/lib/site/multiday.ts`.
+   - **2b, after the R2 backup is in place:** parent and child events
+     (`events.parent_event_id`, "Part of" in Add event and Edit and
+     approve; "Part of Lights of the Ozarks" and "Includes: …").
 3. **Annual events registry** with a verification report for sign-off,
    including the season rule and the War Eagle pair test. **County from
    coordinates** (owner, 2026-10-05): each venue's county comes from the

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { cityPath, categoryPath, venuePath } from "@/lib/routes";
 import type { EventItem, SeriesRow } from "@/lib/site/queries";
 import { venueDisplayName } from "@/lib/venues/display";
-import { agesLine, dayHeading, shortDate, timeOf } from "./format";
+import type { Placed } from "@/lib/site/multiday";
+import { agesLine, dayHeading, hoursLabel, ongoingLabel, rangeLabel, shortDate, timeOf } from "./format";
 
 /** Event pieces shared by every list (docs/product/front-page.md, C). */
 
@@ -53,12 +54,31 @@ export function Actions({ e, compact }: { e: Pick<EventItem, "moreInfoUrl" | "ti
   );
 }
 
+/** The time line of a timeline item: that day's stated hours for a multi-day event, else the start time. */
+function itemTime(e: Placed): string {
+  const p = e.placement;
+  if (!p) return timeOf(e);
+  if (p.hours) return hoursLabel(p.hours);
+  if (p.dayNumber === 1) return timeOf(e);
+  return e.allDay ? "All day" : "Continues today";
+}
+
 /** One event in a day's timeline. */
-export function TimelineItem({ e }: { e: EventItem }) {
+export function TimelineItem({ e }: { e: Placed }) {
+  const p = e.placement;
   return (
     <li className="relative border-b border-line py-4 pl-8 last:border-b-0">
       <span aria-hidden className="absolute left-0 top-5 h-4 w-4 rounded-full border-[3px] border-accent bg-background" />
-      <p className="text-sm font-bold">{timeOf(e)}</p>
+      <p className="text-sm font-bold">
+        {itemTime(e)}
+        {p && e.endAt && (
+          <span className="font-semibold text-muted">
+            {" · "}
+            {rangeLabel(e.startAt, e.endAt)}
+            {p.dayNumber > 1 ? ` · Day ${p.dayNumber} of ${p.dayCount}` : ""}
+          </span>
+        )}
+      </p>
       <h3 className="mt-0.5 text-lg font-bold leading-snug">{e.title}</h3>
       <Place e={e} />
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
@@ -69,7 +89,7 @@ export function TimelineItem({ e }: { e: EventItem }) {
   );
 }
 
-export function DayTimeline({ date, items }: { date: Date; items: EventItem[] }) {
+export function DayTimeline({ date, items }: { date: Date; items: Placed[] }) {
   return (
     <section className="mt-6">
       <h3 className="font-display text-lg font-extrabold text-accent">{dayHeading(date)}</h3>
@@ -78,6 +98,29 @@ export function DayTimeline({ date, items }: { date: Date; items: EventItem[] })
           <TimelineItem key={e.id} e={e} />
         ))}
       </ol>
+    </section>
+  );
+}
+
+/** Long runs ("Through Jan 1" once started, as of the view's first day), listed once above the timeline (festivals 2a). */
+export function OngoingStrip({ items, asOf }: { items: EventItem[]; asOf: Date }) {
+  if (items.length === 0) return null;
+  return (
+    <section aria-label="Ongoing" className="mt-6 rounded-lg border border-line px-4 py-3">
+      <h3 className="font-display text-lg font-extrabold">Ongoing</h3>
+      <ul className="divide-y divide-line">
+        {items.map((e) => (
+          <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+            <div>
+              <p className="font-semibold">
+                {e.title} <span className="text-sm font-semibold text-accent">{ongoingLabel(e, asOf)}</span>
+              </p>
+              <Place e={e} />
+            </div>
+            <Actions e={e} compact />
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
