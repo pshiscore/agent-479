@@ -57,6 +57,18 @@ export function EventFields({ options, values = {} }: { options: EventFormOption
         <span className={hint}>Not listed? A new venue goes through the venue process first.</span>
       </label>
       <label className={field}>
+        <span className={label}>Part of (optional)</span>
+        <select name="parentEventId" defaultValue={val(values, "parentEventId")} className={input}>
+          <option value="">Not part of a festival</option>
+          {options.festivals.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.title} ({f.firstDay} to {f.lastDay})
+            </option>
+          ))}
+        </select>
+        <span className={hint}>For a festival&apos;s own event, like Light Night within Lights of the Ozarks.</span>
+      </label>
+      <label className={field}>
         <span className={label}>Room or area (optional)</span>
         <input name="subSpace" defaultValue={val(values, "subSpace")} placeholder="e.g. Upper Ramble lawn" className={input} />
       </label>

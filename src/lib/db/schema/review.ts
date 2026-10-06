@@ -49,6 +49,8 @@ export interface ProposedEvent {
   moreInfoUrl: string;
   // Per-day hours when the page states them (Chicago wall times, "HH:MM").
   dailyHours: DailyHours[];
+  // The festival this is part of (festivals 2b).
+  parentEventId?: string | null;
 }
 
 export interface DailyHours {

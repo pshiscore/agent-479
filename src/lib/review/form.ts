@@ -92,6 +92,7 @@ export function parseEventForm(v: EventFormValues): ProposedEvent {
     ticketUrl: one(v, "ticketUrl") || null,
     moreInfoUrl: one(v, "moreInfoUrl"),
     dailyHours,
+    parentEventId: one(v, "parentEventId") || null,
   };
 }
 
@@ -128,6 +129,7 @@ export function formValues(f: ProposedEvent): Record<string, string | string[]> 
     ticketUrl: f.ticketUrl ?? "",
     moreInfoUrl: f.moreInfoUrl,
     dailyHours: (f.dailyHours ?? []).map((h) => `${h.day} ${h.opens ?? ""}-${h.closes ?? ""}`).join("\n"),
+    parentEventId: f.parentEventId ?? "",
   };
 }
 

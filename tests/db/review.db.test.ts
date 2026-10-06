@@ -4,7 +4,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { humanActor } from "@/lib/actions/record";
 import { type DbTx, getDb } from "@/lib/db/client";
 import { agentActions, categories, eventDays, eventSources, eventTags, events, type ProposedEvent, sources, tags, venues } from "@/lib/db/schema";
-import { addCheckedSource, approveProposal, createProposal, likelyMatches, mergeProposal, rejectProposal, ReviewError } from "@/lib/review/proposals";
+import { addCheckedSource, approveProposal, createProposal, likelyMatches, mergeProposal, rejectProposal, ReviewError, setParentEvent } from "@/lib/review/proposals";
 import { listEvents } from "@/lib/site/queries";
 import { inRollback } from "./helpers";
 
@@ -133,6 +133,34 @@ describe("review queue", () => {
       const [log] = await tx.select().from(agentActions).where(eq(agentActions.entityId, event.id));
       expect((log.after as { days: unknown[] }).days).toHaveLength(2);
       await expect(createProposal(tx, { facts: { ...facts, dailyHours: [{ day: "2027-10-20", opens: "08:00", closes: "17:00" }] }, sources: [source], origin: "owner_form", reasons: ["owner_draft"] }, { actor: OWNER })).rejects.toThrow(/outside the event's dates/);
+    });
+  });
+
+  it("festival parts: approve with Part of, refuse outside the dates or nesting, link and unlink logged, shown in lists", async () => {
+    await inRollback(async (tx) => {
+      const { facts, source } = await setup(tx);
+      // The festival: Oct 15-18, 2027.
+      const fest = (await approveProposal(tx, (await createProposal(tx, { facts, sources: [source], origin: "owner_form", reasons: ["owner_draft"] }, { actor: OWNER })).id, { actor: OWNER })).event;
+      const part = (f: Partial<ProposedEvent>) => createProposal(tx, { facts: { ...facts, title: `Part ${tag} ${Math.random()}`, endAt: null, ...f }, sources: [source], origin: "owner_form", reasons: ["owner_draft"] }, { actor: OWNER });
+
+      const night = (await approveProposal(tx, (await part({ title: `Light Night ${tag}`, startAt: "2027-10-16T23:00:00.000Z", parentEventId: fest.id })).id, { actor: OWNER })).event;
+      expect(night.parentEventId).toBe(fest.id);
+      await expect(approveProposal(tx, (await part({ startAt: "2027-10-25T23:00:00.000Z", parentEventId: fest.id })).id, { actor: OWNER })).rejects.toThrow(/starts outside/);
+      await expect(approveProposal(tx, (await part({ startAt: "2027-10-16T20:00:00.000Z", parentEventId: night.id })).id, { actor: OWNER })).rejects.toThrow(/itself part of another/);
+
+      // An existing event (say, from a city calendar) linked, then unlinked; both logged.
+      const parade = (await approveProposal(tx, (await part({ title: `Parade ${tag}`, startAt: "2027-10-17T23:30:00.000Z" })).id, { actor: OWNER })).event;
+      await setParentEvent(tx, parade.id, fest.id, { actor: OWNER });
+      await expect(setParentEvent(tx, fest.id, parade.id, { actor: OWNER })).rejects.toThrow(/its own parts|itself part/);
+      await expect(setParentEvent(tx, parade.id, fest.id, { actor: "agent:x" })).rejects.toBeInstanceOf(ReviewError);
+
+      const listed = await listEvents(tx, { from: new Date("2027-10-15T00:00:00Z"), to: new Date("2027-10-20T00:00:00Z") });
+      expect(listed.find((e) => e.id === fest.id)?.parts.map((p) => p.title)).toEqual([`Light Night ${tag}`, `Parade ${tag}`]);
+      expect(listed.find((e) => e.id === night.id)?.parent).toEqual({ id: fest.id, title: facts.title });
+
+      expect((await setParentEvent(tx, parade.id, null, { actor: OWNER })).parentEventId).toBeNull();
+      const logs = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, parade.id), eq(agentActions.action, "update")));
+      expect(logs.map((l) => l.reason)).toEqual(expect.arrayContaining([expect.stringMatching(/^Part of "/), expect.stringMatching(/^No longer part/)]));
     });
   });
 

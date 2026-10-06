@@ -48,6 +48,9 @@ export interface EventItem {
   series: { id: string; kind: string; label: string; title: string } | null;
   // Per-day hours of a multi-day event, when stated (event_days).
   days: { day: string; opensAt: Date | null; closesAt: Date | null }[];
+  // Festivals 2b: the festival this is part of, and a festival's own parts.
+  parent: { id: string; title: string } | null;
+  parts: { title: string; startAt: Date }[];
 }
 
 export interface SeriesRow {
@@ -70,6 +73,8 @@ interface Row {
   series_id: string | null; series_kind: string | null; series_label: string | null; series_title: string | null; series_active: boolean | null;
   tags: { slug: string; name: string }[] | null;
   days: { day: string; opens_at: string | null; closes_at: string | null }[] | null;
+  parent_id: string | null; parent_title: string | null;
+  parts: { title: string; start_at: string; source: string }[] | null;
 }
 
 const chicagoDay = (d: Date) => formatDate(chicagoDate(d));
@@ -106,6 +111,9 @@ function toItem(r: Row, policies: LinkPolicy[]): EventItem {
     source: r.source,
     series: r.series_id && r.series_active ? { id: r.series_id, kind: r.series_kind!, label: r.series_label!, title: r.series_title! } : null,
     days: (r.days ?? []).map((d) => ({ day: d.day, opensAt: d.opens_at ? new Date(d.opens_at) : null, closesAt: d.closes_at ? new Date(d.closes_at) : null })),
+    parent: r.parent_id && r.parent_title ? { id: r.parent_id, title: r.parent_title } : null,
+    // Parts from sources that can't be shown publicly (Ticketmaster, for now) aren't named either.
+    parts: (r.parts ?? []).filter((p) => sourceVisible(p.source)).map((p) => ({ title: p.title, startAt: new Date(p.start_at) })),
   };
 }
 
@@ -125,13 +133,18 @@ export async function listEvents(db: DbExecutor, range: { from: Date; to: Date }
       (select json_agg(json_build_object('slug', t.slug, 'name', t.name)) from event_tags et join tags t on t.id = et.tag_id
         where et.event_id = e.id and t.active) tags,
       (select json_agg(json_build_object('day', d.day, 'opens_at', d.opens_at, 'closes_at', d.closes_at) order by d.day) from event_days d
-        where d.event_id = e.id) days
+        where d.event_id = e.id) days,
+      pe.id parent_id, pe.title parent_title,
+      (select json_agg(json_build_object('title', ch.title, 'start_at', ch.start_at, 'source', chs.slug) order by ch.start_at) from events ch
+        join event_sources ches on ches.event_id = ch.id and ches.is_primary join sources chs on chs.id = ches.source_id
+        where ch.parent_event_id = e.id and ch.status = 'scheduled') parts
     from events e
     join venues v on v.id = e.venue_id
     join categories c on c.id = e.category_id
     join event_sources es on es.event_id = e.id and es.is_primary
     join sources s on s.id = es.source_id
     left join event_series ser on ser.id = e.series_id
+    left join events pe on pe.id = e.parent_event_id and pe.status in ('scheduled', 'postponed')
     where e.status = 'scheduled'
       and e.start_at < ${range.to.toISOString()}::timestamptz and coalesce(e.end_at, e.start_at) >= ${range.from.toISOString()}::timestamptz
       ${f.id ? sql`and e.id = ${f.id}::uuid` : sql``}

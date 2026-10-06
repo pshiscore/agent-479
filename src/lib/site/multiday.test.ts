@@ -8,7 +8,7 @@ const ev = (over: Partial<EventItem> = {}): EventItem => ({
   id: `e${++n}`, slug: `e${n}`, title: `Event ${n}`, startAt: at("2026-10-16T13:00:00Z"), endAt: null, allDay: false, timeTba: false,
   venue: { slug: "v", name: "V", type: "park" }, subSpace: null, city: { slug: "rogers", name: "Rogers" }, category: { slug: "festivals-markets", name: "Festivals" },
   tags: [], shortDescription: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null, moreInfoUrl: null, ticketUrl: null, source: "owner",
-  series: null, days: [], ...over,
+  series: null, days: [], parent: null, parts: [], ...over,
 });
 
 // War Eagle-style fair: Thu Oct 15 8 am to Sun Oct 18 5 pm (Chicago).

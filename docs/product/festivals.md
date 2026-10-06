@@ -62,9 +62,15 @@ anything uncertain waits in `/admin/review`, unpublished (fail closed).
      ("Through Jan 1") instead of the timeline, and don't hold the homepage
      on a finished weekend. Counts once toward the caps. Code:
      `src/lib/site/multiday.ts`.
-   - **2b, after the R2 backup is in place:** parent and child events
-     (`events.parent_event_id`, "Part of" in Add event and Edit and
-     approve; "Part of Lights of the Ozarks" and "Includes: …").
+   - **2b, built 2026-10-06 on branch `festivals-2b`; goes live after the
+     R2 backup is in place** (migration 0024, `events.parent_event_id`):
+     "Part of" in Add event and Edit and approve; "Festival parts" on
+     /admin/review links events already listed (a parade from the city
+     calendar) to their festival, logged. A part must start within the
+     festival's dates, and parts can't have parts. Lists show "Part of
+     Lights of the Ozarks" on a part and "Includes: Light Night (Nov 21),
+     Parade (Dec 4)" on the festival; parts from sources that can't be shown
+     publicly aren't named.
 3. **Annual events registry** with a verification report for sign-off,
    including the season rule and the War Eagle pair test. **County from
    coordinates** (owner, 2026-10-05): each venue's county comes from the

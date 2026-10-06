@@ -169,6 +169,13 @@
       "when": 1791237169117,
       "tag": "0023_event_days",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791249720246,
+      "tag": "0024_event_parent",
+      "breakpoints": true
     }
   ]
 }

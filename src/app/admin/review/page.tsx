@@ -5,7 +5,8 @@ import { getDb } from "@/lib/db/client";
 import { categories, events, type ProposedEvent, venues } from "@/lib/db/schema";
 import { likelyMatches, pendingProposals, recentDecisions, webSearchUrl } from "@/lib/review/proposals";
 import { formatInChicago } from "@/lib/time";
-import { addProposalSourceAction, approveProposalAction, mergeProposalAction, rejectProposalAction } from "../actions";
+import { eventsDuring, festivalOptions } from "@/lib/review/options";
+import { addProposalSourceAction, approveProposalAction, mergeProposalAction, rejectProposalAction, setParentAction } from "../actions";
 import { button, Diff, input, Notice, when } from "../ui";
 
 /** The review queue (AGENTS.md, "Festivals and the review queue"). Nothing here is public until approved. */
@@ -33,7 +34,10 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
   const q = await searchParams;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
   const db = getDb();
-  const [pending, decided] = await Promise.all([pendingProposals(db), recentDecisions(db, 15)]);
+  const [pending, decided, festivals] = await Promise.all([pendingProposals(db), recentDecisions(db, 15), festivalOptions(db)]);
+  const festivalId = one(q.festival);
+  const festival = festivals.find((f) => f.id === festivalId) ?? null;
+  const during = festival ? await eventsDuring(db, festival.id) : [];
 
   const venueIds = pending.map((p) => p.facts.venueId).filter((v): v is string => Boolean(v));
   const categoryIds = pending.map((p) => p.facts.categoryId).filter((v): v is string => Boolean(v));
@@ -176,6 +180,46 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
           </article>
         );
       })}
+
+      <section id="festival-parts" className="grid gap-2 rounded border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="text-base font-semibold">Festival parts</h2>
+        <p className="text-zinc-500">Link events already listed (say, a parade from the city calendar) to the festival they belong to.</p>
+        <form method="get" className="flex flex-wrap gap-2">
+          <select name="festival" defaultValue={festival?.id ?? ""} className={input}>
+            <option value="">Choose a festival</option>
+            {festivals.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.title} ({f.firstDay} to {f.lastDay})
+              </option>
+            ))}
+          </select>
+          <button className="rounded border border-zinc-400 px-3 py-1">Show events during it</button>
+        </form>
+        {festival && (
+          <ul className="grid gap-1">
+            {during.length === 0 && <li className="text-zinc-500">No other events during {festival.title}.</li>}
+            {during.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center gap-3">
+                <span>
+                  {when(c.start_at)} · {c.title} · {c.venue}
+                  {c.parent_event_id === festival.id ? <strong className="text-green-700 dark:text-green-400"> (part of it)</strong> : c.parent_event_id ? <span className="text-zinc-500"> (part of another festival)</span> : null}
+                </span>
+                <form action={setParentAction}>
+                  <input type="hidden" name="childId" value={c.id} />
+                  <input type="hidden" name="festivalId" value={festival.id} />
+                  {c.parent_event_id === festival.id ? (
+                    <button name="unlink" value="1" className="text-sm underline">
+                      Unlink
+                    </button>
+                  ) : (
+                    <button className="rounded border border-zinc-400 px-2 py-0.5 text-sm">Make part of {festival.title}</button>
+                  )}
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {decided.length > 0 && (
         <section>

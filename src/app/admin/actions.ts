@@ -8,7 +8,7 @@ import { labelPair } from "@/lib/admin/dedup-review";
 import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, parseFacts, type PlaceInput, placeById, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
 import { changedFields, type EventFormValues, parseEventForm } from "@/lib/review/form";
-import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal } from "@/lib/review/proposals";
+import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal, setParentEvent } from "@/lib/review/proposals";
 import { getDb } from "@/lib/db/client";
 import { generateStructured } from "@/lib/llm";
 import type { Generate } from "@/lib/pipeline/enrich/types";
@@ -357,6 +357,24 @@ export async function addProposalSourceAction(formData: FormData) {
     target = reviewBack({ msg: "Source recorded as owner-verified." });
   } catch (err) {
     target = reviewBack({ error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+/** Festival parts: link an existing event to a festival, or unlink it (festivals 2b). */
+export async function setParentAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const child = uuid.safeParse(formData.get("childId"));
+  const festival = uuid.safeParse(formData.get("festivalId"));
+  const unlink = formData.get("unlink") === "1";
+  const page = back("/admin/review", festival.success ? { festival: festival.data } : {});
+  let target: string;
+  try {
+    if (!child.success || !festival.success) throw new Error("bad request");
+    const e = await setParentEvent(getDb(), child.data, unlink ? null : festival.data, { actor });
+    target = `${page}&msg=${encodeURIComponent(unlink ? `"${e.title}" unlinked.` : `"${e.title}" is now part of the festival.`)}`;
+  } catch (err) {
+    target = `${page}&error=${encodeURIComponent(`Not linked: ${message(err)}`)}`;
   }
   redirect(target);
 }

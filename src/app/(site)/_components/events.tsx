@@ -54,6 +54,20 @@ export function Actions({ e, compact }: { e: Pick<EventItem, "moreInfoUrl" | "ti
   );
 }
 
+const md = (d: Date) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", month: "short", day: "numeric" }).format(d);
+
+/** "Part of Lights of the Ozarks" on a part; "Includes: Light Night (Nov 21), Parade (Dec 4)" on a festival (festivals 2b). */
+function Family({ e }: { e: Pick<EventItem, "parent" | "parts"> }) {
+  if (!e.parent && e.parts.length === 0) return null;
+  return (
+    <p className="text-sm text-muted">
+      {e.parent && <>Part of {e.parent.title}</>}
+      {e.parent && e.parts.length > 0 && " · "}
+      {e.parts.length > 0 && <>Includes: {e.parts.map((p) => `${p.title} (${md(p.startAt)})`).join(", ")}</>}
+    </p>
+  );
+}
+
 /** The time line of a timeline item: that day's stated hours for a multi-day event, else the start time. */
 function itemTime(e: Placed): string {
   const p = e.placement;
@@ -81,6 +95,7 @@ export function TimelineItem({ e }: { e: Placed }) {
       </p>
       <h3 className="mt-0.5 text-lg font-bold leading-snug">{e.title}</h3>
       <Place e={e} />
+      <Family e={e} />
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <Chips e={e} />
         <Actions e={e} compact />
@@ -116,6 +131,7 @@ export function OngoingStrip({ items, asOf }: { items: EventItem[]; asOf: Date }
                 {e.title} <span className="text-sm font-semibold text-accent">{ongoingLabel(e, asOf)}</span>
               </p>
               <Place e={e} />
+              <Family e={e} />
             </div>
             <Actions e={e} compact />
           </li>

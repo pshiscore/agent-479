@@ -6,7 +6,7 @@ const ev = (over: Partial<EventItem> = {}): EventItem => ({
   id: `e${++n}`, slug: `e${n}`, title: `Event ${n}`, startAt: new Date(Date.UTC(2026, 9, 9, n)), endAt: null, allDay: false, timeTba: false,
   venue: { slug: "v1", name: "V1", type: "theater" }, subSpace: null, city: { slug: "fayetteville", name: "Fayetteville" },
   category: { slug: "music", name: "Music" }, tags: [], shortDescription: null, ageMin: null, ageMax: null, gradeMin: null, gradeMax: null,
-  moreInfoUrl: null, ticketUrl: null, source: "city", series: null, days: [], ...over,
+  moreInfoUrl: null, ticketUrl: null, source: "city", series: null, days: [], parent: null, parts: [], ...over,
 });
 
 describe("foldRecurring", () => {

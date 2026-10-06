@@ -117,6 +117,9 @@ export const events = pgTable(
     ticketUrl: text("ticket_url"),
     status: text("status", { enum: EVENT_STATUSES }).notNull().default("scheduled"),
     canonicalEventId: uuid("canonical_event_id").references((): AnyPgColumn => events.id, { onDelete: "restrict" }),
+    // A festival this event is part of (Light Night within Lights of the
+    // Ozarks; festivals 2b). Set only by the owner, logged.
+    parentEventId: uuid("parent_event_id").references((): AnyPgColumn => events.id, { onDelete: "restrict" }),
     qualityScore: numeric("quality_score", { precision: 5, scale: 3, mode: "number" }),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
@@ -143,6 +146,8 @@ export const events = pgTable(
       sql.raw(`(status = 'merged') = (canonical_event_id is not null)`),
     ),
     check("events_canonical_check", sql.raw(`canonical_event_id is null or canonical_event_id <> id`)),
+    check("events_parent_check", sql.raw(`parent_event_id is null or parent_event_id <> id`)),
+    index("events_parent_idx").on(t.parentEventId).where(sql`${t.parentEventId} is not null`),
     // Free and its basis go together (coalesce: NULL must not slip through).
     // Migration 0019, added once the code setting description_generated_at was live.
     check("events_description_generated_check", sql.raw(`(short_description is null) = (description_generated_at is null)`)),

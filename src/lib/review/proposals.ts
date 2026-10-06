@@ -83,6 +83,7 @@ export const proposedEventSchema = z
       )
       .max(60)
       .default([]),
+    parentEventId: z.uuid().nullable().default(null),
   })
   .superRefine((f, ctx) => {
     if (f.endAt && Date.parse(f.endAt) < Date.parse(f.startAt)) ctx.addIssue({ code: "custom", path: ["endAt"], message: "the end is before the start" });
@@ -205,6 +206,46 @@ async function tagIdsFor(db: DbExecutor, f: ProposedEvent): Promise<string[]> {
   return rows.map((r) => r.id).sort();
 }
 
+/**
+ * A festival an event can be part of (festivals 2b): scheduled, not itself a
+ * part (no nesting), and the event must start within its dates.
+ */
+async function checkParent(db: DbExecutor, parentId: string, child: { id?: string; startAt: Date }) {
+  const [p] = await db.select().from(events).where(and(eq(events.id, parentId), inArray(events.status, ["scheduled", "postponed"])));
+  if (!p) throw new ReviewError("that festival isn't a scheduled event");
+  if (child.id && p.id === child.id) throw new ReviewError("an event can't be part of itself");
+  if (p.parentEventId) throw new ReviewError(`"${p.title}" is itself part of another event; pick the main festival`);
+  if (child.id) {
+    const [kid] = await db.select({ id: events.id }).from(events).where(eq(events.parentEventId, child.id)).limit(1);
+    if (kid) throw new ReviewError("this event has its own parts, so it can't be part of another");
+  }
+  const firstDay = chicagoToUtc(parseDate(chicagoDay(p.startAt)));
+  const lastMoment = p.endAt ?? p.startAt;
+  if (child.startAt < firstDay || child.startAt > lastMoment) throw new ReviewError(`it starts outside "${p.title}" (${chicagoDay(p.startAt)} to ${chicagoDay(lastMoment)})`);
+  return p;
+}
+
+/** The owner links an existing event to a festival (or unlinks it with null). Logged with before and after. */
+export async function setParentEvent(db: DbExecutor, childId: string, parentId: string | null, opts: { actor: string; note?: string }) {
+  ownerOnly(opts.actor, "link an event to a festival");
+  return db.transaction(async (tx) => {
+    const [before] = await tx.select().from(events).where(eq(events.id, childId));
+    if (!before || before.status === "merged") throw new ReviewError("no such event (or it was merged away)");
+    const parent = parentId ? await checkParent(tx, parentId, before) : null;
+    const [after] = await tx.update(events).set({ parentEventId: parentId, updatedAt: new Date() }).where(eq(events.id, childId)).returning();
+    await recordAction(tx, {
+      actor: opts.actor,
+      action: "update",
+      entityType: "event",
+      entityId: childId,
+      before,
+      after,
+      reason: parent ? `Part of "${parent.title}": ${opts.note || "linked by the owner"}` : `No longer part of a festival: ${opts.note || "unlinked by the owner"}`,
+    });
+    return after;
+  });
+}
+
 async function uniqueEventSlug(db: DbExecutor, title: string, startAt: string): Promise<string> {
   const base = `${slugify(title)}-${startAt.slice(0, 10)}`;
   const taken = new Set((await db.select({ slug: events.slug }).from(events).where(like(events.slug, `${base}%`))).map((r) => r.slug));
@@ -229,6 +270,7 @@ export async function approveProposal(db: DbExecutor, id: string, opts: { actor:
     const [category] = await tx.select().from(categories).where(and(eq(categories.id, f.categoryId), eq(categories.active, true)));
     if (!category) throw new ReviewError("that category is retired or unknown");
 
+    if (f.parentEventId) await checkParent(tx, f.parentEventId, { startAt: new Date(f.startAt) });
     const now = opts.now ?? new Date();
     const sourceId = await ownerSourceId(tx, opts.actor);
     const [event] = await tx
@@ -253,6 +295,7 @@ export async function approveProposal(db: DbExecutor, id: string, opts: { actor:
         priceText: priceText(f.priceMin, f.priceMax, f.isFree),
         primarySourceUrl: f.moreInfoUrl,
         ticketUrl: f.ticketUrl,
+        parentEventId: f.parentEventId,
         firstSeenAt: now,
         lastSeenAt: now,
       })
