@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { agentActor, humanActor } from "@/lib/actions/record";
-import { confirmSource, createPlace, hidePlace, linkVenue, PlaceError, publishPlace, suggestVenues } from "@/lib/admin/places";
+import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, PlaceError, publishPlace, suggestVenues, updatePlace } from "@/lib/admin/places";
 import { getDb } from "@/lib/db/client";
 import { agentActions, places } from "@/lib/db/schema";
 import { inRollback } from "./helpers";
@@ -38,7 +38,28 @@ describe("places", () => {
       const nodate = await createPlace(tx, { ...base, sourceUrl: "https://x.example/1", openToPublic: true }, { actor: OWNER, ownerVerified: true, reason: "owner" });
       await expect(publishPlace(tx, nodate.id, { actor: OWNER, note: "go" })).rejects.toThrow(/no stated opening date/);
       const soon = await createPlace(tx, { ...base, name: `${base.name} 2`, target: "2026-11", sourceUrl: "https://x.example/2", openToPublic: true }, { actor: OWNER, ownerVerified: true, reason: "owner" });
-      expect((await publishPlace(tx, soon.id, { actor: OWNER, note: "go" })).status).toBe("opening_soon");
+      expect((await publishPlace(tx, soon.id, { actor: OWNER, note: "go", now: new Date("2026-10-06T17:00:00Z") })).status).toBe("opening_soon");
+    });
+  });
+
+  it("an opening-soon place moves to now open with a stated date; a past target can't publish as opening soon", async () => {
+    await inRollback(async (tx) => {
+      const NOW = new Date("2026-10-06T17:00:00Z");
+      const input = { ...base, name: `Soon ${tag}`, target: "2026-09", sourceUrl: "https://x.example/soon", openToPublic: true };
+      const late = await createPlace(tx, input, { actor: OWNER, ownerVerified: true, reason: "owner" });
+      await expect(publishPlace(tx, late.id, { actor: OWNER, note: "go", now: NOW })).rejects.toThrow(/target date has passed/);
+
+      const soon = await createPlace(tx, { ...input, name: `Soon2 ${tag}`, target: "2026-11" }, { actor: OWNER, ownerVerified: true, reason: "owner" });
+      expect((await publishPlace(tx, soon.id, { actor: OWNER, note: "go", now: NOW })).status).toBe("opening_soon");
+      await expect(markOpen(tx, soon.id, { actor: OWNER, note: "opened" })).rejects.toThrow(/Opened first/);
+      await updatePlace(tx, soon.id, { ...input, name: `Soon2 ${tag}`, target: undefined, opened: "2026-11-03" }, { actor: OWNER, reason: "edit" });
+      const open = await markOpen(tx, soon.id, { actor: OWNER, note: "their post says open" });
+      expect(open).toMatchObject({ status: "open", openedOn: "2026-11-03" });
+      const logs = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, soon.id), eq(agentActions.action, "publish")));
+      expect(logs.map((l) => l.reason)).toContainEqual(expect.stringMatching(/^Moved to now open \(opened 2026-11-03\), per https:\/\/x.example\/soon/));
+      expect(open.targetOn).toBe("2026-11-01"); // kept as history while it was opening soon
+      await expect(markOpen(tx, soon.id, { actor: OWNER, note: "again" })).rejects.toThrow(/not opening soon/);
+      await expect(markOpen(tx, soon.id, { actor: "agent:x", note: "auto" })).rejects.toBeInstanceOf(PlaceError);
     });
   });
 

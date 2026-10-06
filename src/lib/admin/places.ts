@@ -130,7 +130,10 @@ export async function updatePlace(db: DbExecutor, id: string, input: PlaceInput,
   return db.transaction(async (tx) => {
     const before = await load(tx, id);
     const { notes, ...rest } = fields(v);
-    return change(tx, before, { ...rest, notes }, { actor: opts.actor, action: "update", reason: opts.reason });
+    // A place that's public as "opening soon" keeps its target until it's marked
+    // open (the database requires one); clearing it in the form keeps the old one.
+    const keepTarget = before.status === "opening_soon" && !rest.targetOn ? { targetOn: before.targetOn, targetPrecision: before.targetPrecision, targetQualifier: before.targetQualifier } : {};
+    return change(tx, before, { ...rest, ...keepTarget, notes }, { actor: opts.actor, action: "update", reason: opts.reason });
   });
 }
 
@@ -216,11 +219,23 @@ export async function removePlaceDescription(db: DbExecutor, id: string, opts: {
   });
 }
 
+/**
+ * Whether an "opening soon" target is already behind us (Chicago time): a
+ * day before today, or a month before this month. Then it isn't "soon"; if it
+ * opened, the date belongs in Opened.
+ */
+export function targetPassed(p: Pick<PlaceRow, "targetOn" | "targetPrecision">, now = new Date()): boolean {
+  if (!p.targetOn) return false;
+  const todayIso = today(now);
+  return p.targetPrecision === "month" ? p.targetOn.slice(0, 7) < todayIso.slice(0, 7) : p.targetOn < todayIso;
+}
+
 /** What still stands between a place and publishing; empty when it can go live. */
-export function publishBlockers(p: Pick<PlaceRow, "openToPublic" | "openedOn" | "targetOn" | "sources" | "status">): string[] {
+export function publishBlockers(p: Pick<PlaceRow, "openToPublic" | "openedOn" | "targetOn" | "targetPrecision" | "sources" | "status">, now = new Date()): string[] {
   const out: string[] = [];
   if (p.openToPublic !== true) out.push("not confirmed open to the public");
   if (!p.openedOn && !p.targetOn) out.push("no stated opening date (or target date for opening soon)");
+  if (!p.openedOn && targetPassed(p, now)) out.push("the opening-soon target date has passed: if it has opened, put the date in Opened");
   if (!p.sources.some((s) => s.verifiedBy === "owner")) out.push("no owner-verified source");
   if (p.status === "open" || p.status === "opening_soon") out.push("already published");
   return out;
@@ -230,13 +245,34 @@ export async function publishPlace(db: DbExecutor, id: string, opts: { actor: st
   if (!opts.actor.startsWith("human:")) throw new PlaceError("only the owner publishes places");
   return db.transaction(async (tx) => {
     const before = await load(tx, id);
-    const blockers = publishBlockers(before);
+    const blockers = publishBlockers(before, opts.now);
     if (blockers.length) throw new PlaceError(`can't publish: ${blockers.join("; ")}`);
     const status = before.openedOn ? "open" : "opening_soon";
     return change(tx, before, { status, publishedAt: opts.now ?? new Date(), hiddenAt: null, hiddenReason: null }, {
       actor: opts.actor,
       action: "publish",
       reason: `Published as ${status === "open" ? "now open" : "opening soon"}: ${opts.note}`,
+    });
+  });
+}
+
+/**
+ * "Opening soon" becomes "Now open" once a source the owner checked confirms
+ * the opening: the opened date is set and logged with that source
+ * (docs/product/front-page.md, H). The published date stays the first one.
+ */
+export async function markOpen(db: DbExecutor, id: string, opts: { actor: string; note: string }) {
+  if (!opts.actor.startsWith("human:")) throw new PlaceError("only the owner marks a place open");
+  return db.transaction(async (tx) => {
+    const before = await load(tx, id);
+    if (before.status !== "opening_soon") throw new PlaceError(`it's ${before.status.replace("_", " ")}, not opening soon`);
+    if (!before.openedOn) throw new PlaceError("put the stated opening date in Opened first");
+    const checked = before.sources.filter((s) => s.verifiedBy === "owner");
+    if (!checked.length) throw new PlaceError("no owner-verified source");
+    return change(tx, before, { status: "open" }, {
+      actor: opts.actor,
+      action: "publish",
+      reason: `Moved to now open (opened ${before.openedOn}), per ${checked.map((s) => s.url).join(", ")}: ${opts.note}`,
     });
   });
 }

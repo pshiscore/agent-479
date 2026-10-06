@@ -42,7 +42,7 @@ export function PlaceForm({
   withSource: boolean;
   hidden?: Record<string, string>;
   /** Edit mode: record a checked source with the save, and offer "Save and publish". */
-  verify?: { canPublish: boolean; leads?: string[] };
+  verify?: { canPublish: boolean; leads?: string[]; openingSoon?: boolean };
 }) {
   return (
     <form action={action} className="grid max-w-3xl gap-4">
@@ -104,14 +104,14 @@ export function PlaceForm({
         <label className={field}>
           <span className={label}>Opened (as the source states it)</span>
           <input name="opened" placeholder="2026-08-10 or 2026-06" pattern="\d{4}-\d{2}(-\d{2})?" defaultValue={values.opened} className={input} />
-          <span className={hint}>Leave empty if the source states no opening date.</span>
+          <span className={hint}>The date it opened, as stated. Leave empty if no source states one (then use the target below only if it hasn&apos;t opened yet).</span>
         </label>
         <label className={field}>
           <span className={label}>Qualifier (optional)</span>
           <input name="openedQualifier" placeholder="soft opening, grand opening" defaultValue={values.openedQualifier ?? ""} className={input} />
         </label>
         <label className={field}>
-          <span className={label}>Opening soon: target (optional)</span>
+          <span className={label}>Not open yet: target date (optional)</span>
           <input name="target" placeholder="2026-11 or 2026-11-20" pattern="\d{4}-\d{2}(-\d{2})?" defaultValue={values.target} className={input} />
         </label>
         <label className={field}>
@@ -186,9 +186,9 @@ export function PlaceForm({
         <button name="intent" value="save" className={verify ? "rounded border border-zinc-400 px-3 py-1" : button}>
           {submit}
         </button>
-        {verify && (
+        {verify && (verify.canPublish || verify.openingSoon) && (
           <button name="intent" value="publish" className={button}>
-            Save and publish
+            {verify.openingSoon ? "Save and mark open" : "Save and publish"}
           </button>
         )}
       </div>

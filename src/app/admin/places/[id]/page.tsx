@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
-import { placeById, publishBlockers, suggestVenues } from "@/lib/admin/places";
+import { placeById, publishBlockers, suggestVenues, targetPassed } from "@/lib/admin/places";
 import { getDb } from "@/lib/db/client";
 import { addableFacts, placeFacts } from "@/lib/places/describe";
 import { addressLine, openedLabel, PLACE_KIND_LABELS, PLACE_TYPE_LABELS, targetLabel } from "@/lib/places/format";
@@ -27,7 +27,7 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
   const facts = addableFacts(placeFacts(p));
   const checks: [boolean, string][] = [
     [p.openToPublic === true, "Open to the public, confirmed by you"],
-    [Boolean(p.openedOn || p.targetOn), "A stated opening date (or a target date for opening soon)"],
+    [Boolean(p.openedOn || (p.targetOn && !targetPassed(p))), p.targetOn && !p.openedOn && targetPassed(p) ? "A stated opening date (the target date has passed: if it opened, put the date in Opened)" : "A stated opening date (or a future target date if it hasn't opened yet)"],
     [p.sources.some((s) => s.verifiedBy === "owner"), "A page you checked in your browser"],
   ];
 
@@ -52,6 +52,16 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
         </p>
       </div>
 
+      {p.status === "opening_soon" && (
+        <section className="rounded border border-zinc-300 p-3 dark:border-zinc-700">
+          <h2 className="mb-1 text-base font-semibold">Opening soon</h2>
+          <p>
+            Public as &quot;{targetLabel(p)}&quot;. Once it has opened: put the stated date in <strong>Opened</strong>, record the page that says so, and choose{" "}
+            <strong>Save and mark open</strong>.
+          </p>
+          {targetPassed(p) && <p className="mt-1 text-amber-700 dark:text-amber-400">The target date has passed. If it opened, mark it open; if not, hide it until there&apos;s a new date.</p>}
+        </section>
+      )}
       {!live && p.status !== "hidden" && (
         <section className="rounded border border-zinc-300 p-3 dark:border-zinc-700">
           <h2 className="mb-1 text-base font-semibold">To publish</h2>
@@ -78,7 +88,7 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
           cities={cities}
           submit="Save"
           withSource={false}
-          verify={{ canPublish: !live, leads: p.sources.filter((s) => s.verifiedBy !== "owner").map((s) => s.url) }}
+          verify={{ canPublish: !live, openingSoon: p.status === "opening_soon", leads: p.sources.filter((s) => s.verifiedBy !== "owner").map((s) => s.url) }}
           values={{
             name: p.name,
             placeType: p.placeType,

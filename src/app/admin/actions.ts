@@ -5,7 +5,7 @@ import { z } from "zod";
 import { rollbackAction } from "@/lib/actions/rollback";
 import { requireAdmin } from "@/lib/admin/auth";
 import { labelPair } from "@/lib/admin/dedup-review";
-import { confirmSource, createPlace, hidePlace, linkVenue, parseFacts, type PlaceInput, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
+import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, parseFacts, type PlaceInput, placeById, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
 import { changedFields, type EventFormValues, parseEventForm } from "@/lib/review/form";
 import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal } from "@/lib/review/proposals";
@@ -145,8 +145,14 @@ export async function editPlace(formData: FormData) {
     }
 
     if (str(formData, "intent") === "publish") {
-      const p = await publishPlace(db, id.data, { actor, note: confirmed || "Published by the owner" });
-      done.push(`Published (${p.status === "open" ? "now open" : "opening soon"}).`);
+      const current = await placeById(db, id.data);
+      if (current?.status === "opening_soon") {
+        await markOpen(db, id.data, { actor, note: confirmed || "Marked open by the owner" });
+        done.push("Moved to now open.");
+      } else {
+        const p = await publishPlace(db, id.data, { actor, note: confirmed || "Published by the owner" });
+        done.push(`Published (${p.status === "open" ? "now open" : "opening soon"}).`);
+      }
     }
     target = back(page, { msg: done.join(" ") });
   } catch (err) {
