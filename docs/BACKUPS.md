@@ -16,7 +16,10 @@ below, with `off-site: r2:<bucket>/<key> sha256 <encrypted hash>` in the
 note. Without a verified off-site copy, a production migration refuses.
 
 Restore (into a scratch database first):
-- From this machine: `pg_restore --no-owner --dbname <url> backups/<file>.dump`
+- From this machine: `pg_restore --no-owner --no-privileges --dbname <url> backups/<file>.dump`
+  (`--no-privileges` skips Supabase's role grants, which fail on a plain
+  Postgres. Tested 2026-10-11: an R2 copy restored into a scratch database
+  with all tables and rows; the only errors were those grants.)
 - From R2: `MIGRATE_PRODUCTION=yes npm run db:backup:fetch -- --key prod/<file>.dump.age --identity-file <key file>`,
   then `pg_restore` as above. (Or with the age tool:
   `age -d -i <key file> <file>.age > <file>.dump`.)
@@ -40,3 +43,4 @@ Restore (into a scratch database first):
 | 2026-10-05T00:27Z | backups/prod-20261005T0027Z-before-0021.dump | 1305008 | 11cd9b332493dfee7bb85fabf91dbf097102dc63faceb81a7a3a31d519a83e0f | 0021 | 199 entries |
 | 2026-10-05T21:54Z | backups/prod-20261005T2154Z-before-0022.dump | 1321401 | 443e6a9b552eb40b971bf63aad6077f90711b8efd2a381b2bec50c8cd4a7789e | 0022 | 192 entries; covers 0022 and 0023 |
 | 2026-10-11T21:09Z | backups/prod-20261011T2109Z-before-test.dump | 1498401 | ba5682956f8ce5daf9d04c89d4e84aa3a443ce084ae841b07d33aebd072cc0a8 | test | 208 entries; off-site: r2:agent479-backups/prod/prod-20261011T2109Z-before-test.dump.age sha256 a7b7a1423f9c60c03cf8c8ae4a4cce73e15520cdfa8b0aca57c80327c41e5e85; first off-site test |
+| 2026-10-11T21:15Z | backups/prod-20261011T2115Z-before-test.dump | 1498401 | ecbef7effe3d1d68e5c61de699ee7646f450d68ceb5c8d70a324fe3ad33aa57c | test | 208 entries; off-site: r2:agent479-backups/prod/prod-20261011T2115Z-before-test.dump.age sha256 57c13ba74e6a594d893b43f8fe0d96eac18e6b02a6818d09b694b44fa6522b09; test with the new key |
