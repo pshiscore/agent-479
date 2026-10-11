@@ -8,9 +8,12 @@
 export const GOOGLE_PLACE_ID = /^[A-Za-z0-9_-]{10,300}$/;
 export const isGooglePlaceId = (id: string) => GOOGLE_PLACE_ID.test(id);
 
-/** The widget is on only when the switch is exactly "true" and a browser key exists. */
+/**
+ * The widget is on only when the switch is "true" (ignoring case, spaces, line
+ * breaks, and quotes, which a dashboard textbox can add) and a browser key exists.
+ */
 export const googleWidgetEnabled = (env: Record<string, string | undefined> = process.env) =>
-  env.GOOGLE_PLACES_WIDGET === "true" && Boolean(env.NEXT_PUBLIC_GOOGLE_MAPS_KEY);
+  (env.GOOGLE_PLACES_WIDGET ?? "").trim().replace(/^["']|["']$/g, "").toLowerCase() === "true" && Boolean(env.NEXT_PUBLIC_GOOGLE_MAPS_KEY?.trim());
 
 /** The browser key (restricted to 479.guide and localhost, and to three APIs). Public by design. */
 export const googleBrowserKey = () => process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? null;

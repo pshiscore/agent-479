@@ -7,9 +7,9 @@ describe("Google places helpers", () => {
     for (const bad of ["", "short", "ChIJ abc def ghi", "<script>alert(1)</script>", "x".repeat(301)]) expect(isGooglePlaceId(bad)).toBe(false);
   });
 
-  it("is on only with the switch exactly true and a key", () => {
-    expect(googleWidgetEnabled({ GOOGLE_PLACES_WIDGET: "true", NEXT_PUBLIC_GOOGLE_MAPS_KEY: "k" })).toBe(true);
-    expect(googleWidgetEnabled({ GOOGLE_PLACES_WIDGET: "TRUE", NEXT_PUBLIC_GOOGLE_MAPS_KEY: "k" })).toBe(false);
+  it("is on only with the switch true (tolerating spaces, line breaks, case, quotes) and a key", () => {
+    for (const v of ["true", "TRUE", " true\n", '"true"']) expect(googleWidgetEnabled({ GOOGLE_PLACES_WIDGET: v, NEXT_PUBLIC_GOOGLE_MAPS_KEY: "k" })).toBe(true);
+    for (const v of ["false", "1", "yes", ""]) expect(googleWidgetEnabled({ GOOGLE_PLACES_WIDGET: v, NEXT_PUBLIC_GOOGLE_MAPS_KEY: "k" })).toBe(false);
     expect(googleWidgetEnabled({ GOOGLE_PLACES_WIDGET: "true" })).toBe(false);
     expect(googleWidgetEnabled({ NEXT_PUBLIC_GOOGLE_MAPS_KEY: "k" })).toBe(false);
   });
