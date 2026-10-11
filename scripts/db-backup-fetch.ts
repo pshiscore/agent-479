@@ -19,10 +19,12 @@ const { values: args } = parseArgs({ options: { key: { type: "string" }, "identi
 
 async function main() {
   if (!args.key || !args["identity-file"]) throw new Error("Pass --key prod/<file>.age and --identity-file <path>");
-  const identity = readFileSync(args["identity-file"], "utf8").split("\n").find((l) => l.startsWith("AGE-SECRET-KEY-"));
-  if (!identity) throw new Error("No AGE-SECRET-KEY- line in the identity file");
+  const text = readFileSync(args["identity-file"], "utf8");
+  // Tolerate whatever a password manager adds around the key (spaces, a title, Windows line ends).
+  const identity = /AGE-SECRET-KEY-1[0-9A-Z]+/.exec(text)?.[0];
+  if (!identity) throw new Error(text.trim() ? "No AGE-SECRET-KEY-1… line in the identity file" : "The identity file is empty (was the clipboard empty?)");
   const { store } = r2FromEnv();
-  const plain = await decryptWith(identity.trim(), await store.get(args.key));
+  const plain = await decryptWith(identity, await store.get(args.key));
   const out = `backups/restored-${basename(args.key).replace(/\.age$/, "")}`;
   writeFileSync(out, plain);
   chmodSync(out, 0o600);
