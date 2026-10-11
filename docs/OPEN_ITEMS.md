@@ -8,7 +8,6 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 | # | Item | Raised | Blocks |
 |---|---|---|---|
 | 25 | **Later: event weather** (owner, 2026-10-06): forecasts for outdoor events in the next 7 days from the National Weather Service (api.weather.gov: free, public data, our bot's user agent), not Google's Weather API. Plan it after the Google ratings work; terms check first. | 2026-10-06 | Nothing yet |
-| 24 | **Off-site backups setup** (until then, production migrations refuse): create a private R2 bucket and a bucket-scoped API token; run `npm run backup:keygen` and store the private key in your password manager; put `BACKUP_AGE_RECIPIENT`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` in `.env.production.local`. Then one test backup and a test restore. | 2026-10-06 | Next production migration |
 | 22 | **Owner checks:** (a) your Supabase plan and backups: Dashboard → Organization → Billing (plan), and Project → Database → Backups (daily backups are Pro and up; point-in-time recovery is a paid add-on). (b) Venue report (`data/venues.report.md`): since your 2026-10-04 sign-off (0879d721) the file also gained The Ramble and Upper Ramble (the pending Ramble sign-off), so I didn't record a sign-off. Signing now covers both Rambles and The Auditorium set inactive (sha256 4be52c87…). (c) Send the three outreach emails in `docs/outreach/` (Destination Rogers, Fayetteville Flyer, Visit Bentonville). (d) Name the newsletters for the leads inbox. | 2026-10-05 | Venue reseed; festivals steps 8–9 |
 | 21 | **Festivals plan:** approved 2026-10-05 (`docs/product/festivals.md`). Before step 8: confirm Google's terms for Alerts. | 2026-10-05 | Festivals step 8 |
 | 19 | **New in Town (to do):** permission emails to Talk Business & Politics, the Rogers-Lowell, Fayetteville, and Greater Bentonville chambers (ribbon-cutting list or feed), and Arkansas Business; a feed request to Springdale for permits. Then build the lead-and-confirm flow (`docs/sources-terms.md`, openings review). | 2026-10-04 | New in Town content |
@@ -27,6 +26,8 @@ it blocks. Remove an item once it's answered, and note where the answer went.
 | 7 | **Source priorities for weekend coverage** (item 1 of the 2026-10-04 decisions). See the recommendation in that report. | 2026-10-04 | Choosing the next source to build |
 
 ## Answered (kept briefly for context)
+
+- Off-site backups live (2026-10-11): R2 bucket `agent479-backups`, age key in the owner's Apple Passwords (entry 479.guide / backup-key-age, checked against the key by fingerprint); a restore from R2 tested into a scratch database. Festivals 2b deployed with migration 0024.
 
 - Large-venue list approved plus Butterfield Stage; Sports excluded from the large-venue rule (2026-10-06). Google ratings plan approved with all picks; rules in AGENTS.md (2026-10-06).
 

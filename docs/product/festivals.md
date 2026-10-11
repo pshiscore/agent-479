@@ -62,8 +62,7 @@ anything uncertain waits in `/admin/review`, unpublished (fail closed).
      ("Through Jan 1") instead of the timeline, and don't hold the homepage
      on a finished weekend. Counts once toward the caps. Code:
      `src/lib/site/multiday.ts`.
-   - **2b, built 2026-10-06 on branch `festivals-2b`; goes live after the
-     R2 backup is in place** (migration 0024, `events.parent_event_id`):
+   - **2b, live 2026-10-11** (migration 0024, `events.parent_event_id`):
      "Part of" in Add event and Edit and approve; "Festival parts" on
      /admin/review links events already listed (a parade from the city
      calendar) to their festival, logged. A part must start within the
