@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { agentActor, humanActor } from "@/lib/actions/record";
-import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, PlaceError, publishPlace, suggestVenues, updatePlace } from "@/lib/admin/places";
+import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, PlaceError, publishPlace, setGooglePlaceId, suggestVenues, updatePlace } from "@/lib/admin/places";
 import { getDb } from "@/lib/db/client";
 import { agentActions, places } from "@/lib/db/schema";
 import { inRollback } from "./helpers";
@@ -60,6 +60,24 @@ describe("places", () => {
       expect(open.targetOn).toBe("2026-11-01"); // kept as history while it was opening soon
       await expect(markOpen(tx, soon.id, { actor: OWNER, note: "again" })).rejects.toThrow(/not opening soon/);
       await expect(markOpen(tx, soon.id, { actor: "agent:x", note: "auto" })).rejects.toBeInstanceOf(PlaceError);
+    });
+  });
+
+  it("Google match: owner-only, logged, one place per Google ID, bad IDs refused, removable", async () => {
+    await inRollback(async (tx) => {
+      const a = await createPlace(tx, { ...base, name: `G1 ${tag}` }, { actor: OWNER, ownerVerified: true, reason: "owner" });
+      const b = await createPlace(tx, { ...base, name: `G2 ${tag}` }, { actor: OWNER, ownerVerified: true, reason: "owner" });
+      const gid = `ChIJtest${tag}abcdef`;
+      const matched = await setGooglePlaceId(tx, a.id, gid, { actor: OWNER });
+      expect(matched).toMatchObject({ googlePlaceId: gid, googlePlaceIdConfirmedBy: OWNER });
+      expect(matched.googlePlaceIdConfirmedAt).toBeInstanceOf(Date);
+      await expect(setGooglePlaceId(tx, b.id, gid, { actor: OWNER })).rejects.toThrow(/already matched to G1/);
+      await expect(setGooglePlaceId(tx, b.id, "not a place id!", { actor: OWNER })).rejects.toThrow(/doesn't look like/);
+      await expect(setGooglePlaceId(tx, b.id, `ChIJother${tag}xyz`, { actor: "agent:x" })).rejects.toBeInstanceOf(PlaceError);
+      const removed = await setGooglePlaceId(tx, a.id, null, { actor: OWNER });
+      expect(removed).toMatchObject({ googlePlaceId: null, googlePlaceIdConfirmedAt: null, googlePlaceIdConfirmedBy: null });
+      const log = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, a.id), eq(agentActions.action, "update")));
+      expect(log.map((l) => l.reason)).toEqual(expect.arrayContaining([`Matched to Google place ${gid}: confirmed by the owner`, "Google match removed: by the owner"]));
     });
   });
 

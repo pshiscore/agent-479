@@ -6,7 +6,9 @@ import { placeById, publishBlockers, suggestVenues, targetPassed } from "@/lib/a
 import { getDb } from "@/lib/db/client";
 import { addableFacts, placeFacts } from "@/lib/places/describe";
 import { addressLine, openedLabel, PLACE_KIND_LABELS, PLACE_TYPE_LABELS, targetLabel } from "@/lib/places/format";
-import { editPlace, hidePlaceAction, linkPlaceVenue, removePlaceDescriptionAction, writePlaceDescriptionAction } from "../../actions";
+import { googleBrowserKey, mapsPlaceUrl } from "@/lib/google/places";
+import { editPlace, hidePlaceAction, linkPlaceVenue, removePlaceDescriptionAction, setGooglePlaceAction, writePlaceDescriptionAction } from "../../actions";
+import { GoogleMatch } from "../google-match";
 import { button, input, Notice, when } from "../../ui";
 import { PlaceForm } from "../form";
 
@@ -25,6 +27,7 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
   const blockers = publishBlockers(p);
   const live = p.status === "open" || p.status === "opening_soon";
   const facts = addableFacts(placeFacts(p));
+  const googleKey = googleBrowserKey();
   const checks: [boolean, string][] = [
     [p.openToPublic === true, "Open to the public, confirmed by you"],
     [Boolean(p.openedOn || (p.targetOn && !targetPassed(p))), p.targetOn && !p.openedOn && targetPassed(p) ? "A stated opening date (the target date has passed: if it opened, put the date in Opened)" : "A stated opening date (or a future target date if it hasn't opened yet)"],
@@ -175,6 +178,40 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
           </form>
         )}
         {p.status === "hidden" && <p className="text-sm text-zinc-500">Hidden {when(p.hiddenAt)}: {p.hiddenReason}</p>}
+      </section>
+
+      <section>
+        <h2 className="mb-2 text-base font-semibold">Google match</h2>
+        <p className="mb-2 text-zinc-500">
+          For &quot;Show Google ratings and reviews&quot; on the place page. Only Google&apos;s place ID is stored; you confirm it, never automatic.
+        </p>
+        {p.googlePlaceId ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <span>
+              Matched: <span className="font-mono text-xs">{p.googlePlaceId}</span> ({when(p.googlePlaceIdConfirmedAt)})
+            </span>
+            <a className="underline" target="_blank" rel="noreferrer" href={mapsPlaceUrl(`${p.name}, ${p.address}, ${p.city}`, p.googlePlaceId)}>
+              Open in Google Maps
+            </a>
+            <form action={setGooglePlaceAction}>
+              <input type="hidden" name="id" value={p.id} />
+              <button name="remove" value="1" className="text-sm underline">
+                Remove match
+              </button>
+            </form>
+          </div>
+        ) : googleKey ? (
+          <GoogleMatch browserKey={googleKey} placeId={p.id} query={`${p.name}, ${p.address}, ${p.city}, AR`} action={setGooglePlaceAction} />
+        ) : (
+          <p className="text-zinc-500">No Google browser key set (NEXT_PUBLIC_GOOGLE_MAPS_KEY).</p>
+        )}
+        {!p.googlePlaceId && (
+          <form action={setGooglePlaceAction} className="mt-2 flex flex-wrap gap-2">
+            <input type="hidden" name="id" value={p.id} />
+            <input name="googlePlaceId" required placeholder="Or paste a Google place ID (ChIJ…)" className={`${input} min-w-80`} />
+            <button className="rounded border border-zinc-400 px-3 py-1">Use this ID</button>
+          </form>
+        )}
       </section>
 
       <section>

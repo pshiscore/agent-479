@@ -7,8 +7,10 @@ import { applyLinkPolicy, loadLinkPolicies } from "@/lib/links";
 import { PLACE_TYPE_LABELS, addressLine, schemaType, statedDate } from "@/lib/places/format";
 import { linkedVenueSlug, placeBySlug, type PublicPlace } from "@/lib/places/public";
 import { newInTownPath, venuePath } from "@/lib/routes";
+import { googleBrowserKey, googleWidgetEnabled } from "@/lib/google/places";
 import { citySlugs } from "@/lib/site/queries";
 import { chicagoDate, formatDate } from "@/lib/time";
+import { GoogleReviews } from "../../_components/google-reviews";
 import { PlaceCity, PlaceLabels, PlaceLinks, placeWhen } from "../../_components/places";
 
 /** A place's own page (docs/product/front-page.md, H): facts, links, and sources. No reviews or ratings. */
@@ -83,6 +85,8 @@ export default async function PlacePage({ params }: PageProps<"/place/[slug]">) 
       <div className="mt-6">
         <PlaceLinks p={p} website={website} />
       </div>
+      {/* Google's own ratings and reviews, loaded only on tap (AGENTS.md, Content rules). */}
+      {googleWidgetEnabled() && p.googlePlaceId && googleBrowserKey() && <GoogleReviews googlePlaceId={p.googlePlaceId} browserKey={googleBrowserKey()!} />}
       {venueSlug && (
         <p className="mt-6 text-sm">
           <Link href={venuePath(venueSlug)} className="font-semibold underline underline-offset-4">

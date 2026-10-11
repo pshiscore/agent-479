@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { publicBotIdentity } from "@/lib/bot-identity";
+import { googleWidgetEnabled } from "@/lib/google/places";
 
 export const metadata: Metadata = {
   title: "Privacy",
@@ -17,7 +18,7 @@ const { contact: CONTACT } = publicBotIdentity();
 export default async function PrivacyPage() {
   await connection();
   // The Google paragraph shows only while the widget it describes is switched on.
-  const googleWidget = process.env.GOOGLE_PLACES_WIDGET === "true";
+  const googleWidget = googleWidgetEnabled();
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-12 leading-relaxed">
       <h1 className="font-display text-4xl font-extrabold text-brand">Privacy</h1>
@@ -26,7 +27,8 @@ export default async function PrivacyPage() {
       <h2 className="mt-8 text-xl font-bold">What we collect from you</h2>
       <p className="mt-2">
         Nothing directly. 479 Guide has no accounts, sign-ups, comments, or visitor forms. We don&apos;t run analytics or
-        advertising, our pages set no cookies, and they load only our own scripts and fonts.
+        advertising, our pages set no cookies, and they load only our own scripts and fonts
+        {googleWidget ? ", unless you ask for Google ratings (below)" : ""}.
       </p>
 
       <h2 className="mt-8 text-xl font-bold">What stays in your browser</h2>

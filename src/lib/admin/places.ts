@@ -1,8 +1,9 @@
-import { and, desc, eq, like } from "drizzle-orm";
+import { and, desc, eq, like, ne } from "drizzle-orm";
 import { z } from "zod";
 import { agentActor, recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { ADDRESS_KINDS, PLACE_KINDS, PLACE_TYPES, type PlaceSource, places, venues } from "@/lib/db/schema";
+import { isGooglePlaceId } from "@/lib/google/places";
 import { describePlace, placeFacts } from "@/lib/places/describe";
 import { categoryForType } from "@/lib/places/format";
 import type { Generate } from "@/lib/pipeline/enrich/types";
@@ -305,6 +306,29 @@ export async function linkVenue(db: DbExecutor, id: string, venueId: string | nu
   return db.transaction(async (tx) => {
     const before = await load(tx, id);
     return change(tx, before, { venueId }, { actor: opts.actor, action: "update", reason: venueId ? `Linked to venue: ${opts.reason}` : `Venue link removed: ${opts.reason}` });
+  });
+}
+
+/**
+ * The owner confirms which Google place this is (or removes the match with
+ * null). Only the ID is stored; never matched automatically. Logged.
+ */
+export async function setGooglePlaceId(db: DbExecutor, id: string, googlePlaceId: string | null, opts: { actor: string; note?: string; now?: Date }) {
+  if (!opts.actor.startsWith("human:")) throw new PlaceError("only the owner matches a place to Google");
+  const gid = googlePlaceId?.trim() || null;
+  if (gid && !isGooglePlaceId(gid)) throw new PlaceError("that doesn't look like a Google place ID (letters, digits, - and _, like ChIJ…)");
+  return db.transaction(async (tx) => {
+    const before = await load(tx, id);
+    if (gid) {
+      const [other] = await tx.select({ name: places.name }).from(places).where(and(eq(places.googlePlaceId, gid), ne(places.id, id)));
+      if (other) throw new PlaceError(`that Google place is already matched to ${other.name}`);
+    }
+    const set = gid ? { googlePlaceId: gid, googlePlaceIdConfirmedAt: opts.now ?? new Date(), googlePlaceIdConfirmedBy: opts.actor } : { googlePlaceId: null, googlePlaceIdConfirmedAt: null, googlePlaceIdConfirmedBy: null };
+    return change(tx, before, set, {
+      actor: opts.actor,
+      action: "update",
+      reason: gid ? `Matched to Google place ${gid}: ${opts.note || "confirmed by the owner"}` : `Google match removed: ${opts.note || "by the owner"}`,
+    });
   });
 }
 

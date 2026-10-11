@@ -5,7 +5,7 @@ import { z } from "zod";
 import { rollbackAction } from "@/lib/actions/rollback";
 import { requireAdmin } from "@/lib/admin/auth";
 import { labelPair } from "@/lib/admin/dedup-review";
-import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, parseFacts, type PlaceInput, placeById, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
+import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, setGooglePlaceId, parseFacts, type PlaceInput, placeById, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
 import { changedFields, type EventFormValues, parseEventForm } from "@/lib/review/form";
 import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal, setParentEvent } from "@/lib/review/proposals";
@@ -375,6 +375,22 @@ export async function setParentAction(formData: FormData) {
     target = `${page}&msg=${encodeURIComponent(unlink ? `"${e.title}" unlinked.` : `"${e.title}" is now part of the festival.`)}`;
   } catch (err) {
     target = `${page}&error=${encodeURIComponent(`Not linked: ${message(err)}`)}`;
+  }
+  redirect(target);
+}
+
+/** "This is it" (or a pasted ID), and "Remove match": the owner's Google match for a place. */
+export async function setGooglePlaceAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("id"));
+  const remove = formData.get("remove") === "1";
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad place id");
+    const p = await setGooglePlaceId(getDb(), id.data, remove ? null : str(formData, "googlePlaceId"), { actor });
+    target = back(`/admin/places/${id.data}`, { msg: remove ? "Google match removed." : `Matched to Google place ${p.googlePlaceId}.` });
+  } catch (err) {
+    target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not matched: ${message(err)}` });
   }
   redirect(target);
 }

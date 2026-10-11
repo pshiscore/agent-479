@@ -57,6 +57,12 @@ export const places = pgTable(
     // Null until confirmed; publishing requires true.
     openToPublic: boolean("open_to_public"),
     venueId: uuid("venue_id").references(() => venues.id, { onDelete: "restrict" }),
+    // Google's place ID, matched by the owner (never automatically). The only
+    // Google data we store (AGENTS.md, Content rules): ratings and reviews
+    // load live in Google's own component, in the visitor's browser.
+    googlePlaceId: text("google_place_id"),
+    googlePlaceIdConfirmedAt: timestamp("google_place_id_confirmed_at", { withTimezone: true }),
+    googlePlaceIdConfirmedBy: text("google_place_id_confirmed_by"),
     description: text("description"),
     descriptionGeneratedAt: timestamp("description_generated_at", { withTimezone: true }),
     sources: jsonb("sources").$type<PlaceSource[]>().notNull().default([]),
@@ -69,6 +75,10 @@ export const places = pgTable(
   },
   (t) => [
     uniqueIndex("places_slug_uniq").on(t.slug),
+    uniqueIndex("places_google_place_id_uniq").on(t.googlePlaceId).where(sql`${t.googlePlaceId} is not null`),
+    check("places_google_check", sql.raw(`(google_place_id is null) = (google_place_id_confirmed_at is null) and (google_place_id is null) = (google_place_id_confirmed_by is null)`)),
+    // Postgres regexes cap repetition at 255, so the length is checked separately.
+    check("places_google_id_check", sql.raw(`google_place_id is null or (google_place_id ~ '^[A-Za-z0-9_-]+$' and length(google_place_id) between 10 and 300)`)),
     index("places_public_idx").on(t.category, t.openedOn).where(sql`${t.status} in ('opening_soon', 'open')`),
     check("places_slug_check", sql.raw(`slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`)),
     check("places_type_check", sql.raw(`place_type in ${sqlList(PLACE_TYPES)}`)),
