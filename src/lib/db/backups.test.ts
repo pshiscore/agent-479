@@ -38,6 +38,9 @@ describe("production backup guard", () => {
 
   it("the real log parses and lists the existing backups", async () => {
     const { readFileSync } = await import("node:fs");
-    expect(parseBackupLog(readFileSync("docs/BACKUPS.md", "utf8")).map((r) => r.before)).toEqual(["0017", "0020", "0021", "0022"]);
+    const rows = parseBackupLog(readFileSync("docs/BACKUPS.md", "utf8"));
+    expect(rows.slice(0, 4).map((r) => r.before)).toEqual(["0017", "0020", "0021", "0022"]);
+    // From the off-site rule on (2026-10-11), every logged backup has a verified R2 copy.
+    expect(rows.filter((r) => r.takenAt >= new Date("2026-10-11T00:00:00Z")).every((r) => r.offsite?.startsWith("r2:"))).toBe(true);
   });
 });
