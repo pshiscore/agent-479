@@ -19,11 +19,9 @@ export default async function NewInTown() {
   await connection();
   const db = getDb();
   const now = new Date();
-  const [cities, soon, blocks] = await Promise.all([
-    citySlugs(db),
-    openingSoon(db),
-    Promise.all(PLACE_CATEGORY_ORDER.map(async (category) => ({ category, places: await recentOpenings(db, now, { category }) }))),
-  ]);
+  // Few queries at once: more than the pool size can stall Supabase's pooler (src/lib/db/client.ts).
+  const [cities, soon, openings] = await Promise.all([citySlugs(db), openingSoon(db), recentOpenings(db, now)]);
+  const blocks = PLACE_CATEGORY_ORDER.map((category) => ({ category, places: openings.filter((p) => p.category === category) }));
   const shown = blocks.filter((b) => b.places.length > 0);
   const since = windowLabel(windowStart(now));
 

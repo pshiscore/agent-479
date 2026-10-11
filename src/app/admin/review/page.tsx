@@ -47,7 +47,9 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
   ]);
   const venueById = new Map(vs.map((v) => [v.id, v]));
   const categoryById = new Map(cs.map((c) => [c.id, c.name]));
-  const matches = new Map(await Promise.all(pending.map(async (p) => [p.id, await likelyMatches(db, p.facts)] as const)));
+  // One at a time: a burst of queries larger than the pool can stall Supabase's pooler (src/lib/db/client.ts).
+  const matches = new Map<string, Awaited<ReturnType<typeof likelyMatches>>>();
+  for (const p of pending) matches.set(p.id, await likelyMatches(db, p.facts));
   const matchIds = [...new Set([...matches.values()].flat().map((m) => m.id))];
   const matchRows = matchIds.length ? await db.select().from(events).where(inArray(events.id, matchIds)) : [];
   const eventById = new Map(matchRows.map((e) => [e.id, e]));

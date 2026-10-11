@@ -19,6 +19,10 @@ function createDb() {
   const client = postgres(url, {
     // Supabase transaction pooler (Supavisor) doesn't support prepared statements.
     prepare: false,
+    // Keep concurrent queries per request at or below this: on 2026-10-11 /new
+    // ran 6 at once (Promise.all) and hung until the 300 s function timeout in
+    // production, while the same code was instant locally. Loop instead of
+    // Promise.all over a list.
     max: 5,
     idle_timeout: 20,
     connection: { application_name: "agent-479" },

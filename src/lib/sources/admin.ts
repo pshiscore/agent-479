@@ -197,15 +197,16 @@ export async function sourcesNeedingAttention(db: DbExecutor) {
 /** For the admin page: sources the pipeline disabled after a block, with the logged reason. */
 export async function blockedSources(db: DbExecutor) {
   const blocked = await db.select().from(sources).where(eq(sources.disabledReason, "blocked"));
-  return Promise.all(
-    blocked.map(async (source) => {
-      const [action] = await db
-        .select({ reason: agentActions.reason, at: agentActions.createdAt })
-        .from(agentActions)
-        .where(and(eq(agentActions.entityId, source.id), eq(agentActions.action, "disable")))
-        .orderBy(desc(agentActions.createdAt))
-        .limit(1);
-      return { source, disabledAt: action?.at ?? null, reason: action?.reason ?? source.lastError };
-    }),
-  );
+  // One at a time: a burst of queries larger than the pool can stall Supabase's pooler (src/lib/db/client.ts).
+  const out = [];
+  for (const source of blocked) {
+    const [action] = await db
+      .select({ reason: agentActions.reason, at: agentActions.createdAt })
+      .from(agentActions)
+      .where(and(eq(agentActions.entityId, source.id), eq(agentActions.action, "disable")))
+      .orderBy(desc(agentActions.createdAt))
+      .limit(1);
+    out.push({ source, disabledAt: action?.at ?? null, reason: action?.reason ?? source.lastError });
+  }
+  return out;
 }

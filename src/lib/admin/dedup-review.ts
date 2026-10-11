@@ -97,8 +97,10 @@ export async function reviewQueue(db: DbExecutor, limit = 30): Promise<QueueItem
     from ranked where rn = 1 order by distance, id limit ${limit}`)) as unknown as {
     id: string; event_a_id: string; event_b_id: string; decision: string; confidence: number | null; scores: DedupScores; distance: number; same_title_pairs: number;
   }[];
-  return Promise.all(
-    rows.map(async (r) => ({
+  // One pair at a time: a burst of queries larger than the pool can stall Supabase's pooler (src/lib/db/client.ts).
+  const out = [];
+  for (const r of rows) {
+    out.push({
       candidateId: r.id,
       decision: r.decision,
       confidence: r.confidence === null ? null : Number(r.confidence),
@@ -107,8 +109,9 @@ export async function reviewQueue(db: DbExecutor, limit = 30): Promise<QueueItem
       sameTitlePairs: Number(r.same_title_pairs),
       a: await frozen(db, r.event_a_id),
       b: await frozen(db, r.event_b_id),
-    })),
-  );
+    });
+  }
+  return out;
 }
 
 export async function labelPair(db: DbExecutor, candidateId: string, label: "same" | "different", opts: { actor: string; note?: string }) {
