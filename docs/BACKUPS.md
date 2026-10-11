@@ -33,14 +33,19 @@ Restore (into a scratch database first):
 - **0019** (2026-10-04, ~22:38 UTC, after the deploy): no dump of its own;
   covered only by the `before-0017` dump taken about two minutes earlier.
 - **0020** and **0021**: each had its own dump, below.
-- **0025** (2026-10-11, ~21:34 UTC): the pre-0025 backup attempt failed
-  (an error during the run; a retry minutes later worked), and the
-  migration still ran because the guard then accepted any backup from the
-  last 2 hours, here the `before-0024` one from 21:25. 0025 only added empty
-  columns to `places`, so nothing was at risk, but it broke the "backup
-  before every migration" rule. The `before-0025` row below was taken just
-  after. Fixed the same day: the guard now needs a backup made for the
-  newest migration, and backup and migrate run as one `&&` chain.
+- **0025** (2026-10-11). Corrected account: my deploy shell had the local
+  database exported, and the scripts didn't override it. So the first
+  `--before 0025` backup run **refused** (correctly: not the production
+  database), and the "production" migrate ran against the **local**
+  database, where 0025 already existed, and reported success. Production
+  never got 0025 while the new code was live, so pages reading `places`
+  (the homepage, /new, /admin/places) failed for about 15 minutes. The
+  `before-0025` backup at 21:35 was a real production backup; 0025 was then
+  applied to production at about 21:52 in a clean shell, covered by it.
+  Fixes: production scripts and drizzle.config now override shell values
+  with `.env.production.local`, a production migrate refuses any database
+  but production, and the guard needs a backup made for the newest
+  migration.
 
 ## Log
 

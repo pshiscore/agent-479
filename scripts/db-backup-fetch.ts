@@ -14,7 +14,7 @@ import { parseArgs } from "node:util";
 import { decryptWith } from "@/lib/db/offsite";
 import { r2FromEnv } from "@/lib/db/r2-store";
 
-dotenv.config({ path: ".env.production.local", quiet: true });
+dotenv.config({ path: ".env.production.local", quiet: true, override: true });
 const { values: args } = parseArgs({ options: { key: { type: "string" }, "identity-file": { type: "string" } } });
 
 async function main() {

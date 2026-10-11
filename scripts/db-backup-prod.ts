@@ -23,7 +23,7 @@ import { r2FromEnv } from "@/lib/db/r2-store";
 import { PRODUCTION_DATABASE_ID, databaseId } from "@/lib/db/target";
 
 if (process.env.MIGRATE_PRODUCTION !== "yes") throw new Error("Set MIGRATE_PRODUCTION=yes: this script only backs up production.");
-dotenv.config({ path: ".env.production.local", quiet: true });
+dotenv.config({ path: ".env.production.local", quiet: true, override: true });
 
 const { values: args } = parseArgs({ options: { before: { type: "string" }, note: { type: "string", default: "" } } });
 if (!args.before || !/^[\w.-]{1,40}$/.test(args.before)) throw new Error("Pass --before <migration>, e.g. --before 0024");

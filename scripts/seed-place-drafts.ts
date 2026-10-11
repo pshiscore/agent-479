@@ -9,7 +9,7 @@
  * Usage: npm run places:seed-drafts   (production: MIGRATE_PRODUCTION=yes, reads .env.production.local)
  */
 import * as dotenv from "dotenv";
-dotenv.config({ path: process.env.MIGRATE_PRODUCTION === "yes" ? ".env.production.local" : ".env.local", quiet: true });
+dotenv.config({ path: process.env.MIGRATE_PRODUCTION === "yes" ? ".env.production.local" : ".env.local", quiet: true, override: process.env.MIGRATE_PRODUCTION === "yes" });
 
 import { and, eq } from "drizzle-orm";
 import { agentActor } from "@/lib/actions/record";
