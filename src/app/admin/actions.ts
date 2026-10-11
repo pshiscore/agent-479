@@ -94,6 +94,7 @@ function placeInput(f: FormData): PlaceInput {
     target: str(f, "target"),
     targetQualifier: str(f, "targetQualifier"),
     website: str(f, "website"),
+    menuUrl: str(f, "menuUrl"),
     sourceUrl: str(f, "sourceUrl"),
     confirmed: str(f, "confirmed"),
     notes: str(f, "notes"),

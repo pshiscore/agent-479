@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { getDb } from "@/lib/db/client";
+import { loadLinkPolicies } from "@/lib/links";
 import { PLACE_CATEGORIES } from "@/lib/db/schema";
 import { PLACE_CATEGORY_LABELS, windowLabel, windowStart } from "@/lib/places/format";
 import { openingSoon, recentOpenings } from "@/lib/places/public";
@@ -26,6 +27,7 @@ export default async function NewInTownCategory({ params }: PageProps<"/new/[cat
   await connection();
   const db = getDb();
   const now = new Date();
+  const policies = await loadLinkPolicies(db);
   const [cities, places, soon] = await Promise.all([citySlugs(db), recentOpenings(db, now, { category }), openingSoon(db, { category })]);
   const label = PLACE_CATEGORY_LABELS[category];
 
@@ -44,7 +46,7 @@ export default async function NewInTownCategory({ params }: PageProps<"/new/[cat
       ) : (
         <ul className="mt-4 divide-y divide-line">
           {places.map((p) => (
-            <PlaceCard key={p.id} p={p} cities={cities} now={now} />
+            <PlaceCard key={p.id} p={p} cities={cities} now={now} policies={policies} />
           ))}
         </ul>
       )}
@@ -55,7 +57,7 @@ export default async function NewInTownCategory({ params }: PageProps<"/new/[cat
           </SectionTitle>
           <ul className="mt-2 divide-y divide-line">
             {soon.map((p) => (
-              <PlaceCard key={p.id} p={p} cities={cities} now={now} />
+              <PlaceCard key={p.id} p={p} cities={cities} now={now} policies={policies} />
             ))}
           </ul>
         </section>

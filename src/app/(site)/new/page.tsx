@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { getDb } from "@/lib/db/client";
+import { loadLinkPolicies } from "@/lib/links";
 import { PLACE_CATEGORY_LABELS, PLACE_CATEGORY_ORDER, windowLabel, windowStart } from "@/lib/places/format";
 import { openingSoon, recentOpenings } from "@/lib/places/public";
 import { newInTownPath } from "@/lib/routes";
@@ -19,6 +20,7 @@ export default async function NewInTown() {
   await connection();
   const db = getDb();
   const now = new Date();
+  const policies = await loadLinkPolicies(db);
   // Few queries at once: more than the pool size can stall Supabase's pooler (src/lib/db/client.ts).
   const [cities, soon, openings] = await Promise.all([citySlugs(db), openingSoon(db), recentOpenings(db, now)]);
   const blocks = PLACE_CATEGORY_ORDER.map((category) => ({ category, places: openings.filter((p) => p.category === category) }));
@@ -42,7 +44,7 @@ export default async function NewInTown() {
           </div>
           <ul className="mt-2 divide-y divide-line">
             {places.slice(0, PER_BLOCK).map((p) => (
-              <PlaceCard key={p.id} p={p} cities={cities} now={now} />
+              <PlaceCard key={p.id} p={p} cities={cities} now={now} policies={policies} />
             ))}
           </ul>
         </section>
@@ -55,7 +57,7 @@ export default async function NewInTown() {
           </SectionTitle>
           <ul className="mt-2 divide-y divide-line">
             {soon.map((p) => (
-              <PlaceCard key={p.id} p={p} cities={cities} now={now} />
+              <PlaceCard key={p.id} p={p} cities={cities} now={now} policies={policies} />
             ))}
           </ul>
         </section>

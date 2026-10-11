@@ -10,7 +10,7 @@ import { importGoogleLibrary } from "@/components/google-maps-loader";
  * bordered box. We never restyle it or hide its attribution, and nothing it
  * shows is stored, cached, or read by our code. If it fails (or the daily
  * quota is reached), the visitor is pointed to the Maps link, which is
- * always on the page.
+ * always on the page (the "Google reviews" button).
  */
 
 const TIMEOUT_MS = 15_000;
@@ -50,7 +50,7 @@ export function GoogleReviews({ googlePlaceId, browserKey }: { googlePlaceId: st
       )}
       {status === "loading" && <p className="text-sm text-muted">Loading from Google…</p>}
       {status === "failed" && (
-        <p className="text-sm text-muted">Google ratings couldn&apos;t load right now. Use &quot;Reviews on Google Maps&quot; above instead.</p>
+        <p className="text-sm text-muted">Google ratings couldn&apos;t load right now. Use the &quot;Google reviews&quot; link above instead.</p>
       )}
       {/* Google's element, kept apart from our content by a border; its own attribution untouched. */}
       <div ref={box} className={status === "loading" || status === "shown" ? "mt-3 rounded-lg border border-line p-2" : "hidden"} />

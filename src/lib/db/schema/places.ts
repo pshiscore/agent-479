@@ -54,6 +54,9 @@ export const places = pgTable(
     targetPrecision: text("target_precision", { enum: DATE_PRECISIONS }),
     targetQualifier: text("target_qualifier"),
     website: text("website"),
+    // The menu as the business publishes it (a page or PDF), checked by the owner.
+    menuUrl: text("menu_url"),
+    menuCheckedAt: timestamp("menu_checked_at", { withTimezone: true }),
     // Null until confirmed; publishing requires true.
     openToPublic: boolean("open_to_public"),
     venueId: uuid("venue_id").references(() => venues.id, { onDelete: "restrict" }),
@@ -76,6 +79,7 @@ export const places = pgTable(
   (t) => [
     uniqueIndex("places_slug_uniq").on(t.slug),
     uniqueIndex("places_google_place_id_uniq").on(t.googlePlaceId).where(sql`${t.googlePlaceId} is not null`),
+    check("places_menu_check", sql.raw(`(menu_url is null) = (menu_checked_at is null)`)),
     check("places_google_check", sql.raw(`(google_place_id is null) = (google_place_id_confirmed_at is null) and (google_place_id is null) = (google_place_id_confirmed_by is null)`)),
     // Postgres regexes cap repetition at 255, so the length is checked separately.
     check("places_google_id_check", sql.raw(`google_place_id is null or (google_place_id ~ '^[A-Za-z0-9_-]+$' and length(google_place_id) between 10 and 300)`)),

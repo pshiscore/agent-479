@@ -11,7 +11,7 @@ import { googleBrowserKey, googleWidgetEnabled } from "@/lib/google/places";
 import { citySlugs } from "@/lib/site/queries";
 import { chicagoDate, formatDate } from "@/lib/time";
 import { GoogleReviews } from "../../_components/google-reviews";
-import { PlaceCity, PlaceLabels, PlaceLinks, placeWhen } from "../../_components/places";
+import { PlaceButtons, PlaceCity, PlaceLabels, placeWhen } from "../../_components/places";
 
 /** A place's own page (docs/product/front-page.md, H): facts, links, and sources. No reviews or ratings. */
 
@@ -83,7 +83,7 @@ export default async function PlacePage({ params }: PageProps<"/place/[slug]">) 
         </div>
       )}
       <div className="mt-6">
-        <PlaceLinks p={p} website={website} />
+        <PlaceButtons p={p} policies={policies} directions />
       </div>
       {/* Google's own ratings and reviews, loaded only on tap (AGENTS.md, Content rules). */}
       {googleWidgetEnabled() && p.googlePlaceId && googleBrowserKey() && <GoogleReviews googlePlaceId={p.googlePlaceId} browserKey={googleBrowserKey()!} />}

@@ -120,3 +120,7 @@ const SCHEMA_TYPES: Record<string, string> = {
   food_truck: "FoodEstablishment",
 };
 export const schemaType = (placeType: string) => SCHEMA_TYPES[placeType] ?? "LocalBusiness";
+
+/** A plain Yelp search for the business (owner, 2026-10-11): a link only; nothing from Yelp is fetched, shown, or stored. */
+export const yelpSearchUrl = (p: { name: string; address: string; city: string }) =>
+  `https://www.yelp.com/search?find_desc=${encodeURIComponent(p.name)}&find_loc=${encodeURIComponent(`${p.address}, ${p.city}, AR`)}`;

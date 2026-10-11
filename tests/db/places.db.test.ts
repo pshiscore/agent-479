@@ -81,6 +81,20 @@ describe("places", () => {
     });
   });
 
+  it("stamps a menu link as checked when it's set or changed, and clears the stamp when removed", async () => {
+    await inRollback(async (tx) => {
+      const input = { ...base, name: `Menu ${tag}`, menuUrl: "https://menu.example/a.pdf" };
+      const p = await createPlace(tx, input, { actor: OWNER, ownerVerified: true, reason: "owner" });
+      expect(p.menuCheckedAt).toBeInstanceOf(Date);
+      const same = await updatePlace(tx, p.id, input, { actor: OWNER, reason: "edit" });
+      expect(same.menuCheckedAt?.getTime()).toBe(p.menuCheckedAt!.getTime());
+      const changed = await updatePlace(tx, p.id, { ...input, menuUrl: "https://menu.example/b" }, { actor: OWNER, reason: "edit" });
+      expect(changed.menuUrl).toBe("https://menu.example/b");
+      const removed = await updatePlace(tx, p.id, { ...input, menuUrl: undefined }, { actor: OWNER, reason: "edit" });
+      expect(removed).toMatchObject({ menuUrl: null, menuCheckedAt: null });
+    });
+  });
+
   it("the database refuses a public place that isn't open to the public", async () => {
     await inRollback(async (tx) => {
       const p = await createPlace(tx, { ...base, opened: "2026-08-10", sourceUrl: "https://x.example/3" }, { actor: OWNER, ownerVerified: true, reason: "owner" });

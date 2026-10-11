@@ -16,6 +16,7 @@ export interface PlaceFormValues {
   target?: string;
   targetQualifier?: string | null;
   website?: string | null;
+  menuUrl?: string | null;
   sourceUrl?: string;
   notes?: string | null;
   // Edit mode: what the owner checked (prefilled), recorded with the save.
@@ -121,6 +122,12 @@ export function PlaceForm({
         <label className={`${field} sm:col-span-2`}>
           <span className={label}>Official website (optional)</span>
           <input name="website" type="url" defaultValue={values.website ?? ""} className={input} />
+          <span className={hint}>The business&apos;s own site, as you opened it. Shown as the Website button.</span>
+        </label>
+        <label className={`${field} sm:col-span-2`}>
+          <span className={label}>Menu link (optional)</span>
+          <input name="menuUrl" type="url" defaultValue={values.menuUrl ?? ""} placeholder="Their menu page or PDF, if they publish one" className={input} />
+          <span className={hint}>Open it first: it&apos;s recorded as checked by you today. Shown as the Menu button (a link only; we never copy the menu).</span>
         </label>
         {withSource && (
           <>

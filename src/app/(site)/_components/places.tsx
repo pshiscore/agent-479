@@ -10,7 +10,10 @@ import {
   mapsQuery,
   openedLabel,
   targetLabel,
+  yelpSearchUrl,
 } from "@/lib/places/format";
+import { mapsPlaceUrl } from "@/lib/google/places";
+import { applyLinkPolicy, type LinkPolicy } from "@/lib/links";
 import type { PublicPlace } from "@/lib/places/public";
 import { cityPath, placePath } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
@@ -45,7 +48,7 @@ export function PlaceLabels({ p, now }: { p: PublicPlace; now: Date }) {
 export const placeWhen = (p: PublicPlace) => (p.status === "open" ? openedLabel(p) : targetLabel(p));
 
 /** One place in a list: name (to its page), date, address, and labels. */
-export function PlaceCard({ p, cities, now }: { p: PublicPlace; cities: Set<string>; now: Date }) {
+export function PlaceCard({ p, cities, now, policies }: { p: PublicPlace; cities: Set<string>; now: Date; policies: readonly LinkPolicy[] }) {
   return (
     <li className="grid gap-1.5 py-4">
       <p className="text-sm font-semibold text-accent">{placeWhen(p)}</p>
@@ -58,6 +61,9 @@ export function PlaceCard({ p, cities, now }: { p: PublicPlace; cities: Set<stri
         {addressLine(p)}, <PlaceCity city={p.city} cities={cities} />
       </p>
       <PlaceLabels p={p} now={now} />
+      <div className="mt-1">
+        <PlaceButtons p={p} policies={policies} compact />
+      </div>
     </li>
   );
 }
@@ -76,10 +82,18 @@ export function PlaceRow({ p }: { p: PublicPlace }) {
   );
 }
 
-/** Website, Directions, and "Reviews on Google Maps" (a plain link: nothing is fetched or shown from it). */
-export function PlaceLinks({ p, website }: { p: PublicPlace; website: string | null }) {
-  const btn = "rounded-md border border-foreground/70 px-3 py-1.5 text-sm font-semibold hover:bg-chip";
+/**
+ * The place's buttons (owner, 2026-10-11): Website and Menu when we have them
+ * (the owner checked both), Google reviews (Google Maps, at the matched place
+ * when there is one), and Yelp reviews (a search). Links only: nothing from
+ * Google or Yelp is fetched, shown, or stored. The place page adds Directions.
+ */
+export function PlaceButtons({ p, policies, directions = false, compact = false }: { p: PublicPlace; policies: readonly LinkPolicy[]; directions?: boolean; compact?: boolean }) {
+  const btn = `rounded-md border border-foreground/70 font-semibold hover:bg-chip ${compact ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"}`;
   const query = mapsQuery(p);
+  const website = p.website ? applyLinkPolicy(p.website, policies) : null;
+  const menu = p.menuUrl ? applyLinkPolicy(p.menuUrl, policies) : null;
+  const google = p.googlePlaceId ? mapsPlaceUrl(query, p.googlePlaceId) : googleMapsSearchUrl(query);
   return (
     <div className="flex flex-wrap gap-2">
       {website && (
@@ -87,11 +101,21 @@ export function PlaceLinks({ p, website }: { p: PublicPlace; website: string | n
           Website
         </a>
       )}
-      <DirectionsLink google={googleDirectionsUrl(query)} apple={appleDirectionsUrl(query)} className={btn}>
-        Directions
-      </DirectionsLink>
-      <a href={googleMapsSearchUrl(query)} className={btn} rel="noopener" target="_blank">
-        Reviews on Google Maps
+      {menu && (
+        <a href={menu} className={btn} rel="noopener" target="_blank">
+          Menu
+        </a>
+      )}
+      {directions && (
+        <DirectionsLink google={googleDirectionsUrl(query)} apple={appleDirectionsUrl(query)} className={btn}>
+          Directions
+        </DirectionsLink>
+      )}
+      <a href={google} className={btn} rel="noopener" target="_blank">
+        Google reviews
+      </a>
+      <a href={yelpSearchUrl(p)} className={btn} rel="noopener" target="_blank">
+        Yelp reviews
       </a>
     </div>
   );

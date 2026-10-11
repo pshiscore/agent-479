@@ -48,6 +48,8 @@ export const placeInputSchema = z.object({
   target: optional(statedDate),
   targetQualifier: optional(z.string().trim().max(40)),
   website: optional(https),
+  // The business's own menu (page or PDF), opened by the owner.
+  menuUrl: optional(https),
   sourceUrl: optional(https),
   extraSourceUrls: z.array(https).default([]),
   confirmed: optional(z.string().trim().min(3).max(500)),
@@ -82,6 +84,7 @@ function fields(v: z.output<typeof placeInputSchema>) {
     targetPrecision: v.target?.precision ?? null,
     targetQualifier: v.target ? (v.targetQualifier ?? null) : null,
     website: v.website ?? null,
+    menuUrl: v.menuUrl ?? null,
     notes: v.notes ?? null,
     openToPublic: v.openToPublic,
   };
@@ -106,7 +109,7 @@ export async function createPlace(
   return db.transaction(async (tx) => {
     const [row] = await tx
       .insert(places)
-      .values({ ...fields(v), slug: await uniqueSlug(tx, v.name, v.city), status: "draft", sources })
+      .values({ ...fields(v), menuCheckedAt: v.menuUrl ? (opts.now ?? new Date()) : null, slug: await uniqueSlug(tx, v.name, v.city), status: "draft", sources })
       .returning();
     await recordAction(tx, { actor: opts.actor, action: "insert", entityType: "place", entityId: row.id, after: row, reason: opts.reason });
     return row;
@@ -134,7 +137,9 @@ export async function updatePlace(db: DbExecutor, id: string, input: PlaceInput,
     // A place that's public as "opening soon" keeps its target until it's marked
     // open (the database requires one); clearing it in the form keeps the old one.
     const keepTarget = before.status === "opening_soon" && !rest.targetOn ? { targetOn: before.targetOn, targetPrecision: before.targetPrecision, targetQualifier: before.targetQualifier } : {};
-    return change(tx, before, { ...rest, ...keepTarget, notes }, { actor: opts.actor, action: "update", reason: opts.reason });
+    // A new or changed menu link is stamped as checked by the owner now; a removed one clears the stamp.
+    const menu = rest.menuUrl === before.menuUrl ? {} : { menuCheckedAt: rest.menuUrl ? new Date() : null };
+    return change(tx, before, { ...rest, ...keepTarget, ...menu, notes }, { actor: opts.actor, action: "update", reason: opts.reason });
   });
 }
 

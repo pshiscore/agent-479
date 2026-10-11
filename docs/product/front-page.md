@@ -231,7 +231,11 @@ Whenever something new opens, it gets a factual card and its own page.
     generated-at timestamp). No menu items, ingredients, or features unless
     the source states them. Nothing beyond name and type stated: no
     description.
-  - Links: the official website; Directions; "Reviews on Google Maps" (a
+  - Buttons (owner, 2026-10-11), on each New in Town card and the place
+    page: Website and Menu (when the owner has checked them), Google reviews
+    (Google Maps at the matched place), and Yelp reviews (a Yelp search);
+    links only. The place page also has Directions. Originally: the official
+    website; Directions; "Reviews on Google Maps" (a
     plain link in Google's documented Maps URL format, searching by name and
     address: no API, no key, nothing stored); and the source link with a
     "Last checked" date. For intersection addresses, Directions and Maps
@@ -248,7 +252,7 @@ Whenever something new opens, it gets a factual card and its own page.
   content anywhere"): only inside Google's own Place Details element on the
   place page, loaded when the visitor taps "Show Google ratings and
   reviews"; nothing from Google is stored except the owner-confirmed place
-  ID. The "Reviews on Google Maps" link stays visible. Rules in AGENTS.md
+  ID. The "Google reviews" link stays visible. Rules in AGENTS.md
   (Content rules). Google is never a source for our facts.
 - **"Opening soon" and "Now open" are kept separate:**
   - "Opening soon" only when a source states a target date or month, shown

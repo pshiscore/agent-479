@@ -151,8 +151,10 @@ anything else the model writes for readers. They're copied from section E of
   - No Google data in the digest, feeds, JSON-LD, our descriptions, or any
     non-Google map.
   - Never restyle or hide the component's Google attribution.
-  - No other reviews or ratings (Yelp or anyone else) anywhere, and our own
-    text never reviews or rates.
+  - Plain links are fine (owner, 2026-10-11): "Google reviews" (Google Maps
+    at the matched place) and "Yelp reviews" (a Yelp search) buttons on New
+    in Town. We never fetch, show, store, or summarize Yelp's or anyone
+    else's reviews or ratings, and our own text never reviews or rates.
 - **Google is never a source for our facts** (owner, 2026-10-06), including
   "open to the public": a listing or its reviews can hint where to look, but
   what we record comes from the business's own page or post, a permitted

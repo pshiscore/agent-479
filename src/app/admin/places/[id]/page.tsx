@@ -105,6 +105,7 @@ export default async function PlacePage({ params, searchParams }: PageProps<"/ad
             target: monthOrDay(p.targetOn, p.targetPrecision),
             targetQualifier: p.targetQualifier,
             website: p.website,
+            menuUrl: p.menuUrl,
             notes: p.notes,
             openToPublic: p.openToPublic,
           }}
