@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseBackupLog, recentBackup } from "./backups";
+import { newestMigration, parseBackupLog, recentBackup } from "./backups";
 
 const SHA = "a".repeat(64);
 const LOG = `| Taken (UTC) | File | Bytes | SHA-256 | Before | Note |
@@ -42,5 +42,16 @@ describe("production backup guard", () => {
     expect(rows.slice(0, 4).map((r) => r.before)).toEqual(["0017", "0020", "0021", "0022"]);
     // From the off-site rule on (2026-10-11), every logged backup has a verified R2 copy.
     expect(rows.filter((r) => r.takenAt >= new Date("2026-10-11T00:00:00Z")).every((r) => r.offsite?.startsWith("r2:"))).toBe(true);
+  });
+
+  it("needs a backup made for the migration about to run, not an earlier one", () => {
+    const rows = parseBackupLog(LOG).slice(0, 2); // newest: 0022, at 12:00
+    const on = new Date("2026-10-05T12:30:00Z");
+    expect(recentBackup(rows, on, disk({ "backups/new.dump": SHA }), "0022")).toMatchObject({ ok: true });
+    expect(recentBackup(rows, on, disk({ "backups/new.dump": SHA }), "0023")).toMatchObject({ ok: false, reason: expect.stringContaining("no backup for 0023") });
+  });
+
+  it("knows the newest migration from the journal", () => {
+    expect(newestMigration()).toMatch(/^\d{4}$/);
   });
 });

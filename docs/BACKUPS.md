@@ -33,6 +33,14 @@ Restore (into a scratch database first):
 - **0019** (2026-10-04, ~22:38 UTC, after the deploy): no dump of its own;
   covered only by the `before-0017` dump taken about two minutes earlier.
 - **0020** and **0021**: each had its own dump, below.
+- **0025** (2026-10-11, ~21:34 UTC): the pre-0025 backup attempt failed
+  (an error during the run; a retry minutes later worked), and the
+  migration still ran because the guard then accepted any backup from the
+  last 2 hours, here the `before-0024` one from 21:25. 0025 only added empty
+  columns to `places`, so nothing was at risk, but it broke the "backup
+  before every migration" rule. The `before-0025` row below was taken just
+  after. Fixed the same day: the guard now needs a backup made for the
+  newest migration, and backup and migrate run as one `&&` chain.
 
 ## Log
 
@@ -45,3 +53,4 @@ Restore (into a scratch database first):
 | 2026-10-11T21:09Z | backups/prod-20261011T2109Z-before-test.dump | 1498401 | ba5682956f8ce5daf9d04c89d4e84aa3a443ce084ae841b07d33aebd072cc0a8 | test | 208 entries; off-site: r2:agent479-backups/prod/prod-20261011T2109Z-before-test.dump.age sha256 a7b7a1423f9c60c03cf8c8ae4a4cce73e15520cdfa8b0aca57c80327c41e5e85; first off-site test |
 | 2026-10-11T21:15Z | backups/prod-20261011T2115Z-before-test.dump | 1498401 | ecbef7effe3d1d68e5c61de699ee7646f450d68ceb5c8d70a324fe3ad33aa57c | test | 208 entries; off-site: r2:agent479-backups/prod/prod-20261011T2115Z-before-test.dump.age sha256 57c13ba74e6a594d893b43f8fe0d96eac18e6b02a6818d09b694b44fa6522b09; test with the new key |
 | 2026-10-11T21:25Z | backups/prod-20261011T2125Z-before-0024.dump | 1498477 | 7e69ad48c15a8cca99003d722270448ed4a50629e827f7fd93cc15d6d13be08b | 0024 | 208 entries; off-site: r2:agent479-backups/prod/prod-20261011T2125Z-before-0024.dump.age sha256 3b3f2ea2f18822fc5e61a52115fcc5bc8cfe567ecdabe501a2cc1d847e8dcac8 |
+| 2026-10-11T21:35Z | backups/prod-20261011T2135Z-before-0025.dump | 1499645 | 3aef030a66ad4b08cceff6854bb55e7b73f45f5194da110ec61c4d68e7c7f154 | 0025 | 210 entries; off-site: r2:agent479-backups/prod/prod-20261011T2135Z-before-0025.dump.age sha256 478a68ee5f6db81719b4a5c8c6f49f7b2d7ba244b64210c08f385f16266d75c7; taken just after 0025 applied (the pre-0025 attempt failed) |

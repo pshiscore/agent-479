@@ -91,9 +91,11 @@ imports it.
     logging it in `docs/BACKUPS.md`; commit the log. Off-site copies older
     than 30 days are deleted, logged in `docs/BACKUPS-PRUNED.md`. The private
     key is never in the repo or env. A production migration refuses to run
-    without a logged backup from the last 2 hours that's still on disk with a
+    without a logged backup from the last 2 hours, made for that migration
+    (`--before` names the newest migration), that's still on disk with a
     matching checksum and has a verified off-site copy
-    (`src/lib/db/backups.ts`, `src/lib/db/offsite.ts`).
+    (`src/lib/db/backups.ts`, `src/lib/db/offsite.ts`). Run the backup and the
+    migrate as one chain (`&&`), so a failed backup stops everything.
 
 ## Product references
 
