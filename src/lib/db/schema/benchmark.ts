@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, date, index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { createdAt, id, sqlList, updatedAt } from "./columns";
 import { events } from "./events";
 import { organizers } from "./organizers";
@@ -46,6 +46,12 @@ export const MISS_REASONS = [
   "rejected",
   // We have it, with a wrong date, time, or venue.
   "wrong_details",
+  // Held outside Benton and Washington counties: left out of coverage percentages, counted apart.
+  "outside_area",
+  // The organizer's permission is pending (Crystal Bridges, for example).
+  "permission_pending",
+  // The event's source exists but is proposed or paused.
+  "source_not_enabled",
   "other",
 ] as const;
 export const TASK_STATUSES = ["open", "done", "dropped"] as const;
@@ -65,6 +71,10 @@ export const benchmarkItems = pgTable(
     matchedProposalId: uuid("matched_proposal_id").references(() => eventProposals.id, { onDelete: "restrict" }),
     matchedAt: timestamp("matched_at", { withTimezone: true }).notNull(),
     missReason: text("miss_reason", { enum: MISS_REASONS }),
+    // What matching saw (a rejected or hidden match, say); the owner still picks the reason.
+    suggestedReason: text("suggested_reason", { enum: MISS_REASONS }),
+    // The owner said the match was wrong: re-checks leave this item missed.
+    matchOverridden: boolean("match_overridden").notNull().default(false),
     // The registry task a "no source" miss creates: find or add this organizer.
     taskStatus: text("task_status", { enum: TASK_STATUSES }),
     taskOrganizerId: uuid("task_organizer_id").references(() => organizers.id, { onDelete: "restrict" }),
@@ -77,6 +87,7 @@ export const benchmarkItems = pgTable(
     index("benchmark_items_open_task_idx").on(t.createdAt).where(sql`${t.taskStatus} = 'open'`),
     check("benchmark_items_result_check", sql.raw(`result in ${sqlList(BENCHMARK_RESULTS)}`)),
     check("benchmark_items_miss_reason_check", sql.raw(`miss_reason is null or (result = 'missed' and miss_reason in ${sqlList(MISS_REASONS)})`)),
+    check("benchmark_items_suggested_reason_check", sql.raw(`suggested_reason is null or suggested_reason in ${sqlList(MISS_REASONS)}`)),
     check("benchmark_items_task_status_check", sql.raw(`task_status is null or (miss_reason = 'no_source' and task_status in ${sqlList(TASK_STATUSES)})`)),
     // What a result points at: live an event, review and shadow a queue item, missed nothing.
     check(

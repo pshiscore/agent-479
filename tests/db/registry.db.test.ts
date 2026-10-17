@@ -25,7 +25,7 @@ async function rejects(tx: DbTx, constraint: string, fn: (tx: DbTx) => Promise<u
 const organizer = (tx: DbTx, over: Partial<typeof organizers.$inferInsert> = {}) =>
   tx
     .insert(organizers)
-    .values({ slug: "test-org", name: "Test Organizer", organizerType: "government", city: "Pea Ridge", county: "Benton", ...over })
+    .values({ slug: "test-org", name: "Test Organizer", organizerType: "government", city: "Pea Ridge", homeCounty: "Benton", homeState: "AR", ...over })
     .returning()
     .then((r) => r[0]);
 
@@ -42,10 +42,19 @@ describe("organizers (migration 0029)", () => {
     });
   });
 
-  it("enforces type, county, https, and verified-means-checked", async () => {
+  it("allows organizers based outside the area (owner, 2026-10-17); coverage stays on events", async () => {
+    await inRollback(async (tx) => {
+      const org = await organizer(tx, { slug: "vintage-market-days", organizerType: "business", city: "Oklahoma City", homeCounty: "Oklahoma", homeState: "OK", holdsEventsInArea: "yes" });
+      expect(org).toMatchObject({ homeState: "OK", holdsEventsInArea: "yes" });
+      expect((await organizer(tx, { slug: "unknown-org" })).holdsEventsInArea).toBe("unknown");
+    });
+  });
+
+  it("enforces type, state, https, and verified-means-checked", async () => {
     await inRollback(async (tx) => {
       await rejects(tx, "organizers_type_check", (sp) => organizer(sp, { organizerType: "band" as never }));
-      await rejects(tx, "organizers_county_check", (sp) => organizer(sp, { county: "Carroll" as never }));
+      await rejects(tx, "organizers_state_check", (sp) => organizer(sp, { homeState: "Arkansas" }));
+      await rejects(tx, "organizers_holds_events_check", (sp) => organizer(sp, { holdsEventsInArea: "maybe" as never }));
       await rejects(tx, "organizers_website_check", (sp) => organizer(sp, { website: "http://example.gov/" }));
       await rejects(tx, "organizers_verified_check", (sp) => organizer(sp, { status: "verified" }));
       await rejects(tx, "organizers_slug_check", (sp) => organizer(sp, { slug: "Not A Slug" }));

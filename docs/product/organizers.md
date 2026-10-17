@@ -24,8 +24,12 @@ shadow-mode fixes of 2026-10-17. Shadow mode itself is in AGENTS.md
   - Tier 3: social-only organizers (most fire departments, many festivals),
     added only when a benchmark miss points to one. We never fetch social
     media.
-- **Coverage area:** organizers outside Benton and Washington counties aren't
-  added (`organizers.county`).
+- **Coverage area applies to events, not organizers** (owner, 2026-10-17).
+  An organizer based elsewhere (Vintage Market Days, statewide media hosts,
+  race companies) is added when it holds events here. Its home county and
+  state are stored as facts (nullable), with `holds_events_in_area` (yes /
+  no / unknown). Out-of-area events are still held in review, as for any
+  source.
 - **Venues and organizers are separate tables**, linked
   (`organizers.venue_id`) when a venue runs its own calendar.
 - **Feed discovery** records the robots.txt result, the terms page link, and
@@ -55,14 +59,26 @@ when the typed date falls inside its range. Each line's result is one of:
 - `live`: a published event.
 - `review`: waiting in the review queue.
 - `shadow`: a shadow source has it ("would have caught").
-- `missed`: the owner picks a reason. "No source" opens a registry task.
+- `missed`: the owner picks a reason (code suggests one when it saw a
+  rejected item or hidden event). "No source" opens a registry task.
 
-The weekly report shows live coverage and potential coverage (live plus
-shadow), so a source's value shows before it's promoted.
+Miss reasons: no source, social only, not in the feed, filtered, rejected,
+wrong details, outside coverage area, permission pending (Crystal Bridges,
+for example), source not enabled (proposed or paused), and other. An event
+we hold in review outside the coverage area is recorded as missed, outside
+coverage area, by code.
 
-## Schema (migration 0029)
+Items missed as outside the coverage area are left out of the total and
+shown as a count. The weekly report shows live coverage (live over the
+total) and potential coverage (live, review, and shadow together over the
+total), with a trend, so a source's value shows before it's promoted. Weeks
+can be re-checked as sources keep fetching; a match the owner marked wrong
+stays missed.
 
-- `organizers`: name, type, website, city, county, channel (feed /
+## Schema (migrations 0029 and 0030)
+
+- `organizers`: name, type, website, home city, county, and state,
+  whether it holds events in the coverage area, channel (feed /
   structured page / HTML page / social only / newsletter / unknown), status
   (candidate / verified / retired), last checked, notes, venue link,
   verification.
@@ -78,8 +94,8 @@ shadow), so a source's value shows before it's promoted.
 
 1. Shadow source state and the "By source" review view. Done.
 2. Tier 1 into shadow. Done.
-3. Migration 0029. Done.
-4. `/admin/benchmark`.
+3. Migration 0029. Done; fixes in 0030.
+4. `/admin/benchmark`. Done.
 5. Tier 2 registry seeding (agent-verified, logged).
 6. The discovery agent, producing proposals.
 7. The structured-data fetcher (event data from pages, no AI).

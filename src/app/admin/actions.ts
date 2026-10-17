@@ -11,7 +11,8 @@ import { changedFields, type EventFormValues, parseEventForm } from "@/lib/revie
 import { addSourceFilter, bulkDecide, editSourceFilter, removeSourceFilter } from "@/lib/review/by-source";
 import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal, setParentEvent } from "@/lib/review/proposals";
 import { setPublishState } from "@/lib/sources/admin";
-import { PUBLISH_STATES, REJECT_KINDS } from "@/lib/db/schema";
+import { addLines, markWrongMatch, recheckWeek, setMissReason, setTaskStatus } from "@/lib/benchmark/service";
+import { MISS_REASONS, PUBLISH_STATES, REJECT_KINDS, TASK_STATUSES } from "@/lib/db/schema";
 import { getDb } from "@/lib/db/client";
 import { generateStructured } from "@/lib/llm";
 import type { Generate } from "@/lib/pipeline/enrich/types";
@@ -473,6 +474,88 @@ export async function editSourceFilterAction(formData: FormData) {
     target = bySource({ msg: `Filter changed to "${r.added.filter.contains}": ${r.removed.items + r.removed.records} restored, ${r.added.rejected} now filtered.` });
   } catch (err) {
     target = bySource({ error: `Not changed: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+// ---- Coverage benchmark ----
+
+const benchmark = (params: Record<string, string>) => back("/admin/benchmark", params);
+
+export async function addBenchmarkLinesAction(formData: FormData) {
+  const actor = await requireAdmin();
+  let target: string;
+  try {
+    const r = await addLines(getDb(), { weekStart: str(formData, "weekStart"), label: str(formData, "label"), text: str(formData, "lines") }, { actor });
+    const problems = r.errors.map((e) => `"${e.line.slice(0, 60)}" (${e.problem})`).join("; ");
+    target = benchmark({
+      week: r.weekId,
+      msg: `Matched ${r.added} line(s)${r.repeated ? `; ${r.repeated} already in this week` : ""}.`,
+      ...(problems ? { error: `Not read: ${problems}`.slice(0, 600) } : {}),
+    });
+  } catch (err) {
+    target = benchmark({ error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function setMissReasonAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("itemId"));
+  const reason = MISS_REASONS.find((r) => r === str(formData, "reason"));
+  const week = str(formData, "week");
+  let target: string;
+  try {
+    if (!id.success || !reason) throw new Error("bad request");
+    const r = await setMissReason(getDb(), id.data, reason, { actor, note: str(formData, "note") });
+    target = benchmark({ week, msg: `Reason saved for "${r.name}"${r.taskStatus === "open" ? "; registry task open" : ""}.` });
+  } catch (err) {
+    target = benchmark({ week, error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function wrongMatchAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("itemId"));
+  const week = str(formData, "week");
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad item");
+    const r = await markWrongMatch(getDb(), id.data, { actor });
+    target = benchmark({ week, msg: `"${r.name}" is now missed; pick a reason.` });
+  } catch (err) {
+    target = benchmark({ week, error: `Not changed: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function setTaskStatusAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("itemId"));
+  const status = TASK_STATUSES.find((t) => t === str(formData, "status"));
+  const week = str(formData, "week");
+  let target: string;
+  try {
+    if (!id.success || !status) throw new Error("bad request");
+    const r = await setTaskStatus(getDb(), id.data, status, { actor });
+    target = benchmark({ ...(week ? { week } : {}), msg: `Registry task for "${r.name}": ${status}.` });
+  } catch (err) {
+    target = benchmark({ ...(week ? { week } : {}), error: `Not changed: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function recheckWeekAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("weekId"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad week");
+    const r = await recheckWeek(getDb(), id.data, { actor });
+    target = benchmark({ week: id.data, msg: `Re-checked ${r.checked} item(s); ${r.changed} changed.` });
+  } catch (err) {
+    target = benchmark({ week: id.success ? id.data : "", error: `Not re-checked: ${message(err)}` });
   }
   redirect(target);
 }

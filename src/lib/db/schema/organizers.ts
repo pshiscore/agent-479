@@ -11,8 +11,10 @@ import { type FieldProvenance, venues } from "./venues";
  * pointers, not published facts, so the agent verifies each against the
  * organizer's own site and logs it; no owner sign-off. The owner approves
  * feeds (sources) and events. Venues and organizers stay separate tables,
- * linked when a venue runs its own calendar. Organizers outside Benton and
- * Washington counties aren't added.
+ * linked when a venue runs its own calendar. The coverage area applies to
+ * where events happen, not where an organizer is based (owner, 2026-10-17):
+ * an organizer based elsewhere is added when it holds events here, and its
+ * out-of-area events are still held in review like any other.
  */
 
 export const ORGANIZER_TYPES = [
@@ -32,7 +34,7 @@ export const ORGANIZER_TYPES = [
 /** How the organizer publishes events. We never fetch social media; social_only reaches us through the owner or submissions. */
 export const ORGANIZER_CHANNELS = ["feed", "structured_page", "html_page", "social_only", "newsletter", "unknown"] as const;
 export const ORGANIZER_STATUSES = ["candidate", "verified", "retired"] as const;
-export const COUNTIES = ["Benton", "Washington"] as const;
+export const HOLDS_EVENTS_IN_AREA = ["yes", "no", "unknown"] as const;
 
 /** Per-field provenance, like venues: where each fact was checked, and when. */
 export interface OrganizerVerification {
@@ -52,10 +54,12 @@ export const organizers = pgTable(
     aliases: text("aliases").array().notNull().default(sql`'{}'::text[]`),
     organizerType: text("organizer_type", { enum: ORGANIZER_TYPES }).notNull(),
     website: text("website"),
-    // Null for an organizer that works across a county or the region.
+    // Where the organizer is based (facts, nullable; may be outside the coverage area).
     city: text("city"),
-    // Null for one that works across both counties.
-    county: text("county", { enum: COUNTIES }),
+    homeCounty: text("county"),
+    homeState: text("state"),
+    // Whether it holds events in Benton or Washington county.
+    holdsEventsInArea: text("holds_events_in_area", { enum: HOLDS_EVENTS_IN_AREA }).notNull().default("unknown"),
     channel: text("channel", { enum: ORGANIZER_CHANNELS }).notNull().default("unknown"),
     status: text("status", { enum: ORGANIZER_STATUSES }).notNull().default("candidate"),
     lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
@@ -74,7 +78,8 @@ export const organizers = pgTable(
     check("organizers_type_check", sql.raw(`organizer_type in ${sqlList(ORGANIZER_TYPES)}`)),
     check("organizers_channel_check", sql.raw(`channel in ${sqlList(ORGANIZER_CHANNELS)}`)),
     check("organizers_status_check", sql.raw(`status in ${sqlList(ORGANIZER_STATUSES)}`)),
-    check("organizers_county_check", sql.raw(`county is null or county in ${sqlList(COUNTIES)}`)),
+    check("organizers_state_check", sql.raw(`state is null or state ~ '^[A-Z]{2}$'`)),
+    check("organizers_holds_events_check", sql.raw(`holds_events_in_area in ${sqlList(HOLDS_EVENTS_IN_AREA)}`)),
     check("organizers_website_check", sql.raw(`website is null or website ~ '^https://'`)),
     // Verified means the agent checked it against the organizer's own site.
     check("organizers_verified_check", sql.raw(`status <> 'verified' or last_checked_at is not null`)),
