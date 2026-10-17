@@ -30,6 +30,9 @@ const WASHINGTON = [
   "Canehill", "Cincinnati", "Evansville", "Morrow",
 ];
 
+/** Every place in the area, by name, for forms (Elm Springs and Springdale appear once). */
+export const COVERAGE_PLACE_NAMES: readonly string[] = [...new Set([...BENTON, ...WASHINGTON])].sort();
+
 export const COVERAGE_PLACES: ReadonlySet<string> = new Set([...BENTON, ...WASHINGTON].map((c) => c.toLowerCase()));
 
 /** Whether a city or town is inside the coverage area. */

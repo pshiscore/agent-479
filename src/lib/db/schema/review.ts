@@ -14,7 +14,7 @@ import { runs } from "./runs";
  */
 
 export const PROPOSAL_STATUSES = ["pending", "approved", "rejected", "merged"] as const;
-export const PROPOSAL_ORIGINS = ["owner_form", "registry", "calendar", "lead", "shadow"] as const;
+export const PROPOSAL_ORIGINS = ["owner_form", "registry", "calendar", "lead", "shadow", "submission"] as const;
 // Why an item is in review (plan section 5, owner decisions 2026-10-05).
 export const REVIEW_REASONS = [
   "owner_draft",
@@ -30,6 +30,8 @@ export const REVIEW_REASONS = [
   "shadow_source",
   // A changed date, time, or venue for an event already approved from a shadow source.
   "shadow_update",
+  // Sent through the public "Submit an event" form (step 10); always reviewed.
+  "submitted",
 ] as const;
 
 /** Shadow items that need a look one by one; everything else is reviewed by source. */
@@ -124,5 +126,35 @@ export const eventProposals = pgTable(
     // A decision has a time and a decider; a pending item has neither.
     check("event_proposals_decided_check", sql.raw(`(status = 'pending') = (decided_at is null) and (decided_at is null) = (decided_by is null)`)),
     check("event_proposals_reject_note_check", sql.raw(`status <> 'rejected' or length(coalesce(decision_note, '')) >= 3`)),
+  ],
+).enableRLS();
+
+/**
+ * Who sent a submitted event (step 10; owner, 2026-10-16). Only the email is
+ * personal; it and the free-text note are deleted 30 days after the owner's
+ * decision (maintenance job). The place and organizer as typed stay as the
+ * record of what was submitted. Kept apart from event_proposals so the purge
+ * touches nothing else.
+ */
+export const eventSubmissions = pgTable(
+  "event_submissions",
+  {
+    id: id(),
+    proposalId: uuid("proposal_id")
+      .notNull()
+      .references(() => eventProposals.id, { onDelete: "restrict" }),
+    email: text("email"),
+    // The place as the submitter typed it; the owner picks the venue in review.
+    placeText: text("place_text").notNull(),
+    organizerName: text("organizer_name"),
+    note: text("note"),
+    purgedAt: timestamp("purged_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("event_submissions_proposal_uniq").on(t.proposalId),
+    index("event_submissions_email_idx").on(t.email, t.createdAt),
+    // Until purged there is an email; after, neither the email nor the note remains.
+    check("event_submissions_purge_check", sql.raw(`(purged_at is null) = (email is not null) and (purged_at is null or note is null)`)),
   ],
 ).enableRLS();

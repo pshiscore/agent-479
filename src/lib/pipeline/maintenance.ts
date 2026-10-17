@@ -6,6 +6,7 @@ import { Deadline } from "@/lib/cron-budget";
 import { rediscoverDue } from "@/lib/discovery/rediscover";
 import { claimJob } from "@/lib/jobs";
 import { PoliteClient } from "@/lib/sources/http";
+import { purgeSubmitterEmails } from "@/lib/submissions/purge";
 import { finishRun } from "@/lib/runs";
 import { demoteLiveSources } from "@/lib/sources/demotion";
 import { proposeTicketmasterLinks } from "@/lib/sources/ticketmaster-venues";
@@ -101,6 +102,8 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; dead
     };
     const descriptionsPurged = await step("purge descriptions", 0, () => purgeDescriptions(db, now));
     const payloadsPurged = await step("purge payloads", 0, () => purgeStalePayloads(db, now));
+    // Submitters' emails, 30 days after the owner's decision (step 10).
+    const submitterEmailsPurged = await step("purge submitter emails", 0, () => purgeSubmitterEmails(db, now, agentActor("maintenance"), claim.id));
     // Proposals only: never links a Ticketmaster venue by itself.
     const linkProposals = await step("Ticketmaster links", { proposed: 0, alreadyDecided: 0 }, async () => {
       const [tm] = await db.select({ id: sources.id }).from(sources).where(eq(sources.slug, "ticketmaster"));
@@ -117,6 +120,7 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; dead
     const stats = {
       descriptionsPurged,
       payloadsPurged,
+      submitterEmailsPurged,
       linkProposals: linkProposals.proposed,
       needsVenueArchived,
       categoryProposals: categoryProposals.proposed,

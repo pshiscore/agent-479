@@ -22,6 +22,7 @@ describe("schema", () => {
         "dedup_labels",
         "event_days",
         "event_proposals",
+        "event_submissions",
         "event_series",
         "event_sources",
         "event_tags",

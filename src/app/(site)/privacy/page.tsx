@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { publicBotIdentity } from "@/lib/bot-identity";
 import { googleWidgetEnabled } from "@/lib/google/places";
+import { SUBMITTER_EMAIL_DAYS } from "@/lib/submissions/purge";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description: "What 479 Guide collects (almost nothing), who hosts it, and what loads from Google and when.",
+  description: "What 479 Guide collects (almost nothing: an email only if you submit an event), who hosts it, and what loads from Google and when.",
 };
 
 const { contact: CONTACT } = publicBotIdentity();
@@ -22,14 +23,35 @@ export default async function PrivacyPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-12 leading-relaxed">
       <h1 className="font-display text-4xl font-extrabold text-brand">Privacy</h1>
-      <p className="mt-2 text-sm text-muted">Last updated October 6, 2026.</p>
+      <p className="mt-2 text-sm text-muted">Last updated October 17, 2026.</p>
 
       <h2 className="mt-8 text-xl font-bold">What we collect from you</h2>
       <p className="mt-2">
-        Nothing directly. 479 Guide has no accounts, sign-ups, comments, or visitor forms. We don&apos;t run analytics or
-        advertising, our pages set no cookies, and they load only our own scripts and fonts
+        Nothing, unless you submit an event (below). 479 Guide has no accounts, sign-ups, or comments. We don&apos;t run
+        analytics or advertising, our pages set no cookies, and they load only our own scripts and fonts
         {googleWidget ? ", unless you ask for Google ratings (below)" : ""}.
       </p>
+
+      <h2 className="mt-8 text-xl font-bold">If you submit an event</h2>
+      <p className="mt-2">
+        The <a className="underline" href="/submit">Submit an event</a> form sends us what you type: the event&apos;s details and
+        link, who&apos;s putting it on and a note if you add them, and your email address.
+      </p>
+      <ul className="mt-2 list-disc pl-6">
+        <li>
+          We use your email only to ask about the event you sent, and to limit how many events one address can send in a
+          day. We delete it, along with your note, {SUBMITTER_EMAIL_DAYS} days after we approve or decline the event.
+        </li>
+        <li>
+          If we approve the event, its facts (what, when, where, and your link) appear on the site after we&apos;ve checked them.
+          Either way we keep the event details you sent as our record of the decision.
+        </li>
+        <li>
+          To keep out spam, the form uses a hidden field and checks how long it took to fill in. We don&apos;t use a CAPTCHA or any
+          outside service, and we don&apos;t record your IP address (our host&apos;s standard logs, below, still apply).
+        </li>
+        <li>Our log of changes records that a submission arrived, never your email address.</li>
+      </ul>
 
       <h2 className="mt-8 text-xl font-bold">What stays in your browser</h2>
       <p className="mt-2">

@@ -34,6 +34,7 @@ export const RESERVED_ROOT_SEGMENTS = [
   "about",
   "privacy",
   "digest",
+  "submit",
 ] as const;
 
 const RESERVED = new Set<string>(RESERVED_ROOT_SEGMENTS);

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { inArray, sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getDb } from "@/lib/db/client";
-import { categories, events, type ProposedEvent, venues } from "@/lib/db/schema";
+import { categories, eventSubmissions, events, type ProposedEvent, venues } from "@/lib/db/schema";
 import { likelyMatches, pendingProposals, recentDecisions, webSearchUrl } from "@/lib/review/proposals";
 import { formatInChicago } from "@/lib/time";
 import { eventsDuring, festivalOptions } from "@/lib/review/options";
@@ -22,6 +22,7 @@ const REASON_LABELS: Record<string, string> = {
   unclear_schedule: "Dates or schedule unclear",
   first_time_organizer: "First-time organizer",
   outside_coverage_area: "Outside coverage area",
+  submitted: "Sent through the Submit an event form",
 };
 
 const range = (f: Pick<ProposedEvent, "startAt" | "endAt" | "allDay">) => {
@@ -83,6 +84,11 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
   const matchIds = [...new Set([...matches.values()].flat().map((m) => m.id))];
   const matchRows = matchIds.length ? await db.select().from(events).where(inArray(events.id, matchIds)) : [];
   const eventById = new Map(matchRows.map((e) => [e.id, e]));
+  // Who sent each submitted item (step 10). The email is deleted 30 days after your decision.
+  const submittedIds = pending.filter((p) => p.origin === "submission").map((p) => p.id);
+  const submissions = new Map(
+    (submittedIds.length ? await db.select().from(eventSubmissions).where(inArray(eventSubmissions.proposalId, submittedIds)) : []).map((s) => [s.proposalId, s]),
+  );
   const compare = (f: ProposedEvent, venueName: string | undefined) => ({
     title: f.title,
     when: range(f),
@@ -126,6 +132,20 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
                 Why it&apos;s here: {p.reasons.map((r) => REASON_LABELS[r] ?? r).join("; ")} · from {p.origin.replace("_", " ")} · {when(p.createdAt)}
               </p>
             </div>
+            {submissions.get(p.id) && (
+              <div className="rounded border border-zinc-200 p-3 dark:border-zinc-800">
+                <p>
+                  <strong>Submitted.</strong> Place as typed: {submissions.get(p.id)!.placeText}
+                  {submissions.get(p.id)!.organizerName ? ` · Organizer: ${submissions.get(p.id)!.organizerName}` : ""}
+                </p>
+                {submissions.get(p.id)!.note && <p className="text-zinc-500">Their note (not published): {submissions.get(p.id)!.note}</p>}
+                {submissions.get(p.id)!.email && (
+                  <p className="text-zinc-500">
+                    Contact: <a className="underline" href={`mailto:${submissions.get(p.id)!.email}`}>{submissions.get(p.id)!.email}</a> (deleted 30 days after your decision). Check the event&apos;s own page, then pick the venue and category in Edit and approve.
+                  </p>
+                )}
+              </div>
+            )}
 
             <div>
               <p className="font-semibold">Sources</p>

@@ -49,6 +49,7 @@ export function Footer() {
           479 Guide lists events from public sources across Northwest Arkansas. Summaries are generated from those listings and link to the original.
         </p>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2 font-semibold underline underline-offset-4">
+          <Link href="/submit">Submit an event</Link>
           <Link href="/bot">About Agent 479</Link>
           <a href="mailto:bot@479.guide?subject=Issue%20on%20479%20Guide">Report an issue</a>
           <Link href="/bot">For site owners</Link>

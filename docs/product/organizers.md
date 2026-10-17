@@ -137,7 +137,18 @@ stays missed.
    needs approved API access (open item 31); MarketSpread, Eventeny,
    FestivalNet, Macaroni KID, 5NEWS, and 40/29 bar automated access in
    their terms, and KNWA refused us (403): all leads only.
-10. The submission form and invite email template.
+10. The submission form and invite email template. Done 2026-10-17:
+    `/submit` (footer link "Submit an event"). Every submission is a review
+    item (origin `submission`, reason `submitted`, plus "outside coverage
+    area" when it is); the owner checks the event's own page and picks the
+    venue and category before approving. Only the submitter's email is
+    personal; it lives in `event_submissions` with their note, is never
+    written to the change log, and the maintenance job deletes both 30 days
+    after the decision. Anti-spam is a hidden field plus a signed form time
+    (no CAPTCHA, no third parties, no IP stored); limits are 30 an hour and
+    5 per email a day. The privacy page was updated first. The invite email
+    is `docs/outreach/invite-organizers.md`. The form stays behind the site
+    lock until launch.
 11. Later: ICS subscription feeds and a JSON feed for each filtered view
     (`docs/product/front-page.md`, section F), after the Ticketmaster display
     terms review. Feeds carry only our own facts plus source links, never

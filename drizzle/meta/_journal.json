@@ -232,6 +232,13 @@
       "when": 1792264748741,
       "tag": "0032_organizer_discovery_check",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792265394409,
+      "tag": "0033_event_submissions",
+      "breakpoints": true
     }
   ]
 }

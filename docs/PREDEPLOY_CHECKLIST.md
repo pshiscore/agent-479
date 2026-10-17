@@ -56,6 +56,10 @@ marked (every deploy) each time.
   an analytics package or script appears in the code.
 - [ ] The Google paragraph on `/privacy` shows only while
   `GOOGLE_PLACES_WIDGET` is `true`.
+- [ ] **Owner approves the updated `/privacy`** (2026-10-17: the "If you
+  submit an event" section for `/submit`). Before launch, submit one test
+  event, check it in `/admin/review`, decide it, and confirm the email is
+  gone 30 days later (or run the purge with a later date in development).
 
 ## Sources
 
