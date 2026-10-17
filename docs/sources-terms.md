@@ -345,3 +345,34 @@ owner's call.
 
 **Rogers Public Library:** links to LibCal, but the page has no subscribe
 link we can read; the feed URL still comes from the owner (open item 5).
+
+## Specialist platforms: terms review (2026-10-17)
+
+Step 9 of the organizer registry build (`docs/product/organizers.md`):
+terms review only, nothing built. Each site's robots.txt, home page, and
+linked terms pages were read with our bot through PoliteClient, one request
+at a time. Summaries are in our own words; the pages themselves are linked.
+
+| Platform | What it offers us | Terms (read 2026-10-17) | Verdict |
+|---|---|---|---|
+| **RunSignup** (races) | A documented API: race search by state, city, or ZIP radius; race facts and registration links | [API Terms of Use](https://runsignup.com/About-Us/APIDeveloper-Contract): access needs a registered, approved application (permanent keys for affiliates, partners, and timers); the license covers apps that work with and complement RunSignup and may display API content as the terms allow; no bulk extraction beyond the app's normal function, at most 2 concurrent calls, no app that imitates RunSignup, delete API content within 30 days if access ends | **Permission needed.** Apply for API access, saying exactly what we'd show (race name, date, place, distance, and a link to its RunSignup registration page). Build nothing until approved. |
+| **MarketSpread** (vendor markets) | Market organizers' vendor applications and dates | [Terms of Service](https://marketspread.com/terms-of-service/): automated access (robots, spiders, scrapers) only with their prior written approval | **Blocked** (terms bar automated access). Use the market organizer's own site instead; a market found here is a lead for the owner. |
+| **Eventeny** (festivals, vendor markets) | Festival and market listings with vendor applications | [Acceptable Use Policy](https://www.eventeny.com/legal/acceptable-use-policy/): access only through their publicly supported interfaces; scraping, spidering, and crawling named as not allowed | **Blocked.** Leads only, through the owner. |
+| **FestivalNet** (craft fairs, festivals) | A national festival and fair directory | [Terms of Service](https://festivalnet.com/terms-of-service): no scraping, copying, or collecting data, and no automated browsing tools, without written permission | **Blocked.** Leads only. |
+| **Macaroni KID** (Fayetteville and Rogers-Bentonville family calendars) | Local family event roundups | [Terms and Conditions](https://fayetteville.macaronikid.com/terms-conditions): no automatic or manual process to search or harvest information from the site; no copying or distributing without written permission | **Blocked**, and leads only: the owner may read it like any visitor to find an organizer, whose own page is then the source. Nothing from Macaroni KID is recorded. |
+| **5NEWS / KFSM** (Tegna) | Station community content | [Terms of Service](https://www.5newsonline.com/terms): personal, noncommercial use; no automated queries or scraping (search engines excepted); no reproducing material | **Blocked.** Leads only. |
+| **40/29 / KHBS** (Hearst) | Station community content | [Terms of Use](https://www.4029tv.com/article/htv-terms-of-use/63785703): personal, noncommercial use; no robots, spiders, crawlers, or other data-gathering tools; no aggregating content into a substitute service; no use of content to ground or train AI | **Blocked.** Leads only. |
+| **KNWA / FOX24** (Nexstar, `nwahomepage.com`) | Station community calendar | Not read: the home page returned **403** to our bot | **Blocked** (a block means stop). Leads only. |
+
+**How "leads only" works:** the owner may read these in a browser like any
+visitor. A lead points us at an organizer; what we record comes from the
+organizer's own page, a permitted source, or the owner's visit, never from
+the lead's listing. These platforms are also fine to type from into the
+benchmark (only the owner's typed names and dates are stored).
+
+**Process note:** the research script followed "legal" links off each site,
+so it also read Google's general policy pages (and loaded a Google sign-in
+page), Stripe's and Payrix's payment terms, and a hearst.com page that
+returned **403** (Hearst Television's advertising terms; stopped there, not
+retried). None of those pages are used here. Later research scripts follow
+legal links on the same site only.

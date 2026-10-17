@@ -132,7 +132,11 @@ stays missed.
    stand. A block sets `organizers.discovery_blocked`, shown on the admin
    overview, and is never retried until the owner clears it.
 9. Terms review of specialist platforms: RunSignup's API, MarketSpread and
-   similar; Macaroni KID and TV station listings as leads only.
+   similar; Macaroni KID and TV station listings as leads only. Done
+   2026-10-17 (`docs/sources-terms.md`, specialist platforms): RunSignup
+   needs approved API access (open item 31); MarketSpread, Eventeny,
+   FestivalNet, Macaroni KID, 5NEWS, and 40/29 bar automated access in
+   their terms, and KNWA refused us (403): all leads only.
 10. The submission form and invite email template.
 11. Later: ICS subscription feeds and a JSON feed for each filtered view
     (`docs/product/front-page.md`, section F), after the Ticketmaster display
