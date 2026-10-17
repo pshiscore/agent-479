@@ -1,9 +1,11 @@
 /**
- * Feed discovery (docs/product/organizers.md, step 6): for each verified
- * organizer with a website, finds its event feeds and saves each as a
- * proposal in /admin/discoveries (logged as agent:discovery). Approving one
- * is the owner's. One organizer at a time; requests go through PoliteClient
- * (robots.txt on every request, per-host pauses, a block stops the organizer).
+ * Feed discovery by hand (docs/product/organizers.md, step 6). The daily
+ * maintenance job does this monthly (step 8); run this to look now. For each
+ * verified organizer with a website (or only --only slugs), finds its event
+ * feeds and saves each as a proposal in /admin/discoveries, logged as
+ * agent:discovery, and records the look on the organizer. Organizers blocked
+ * for discovery are skipped. Requests go through PoliteClient (robots.txt on
+ * every request, per-host pauses, a block stops the organizer).
  *
  * Usage: npm run discover:feeds [-- --only slug1,slug2]
  * Writes a run summary to data/discovery.last-run.json (addresses only).
@@ -15,12 +17,12 @@ dotenv.config({ path: production ? ".env.production.local" : ".env.local", quiet
 
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
-import { and, asc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
 import { agentActor } from "@/lib/actions/record";
 import { getDb } from "@/lib/db/client";
 import { organizers } from "@/lib/db/schema";
-import { discoverOrganizer, knownFeedKeys } from "@/lib/discovery/discover";
-import { saveFinds } from "@/lib/discovery/store";
+import { knownFeedKeys } from "@/lib/discovery/discover";
+import { discoverAndSave } from "@/lib/discovery/rediscover";
 import { withRun } from "@/lib/runs";
 import { PoliteClient } from "@/lib/sources/http";
 
@@ -34,12 +36,16 @@ async function main() {
   try {
     const stats = await withRun(db, "manual", async (run) => {
       const known = await knownFeedKeys(db);
-      const orgs = (await db.select().from(organizers).where(and(eq(organizers.status, "verified"), isNotNull(organizers.website))).orderBy(asc(organizers.name))).filter((o) => !only || only.has(o.slug));
+      const orgs = (
+        await db
+          .select()
+          .from(organizers)
+          .where(and(eq(organizers.status, "verified"), isNotNull(organizers.website), isNull(organizers.discoveryBlocked)))
+          .orderBy(asc(organizers.name))
+      ).filter((o) => !only || only.has(o.slug));
       const totals = { organizers: orgs.length, proposed: 0, refreshed: 0, gone: 0, blocked: 0, withFinds: 0 };
       for (const o of orgs) {
-        const hint = o.verification.notes?.find((n) => n.note?.startsWith("Events link"))?.url ?? null;
-        const r = await discoverOrganizer(http, { name: o.name, website: o.website!, eventsHint: hint }, known);
-        const saved = await saveFinds(db, o.id, r.finds, { actor: agentActor("discovery"), runId: run.id });
+        const { result: r, saved } = await discoverAndSave(db, o, http, known, { actor: agentActor("discovery"), runId: run.id });
         totals.proposed += saved.proposed;
         totals.refreshed += saved.refreshed;
         totals.gone += saved.gone;

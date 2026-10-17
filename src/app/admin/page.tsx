@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { CRON_MAX_DURATION_S, runTiming } from "@/lib/cron-budget";
-import { sql } from "drizzle-orm";
+import { isNotNull, sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { COMMUNITY_WARN_SHARE, dashboard } from "@/lib/admin/queries";
 import { getDb } from "@/lib/db/client";
+import { organizers } from "@/lib/db/schema";
 import { when } from "./ui";
 
 export default async function AdminOverview() {
@@ -16,6 +17,12 @@ export default async function AdminOverview() {
     select a.created_at, s.slug, a.reason from agent_actions a join sources s on s.id = a.entity_id
     where a.entity_type = 'source' and a.actor like 'agent:%' and a.reason like 'live → shadow:%' and a.created_at > now() - interval '14 days'
     order by a.created_at desc`)) as unknown as { created_at: string; slug: string; reason: string }[];
+  // Feed discovery (steps 6 and 8): proposals waiting, this month's re-discovery, and organizers that refused it.
+  const [disc] = (await db.execute(sql`select
+      (select count(*)::int from feed_discoveries where status = 'proposed') as waiting,
+      (select count(*)::int from organizers where status = 'verified' and website is not null and discovery_blocked is null
+         and (discovery_checked_at is null or discovery_checked_at < date_trunc('month', now() at time zone 'America/Chicago') at time zone 'America/Chicago')) as due`)) as unknown as { waiting: number; due: number }[];
+  const discoveryBlocked = await db.select({ name: organizers.name, why: organizers.discoveryBlocked }).from(organizers).where(isNotNull(organizers.discoveryBlocked));
   const pct = (x: number) => `${Math.round(x * 100)}%`;
   const pendingTotal = d.pending.reduce((n, p) => n + p.n, 0);
 
@@ -46,6 +53,29 @@ export default async function AdminOverview() {
             ))}
           </ul>
         </section>
+      )}
+      {discoveryBlocked.length > 0 && (
+        <section className="rounded border border-amber-300 bg-amber-50 p-3 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          <h2 className="font-semibold">Organizers that refused feed discovery (not retried until you clear them)</h2>
+          <ul>
+            {discoveryBlocked.map((o) => (
+              <li key={o.name}>
+                {o.name}: {o.why}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {(disc.waiting > 0 || disc.due > 0) && (
+        <p>
+          {disc.waiting > 0 && (
+            <Link href="/admin/discoveries" className="underline">
+              {disc.waiting} feed discover{disc.waiting === 1 ? "y" : "ies"} waiting
+            </Link>
+          )}
+          {disc.waiting > 0 && disc.due > 0 ? " · " : ""}
+          {disc.due > 0 ? `${disc.due} organizer${disc.due === 1 ? "" : "s"} due for this month's re-discovery (the daily maintenance job works through them)` : ""}
+        </p>
       )}
       {shadow > 0 && (
         <p>

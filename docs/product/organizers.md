@@ -123,7 +123,14 @@ stays missed.
    or the record fails. Approving a page-data discovery makes a `jsonld`
    source, tested and enabled like any other.
 8. Monthly re-discovery in the maintenance job (first-of-month guard; each
-   change logged).
+   change logged). Done 2026-10-17 (`src/lib/discovery/rediscover.ts`): each
+   verified organizer is due once per Chicago month
+   (`organizers.discovery_checked_at`); from the 1st, the daily maintenance
+   job works through due organizers in its leftover time, stopping cleanly
+   (a look cut short marks nothing gone and stays due). New feeds become
+   proposals, waiting proposals not found again are marked gone, rejections
+   stand. A block sets `organizers.discovery_blocked`, shown on the admin
+   overview, and is never retried until the owner clears it.
 9. Terms review of specialist platforms: RunSignup's API, MarketSpread and
    similar; Macaroni KID and TV station listings as leads only.
 10. The submission form and invite email template.

@@ -225,6 +225,13 @@
       "when": 1792246827100,
       "tag": "0031_discovery_label_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792264748741,
+      "tag": "0032_organizer_discovery_check",
+      "breakpoints": true
     }
   ]
 }

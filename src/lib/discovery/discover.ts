@@ -37,6 +37,8 @@ export interface DiscoveryResult {
   googleCalendars: string[];
   blocked: string | null;
   errors: string[];
+  // Stopped for time before reading every candidate: nothing is marked gone, and the organizer stays due.
+  incomplete: boolean;
 }
 
 const MAX_FINDS = 10;
@@ -66,8 +68,9 @@ export async function discoverOrganizer(
   org: { name: string; website: string; eventsHint?: string | null },
   known: ReadonlySet<string>,
   today = new Date(),
+  deadline?: { readonly passed: boolean },
 ): Promise<DiscoveryResult> {
-  const result: DiscoveryResult = { finds: [], skipped: [], googleCalendars: [], blocked: null, errors: [] };
+  const result: DiscoveryResult = { finds: [], skipped: [], googleCalendars: [], blocked: null, errors: [], incomplete: false };
   const get = async (url: string, what: string): Promise<PoliteResponse | null> => {
     try {
       return await http.get(url, "text/html,application/xhtml+xml,text/calendar,application/rss+xml,*/*;q=0.5");
@@ -149,6 +152,11 @@ export async function discoverOrganizer(
       }
       if (hasSource && c.platform !== "civicplus") {
         skip("same events as an existing source");
+        continue;
+      }
+      if (deadline?.passed) {
+        result.incomplete = true;
+        skip("out of time; next run");
         continue;
       }
       if (usable.length >= MAX_FINDS) {

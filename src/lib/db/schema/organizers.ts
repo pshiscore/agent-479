@@ -63,6 +63,10 @@ export const organizers = pgTable(
     channel: text("channel", { enum: ORGANIZER_CHANNELS }).notNull().default("unknown"),
     status: text("status", { enum: ORGANIZER_STATUSES }).notNull().default("candidate"),
     lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+    // When feed discovery last looked at this organizer's site; due again each Chicago month (step 8).
+    discoveryCheckedAt: timestamp("discovery_checked_at", { withTimezone: true }),
+    // Set when the site refused discovery (a block means stop): no later run retries until the owner clears it.
+    discoveryBlocked: text("discovery_blocked"),
     notes: text("notes"),
     // The venue this organizer is, or runs (a venue with its own calendar).
     venueId: uuid("venue_id").references(() => venues.id, { onDelete: "restrict" }),

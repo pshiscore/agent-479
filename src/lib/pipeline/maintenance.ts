@@ -3,7 +3,9 @@ import { agentActor } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources } from "@/lib/db/schema";
 import { Deadline } from "@/lib/cron-budget";
+import { rediscoverDue } from "@/lib/discovery/rediscover";
 import { claimJob } from "@/lib/jobs";
+import { PoliteClient } from "@/lib/sources/http";
 import { finishRun } from "@/lib/runs";
 import { demoteLiveSources } from "@/lib/sources/demotion";
 import { proposeTicketmasterLinks } from "@/lib/sources/ticketmaster-venues";
@@ -14,8 +16,9 @@ import { proposeCategoriesFromHints } from "./category-themes";
  * rule 4): 30 days after the event ends, or, for an open-ended series, 30 days
  * after the item was last seen in its feed; and raw payloads not seen for 30
  * days; and proposes Ticketmaster venue links for the owner (never links).
- * Counts go in runs.stats. Later steps add the dedup sweep and source health
- * checks.
+ * Counts go in runs.stats. Also demotes misbehaving live sources and runs
+ * the monthly feed re-discovery (src/lib/discovery/rediscover.ts) in the
+ * time left.
  */
 
 export async function purgeDescriptions(db: DbExecutor, now: Date): Promise<number> {
@@ -81,7 +84,7 @@ export async function needsVenueSummary(db: DbExecutor) {
 }
 
 /** Returns null if another maintenance job holds the lease. */
-export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; deadline?: Deadline } = {}) {
+export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; deadline?: Deadline; http?: PoliteClient } = {}) {
   const now = opts.now ?? new Date();
   const deadline = opts.deadline ?? new Deadline();
   const claim = await claimJob(db, "maintenance", { now, staleAfterMs: 60 * 60_000 });
@@ -107,6 +110,10 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; dead
     const categoryProposals = await step("category proposals", { proposed: 0, themes: 0 }, () => proposeCategoriesFromHints(db, { actor: agentActor("maintenance"), now, runId: claim.id }));
     // Live sources that misbehaved this week go back to shadow (owner, 2026-10-16).
     const demoted = await step("demotions", [] as unknown[], () => demoteLiveSources(db, now, agentActor("maintenance")));
+    // Monthly feed re-discovery (step 8): organizers due this Chicago month, in the time left.
+    const rediscovery = await step("rediscovery", null, () =>
+      rediscoverDue(db, { deadline, http: opts.http ?? new PoliteClient({ timeoutMs: 15_000, maxBytes: 5 * 1024 * 1024 }), actor: agentActor("discovery"), runId: claim.id, now }),
+    );
     const stats = {
       descriptionsPurged,
       payloadsPurged,
@@ -114,6 +121,7 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; dead
       needsVenueArchived,
       categoryProposals: categoryProposals.proposed,
       sourcesDemoted: demoted.length,
+      rediscovery,
       stoppedForTime: skipped.length > 0,
       stepsSkipped: skipped,
       elapsedMs: deadline.elapsedMs,
