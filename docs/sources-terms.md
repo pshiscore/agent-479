@@ -293,3 +293,32 @@ for terms of use.
 All three: facts and links only, `commercial_use_ok = unknown`, public-meeting
 and adult-sports calendars not used. Each enters shadow through a passing
 test fetch, so nothing publishes until reviewed.
+
+## Organizer registry, Tier 2: home page check (2026-10-17)
+
+Step 5 of the organizer registry build (`docs/product/organizers.md`).
+`npm run organizers:check` read each organizer's robots.txt, then its home
+page, one request at a time, 2 s apart, with our bot identity; redirects
+were followed by hand with robots.txt checked for each new host. Only two
+things are kept per organizer: whether the page names it, and the address
+of a link that looks like its events page (a hint for discovery). Results:
+`data/organizers.check.json`. Nothing was fetched from the unpermitted
+domains, the sites that refused us before, or the city sites waiting on the
+owner's browser check.
+
+**Refusals (stopped, not retried; the seed now marks them do-not-fetch):**
+
+| Site | Finding |
+|---|---|
+| Bike Rack Brewing (`bikerackbrewing.com`) | robots.txt returned 403. |
+| Bella Vista Public Library (`bvpl.org`) | robots.txt disallows our bot for the whole site. |
+
+**No answer (not blocks):** `pgchamber.org`, `prairiegrovearkansas.org`
+(the city site, also silent on 2026-10-16), `saddlebockbrewery.com`, and
+`vanzantfruitfarm.com` have no DNS record; `downtownrogersinc.org` serves a
+certificate for another name. The Iva Jane Peek Public Library page on
+`decaturarkansas.com` returned 404.
+
+**Address didn't name the organizer:** `tontitownwinery.com` and
+`blackapplecrossing.com` (both likely addresses, not from search). They stay
+candidates.

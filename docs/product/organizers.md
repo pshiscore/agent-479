@@ -96,7 +96,13 @@ stays missed.
 2. Tier 1 into shadow. Done.
 3. Migration 0029. Done; fixes in 0030.
 4. `/admin/benchmark`. Done.
-5. Tier 2 registry seeding (agent-verified, logged).
+5. Tier 2 registry seeding (agent-verified, logged). Done 2026-10-17: 67
+   organizers, 50 verified against their own home page. The list is in
+   `src/lib/organizers/seed-data.ts`; `npm run organizers:check` checks each
+   site (robots.txt, then the home page, which must name the organizer)
+   into `data/organizers.check.json`; `npm run db:seed:organizers` applies
+   both, logged as `agent:registry`. A candidate says why in its notes.
+   `/admin/organizers` lists them.
 6. The discovery agent, producing proposals.
 7. The structured-data fetcher (event data from pages, no AI).
 8. Monthly re-discovery in the maintenance job (first-of-month guard; each

@@ -1,0 +1,719 @@
+{
+  "checkedAt": "2026-10-17",
+  "results": {
+    "city-of-bentonville": {
+      "outcome": "confirmed",
+      "website": "https://www.bentonville.ar.gov/",
+      "eventsPage": "https://www.bentonville.ar.gov/calendar.aspx?view=list&year=2026&month=10&day=20&CID=32",
+      "tried": [
+        {
+          "url": "https://www.bentonville.ar.gov/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "city-of-fayetteville": {
+      "outcome": "confirmed",
+      "website": "https://www.fayetteville-ar.gov/",
+      "eventsPage": "https://www.fayetteville-ar.gov/4052/My-Fayetteville-Services",
+      "tried": [
+        {
+          "url": "https://www.fayetteville-ar.gov/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "city-of-rogers": {
+      "outcome": "confirmed",
+      "website": "https://www.rogersar.gov/",
+      "eventsPage": "https://www.rogersar.gov/Calendar.aspx",
+      "tried": [
+        {
+          "url": "https://www.rogersar.gov/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "city-of-siloam-springs": {
+      "outcome": "confirmed",
+      "website": "https://www.siloamsprings.gov/",
+      "eventsPage": "https://www.siloamsprings.gov/calendar.aspx?view=list&year=2026&month=10&day=17&CID=24,27,29,14,25,26,22,30",
+      "tried": [
+        {
+          "url": "https://www.siloamsprings.gov/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "city-of-pea-ridge": {
+      "outcome": "confirmed",
+      "website": "https://cityofpearidgear.gov/",
+      "eventsPage": "https://cityofpearidgear.gov/event-calendar/",
+      "tried": [
+        {
+          "url": "https://cityofpearidgear.gov/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "downtown-bentonville-inc": {
+      "outcome": "confirmed",
+      "website": "https://downtownbentonville.org/",
+      "eventsPage": "https://downtownbentonville.org/events",
+      "tried": [
+        {
+          "url": "https://downtownbentonville.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "downtown-rogers-inc": {
+      "outcome": "unreachable",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.downtownrogersinc.org/",
+          "result": "unreachable",
+          "detail": "robots.txt: ERR_TLS_CERT_ALTNAME_INVALID"
+        },
+        {
+          "url": "https://downtownrogersinc.org/",
+          "result": "unreachable",
+          "detail": "robots.txt: ERR_TLS_CERT_ALTNAME_INVALID"
+        }
+      ]
+    },
+    "go-downtown-rogers": {
+      "outcome": "confirmed",
+      "website": "https://www.godowntownrogers.com/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.godowntownrogers.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "downtown-springdale-alliance": {
+      "outcome": "confirmed",
+      "website": "https://www.downtownspringdale.org/",
+      "eventsPage": "https://www.downtownspringdale.org/events",
+      "tried": [
+        {
+          "url": "https://www.downtownspringdale.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "main-street-siloam-springs": {
+      "outcome": "confirmed",
+      "website": "https://mainstreetsiloam.org/",
+      "eventsPage": "https://mainstreetsiloam.org/events/",
+      "tried": [
+        {
+          "url": "https://www.mainstreetsiloam.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "greater-bentonville-area-chamber": {
+      "outcome": "confirmed",
+      "website": "https://bentonvillearea.com/",
+      "eventsPage": "https://bentonvillearea.com/chamber-events",
+      "tried": [
+        {
+          "url": "https://www.greaterbentonville.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "rogers-lowell-area-chamber": {
+      "outcome": "confirmed",
+      "website": "https://www.rogerslowell.com/",
+      "eventsPage": "https://www.rogerslowell.com/pages/news-events/",
+      "tried": [
+        {
+          "url": "https://www.rogerslowell.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "springdale-chamber": {
+      "outcome": "confirmed",
+      "website": "https://springdale.com/",
+      "eventsPage": "https://springdale.com/eventsandprograms/",
+      "tried": [
+        {
+          "url": "https://springdale.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "fayetteville-chamber": {
+      "outcome": "confirmed",
+      "website": "https://www.fayettevillear.com/",
+      "eventsPage": "https://www.fayettevillear.com/networking",
+      "tried": [
+        {
+          "url": "https://www.fayettevillear.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "siloam-springs-chamber": {
+      "outcome": "confirmed",
+      "website": "https://siloamchamber.com/",
+      "eventsPage": "https://siloamchamber.com/upcoming-events",
+      "tried": [
+        {
+          "url": "https://www.siloamchamber.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "gentry-chamber": {
+      "outcome": "confirmed",
+      "website": "https://gentrychamber.com/",
+      "eventsPage": "https://gentrychamber.com/events",
+      "tried": [
+        {
+          "url": "https://www.gentrychamber.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "prairie-grove-chamber": {
+      "outcome": "unreachable",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.pgchamber.org/",
+          "result": "unreachable",
+          "detail": "robots.txt: ENOTFOUND"
+        }
+      ]
+    },
+    "fayetteville-public-library": {
+      "outcome": "confirmed",
+      "website": "https://www.faylib.org/",
+      "eventsPage": "https://www.faylib.org/events",
+      "tried": [
+        {
+          "url": "https://www.faylib.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "rogers-public-library": {
+      "outcome": "confirmed",
+      "website": "https://rogerspubliclibrary.org/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.rogerspubliclibrary.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "bentonville-public-library": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "Returned 403 to our requests (2026-10-02): a block means stop. Feed request in docs/outreach."
+    },
+    "springdale-public-library": {
+      "outcome": "confirmed",
+      "website": "https://springdalelibrary.org/",
+      "eventsPage": "https://springdalelibrary.org/upcoming-events/",
+      "tried": [
+        {
+          "url": "https://www.springdalelibrary.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "bella-vista-public-library": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "robots.txt disallows our bot (checked 2026-10-17): a block means stop."
+    },
+    "pea-ridge-community-library": {
+      "outcome": "confirmed",
+      "website": "https://pearidgepubliclibrary.org/",
+      "eventsPage": "https://pearidgepubliclibrary.org/upcomingevents/",
+      "tried": [
+        {
+          "url": "https://www.pearidgecommunitylibrary.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "gravette-public-library": {
+      "outcome": "confirmed",
+      "website": "https://www.gravettelibrary.org/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.gravettelibrary.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "gentry-public-library": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "Its pages are on the Gentry city site, which may show a bot challenge; waiting on the owner's browser check."
+    },
+    "iva-jane-peek-public-library": {
+      "outcome": "unreachable",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://decaturarkansas.com/iva-jane-peek-public-library",
+          "result": "unreachable",
+          "detail": "HTTP 404"
+        }
+      ]
+    },
+    "prairie-grove-public-library": {
+      "outcome": "unreachable",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.prairiegrovearkansas.org/library",
+          "result": "unreachable",
+          "detail": "robots.txt: ENOTFOUND"
+        }
+      ]
+    },
+    "farmington-public-library": {
+      "outcome": "confirmed",
+      "website": "https://www.cityoffarmington-ar.gov/library",
+      "eventsPage": "https://www.cityoffarmington-ar.gov/city-calendar",
+      "tried": [
+        {
+          "url": "https://www.cityoffarmington-ar.gov/library",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "georges-majestic-lounge": {
+      "outcome": "confirmed",
+      "website": "https://georgesmajesticlounge.com/",
+      "eventsPage": "https://georgesmajesticlounge.com/shows/",
+      "tried": [
+        {
+          "url": "https://www.georgesmajesticlounge.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "ozark-music-hall": {
+      "outcome": "confirmed",
+      "website": "https://ozarkmusichall.com/",
+      "eventsPage": "https://ozarkmusichall.com/shows",
+      "tried": [
+        {
+          "url": "https://ozarkmusichall.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "theatresquared": {
+      "outcome": "confirmed",
+      "website": "https://www.theatre2.org/",
+      "eventsPage": "https://www.theatre2.org/community-events",
+      "tried": [
+        {
+          "url": "https://theatre2.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "faulkner-performing-arts-center": {
+      "outcome": "confirmed",
+      "website": "https://faulkner.uark.edu/",
+      "eventsPage": "https://faulkner.uark.edu/events/index.php",
+      "tried": [
+        {
+          "url": "https://faulkner.uark.edu/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "botanical-garden-of-the-ozarks": {
+      "outcome": "confirmed",
+      "website": "https://bgozarks.org/",
+      "eventsPage": "https://bgozarks.org/calendar/",
+      "tried": [
+        {
+          "url": "https://www.bgozarks.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "clinton-house-museum": {
+      "outcome": "confirmed",
+      "website": "https://clintonhousemuseum.org/",
+      "eventsPage": "https://clintonhousemuseum.org/events/",
+      "tried": [
+        {
+          "url": "https://www.clintonhousemuseum.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "fayetteville-town-center": {
+      "outcome": "confirmed",
+      "website": "https://twncenter.com/",
+      "eventsPage": "https://twncenter.com/events/concerts",
+      "tried": [
+        {
+          "url": "https://twncenter.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "arkansas-public-theatre": {
+      "outcome": "confirmed",
+      "website": "https://www.arkansaspublictheatre.org/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.arkansaspublictheatre.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "rogers-historical-museum": {
+      "outcome": "confirmed",
+      "website": "https://www.rogershistoricalmuseum.org/",
+      "eventsPage": "https://www.rogershistoricalmuseum.org/events.html",
+      "tried": [
+        {
+          "url": "https://www.rogershistoricalmuseum.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "railyard-live": {
+      "outcome": "confirmed",
+      "website": "https://railyardlive.com/",
+      "eventsPage": "https://railyardlive.com/live-events/",
+      "tried": [
+        {
+          "url": "https://railyardlive.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "pinnacle-hills-promenade": {
+      "outcome": "confirmed",
+      "website": "https://www.pinnaclehillspromenade.com/en/",
+      "eventsPage": "https://www.pinnaclehillspromenade.com/en/events",
+      "tried": [
+        {
+          "url": "https://www.pinnaclehillspromenade.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "ozark-beer-company": {
+      "outcome": "confirmed",
+      "website": "https://www.ozarkbeercompany.com/",
+      "eventsPage": "https://www.ozarkbeercompany.com/calendar",
+      "tried": [
+        {
+          "url": "https://www.ozarkbeercompany.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "scott-family-amazeum": {
+      "outcome": "confirmed",
+      "website": "https://www.amazeum.org/",
+      "eventsPage": "https://www.amazeum.org/calendar",
+      "tried": [
+        {
+          "url": "https://www.amazeum.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "museum-of-native-american-history": {
+      "outcome": "confirmed",
+      "website": "https://www.monah.org/",
+      "eventsPage": "https://www.monah.org/events",
+      "tried": [
+        {
+          "url": "https://monah.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "walmart-museum": {
+      "outcome": "confirmed",
+      "website": "https://corporate.walmart.com/about/walmart-museum/",
+      "eventsPage": "https://corporate.walmart.com/news/events",
+      "tried": [
+        {
+          "url": "https://corporate.walmart.com/about/walmart-museum/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "peel-compton-foundation": {
+      "outcome": "confirmed",
+      "website": "https://peelcompton.org/",
+      "eventsPage": "https://peelcompton.org/calendar",
+      "tried": [
+        {
+          "url": "https://www.peelcompton.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "record": {
+      "outcome": "confirmed",
+      "website": "https://www.recorddowntown.com/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.recorddowntown.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "jones-center": {
+      "outcome": "confirmed",
+      "website": "https://thejonescenter.org/",
+      "eventsPage": "https://thejonescenter.org/events",
+      "tried": [
+        {
+          "url": "https://thejonescenter.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "shiloh-museum": {
+      "outcome": "confirmed",
+      "website": "https://shilohmuseum.org/",
+      "eventsPage": "https://shilohmuseum.org/events/",
+      "tried": [
+        {
+          "url": "https://shilohmuseum.org/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "pea-ridge-national-military-park": {
+      "outcome": "confirmed",
+      "website": "https://www.nps.gov/peri/index.htm",
+      "eventsPage": "https://www.nps.gov/peri/planyourvisit/calendar.htm",
+      "tried": [
+        {
+          "url": "https://www.nps.gov/peri/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "prairie-grove-battlefield-state-park": {
+      "outcome": "confirmed",
+      "website": "https://www.arkansas.com/state-parks/explore/parks/prairie-grove-battlefield-state-park",
+      "eventsPage": "https://www.arkansas.com/experiences/enjoy/events-festivals",
+      "tried": [
+        {
+          "url": "https://www.arkansas.com/state-parks/parks/prairie-grove-battlefield-state-park",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "walton-arts-center": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "Unpermitted source: never fetched until written permission (AGENTS.md, Fetching)."
+    },
+    "walmart-amp": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "Unpermitted source: never fetched until written permission (AGENTS.md, Fetching)."
+    },
+    "crystal-bridges": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "Unpermitted source: never fetched until written permission (AGENTS.md, Fetching)."
+    },
+    "the-momentary": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "Unpermitted source: never fetched until written permission (AGENTS.md, Fetching)."
+    },
+    "northwest-arkansas-naturals": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "milb.com refused our request with 406 (a block means stop). Games come through Ticketmaster."
+    },
+    "bike-rack-brewing": {
+      "outcome": "not_fetched",
+      "website": null,
+      "eventsPage": null,
+      "tried": [],
+      "note": "Its robots.txt returned 403 to our request (2026-10-17): a block means stop."
+    },
+    "bentonville-brewing": {
+      "outcome": "confirmed",
+      "website": "https://www.bentonvillebrewing.com/",
+      "eventsPage": "https://www.bentonvillebrewing.com/events/",
+      "tried": [
+        {
+          "url": "https://www.bentonvillebrewing.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "new-province-brewing": {
+      "outcome": "confirmed",
+      "website": "https://www.newprovincebrewing.com/",
+      "eventsPage": "https://www.newprovincebrewing.com/events",
+      "tried": [
+        {
+          "url": "https://www.newprovincebrewing.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "saddlebock-brewery": {
+      "outcome": "unreachable",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.saddlebockbrewery.com/",
+          "result": "unreachable",
+          "detail": "robots.txt: ENOTFOUND"
+        }
+      ]
+    },
+    "fossil-cove-brewing": {
+      "outcome": "confirmed",
+      "website": "https://www.fossilcovebrewing.com/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.fossilcovebrewing.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "columbus-house-brewery": {
+      "outcome": "confirmed",
+      "website": "https://columbushousebrewery.com/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.columbushousebrewery.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "black-apple-crossing": {
+      "outcome": "not_confirmed",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.blackapplecrossing.com/",
+          "result": "name_not_found",
+          "detail": "final page https://www.blackapplecrossing.com/"
+        }
+      ]
+    },
+    "tontitown-winery": {
+      "outcome": "not_confirmed",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.tontitownwinery.com/",
+          "result": "name_not_found",
+          "detail": "final page https://www.tontitownwinery.com/"
+        }
+      ]
+    },
+    "sassafras-springs-vineyard": {
+      "outcome": "confirmed",
+      "website": "https://www.sassafrasspringsvineyard.com/",
+      "eventsPage": "https://www.sassafrasspringsvineyard.com/events-calendar/",
+      "tried": [
+        {
+          "url": "https://www.sassafrasspringsvineyard.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "farmland-adventures": {
+      "outcome": "confirmed",
+      "website": "https://www.farmlandadventures.com/",
+      "eventsPage": "https://www.farmlandadventures.com/event-calendar",
+      "tried": [
+        {
+          "url": "https://www.farmlandadventures.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "rivercrest-orchard": {
+      "outcome": "confirmed",
+      "website": "https://www.rivercrestorchard.com/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.rivercrestorchard.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "mcgarrah-farms": {
+      "outcome": "confirmed",
+      "website": "https://www.mcgarrahfarms.com/",
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.mcgarrahfarms.com/",
+          "result": "confirmed"
+        }
+      ]
+    },
+    "vanzant-fruit-farm": {
+      "outcome": "unreachable",
+      "website": null,
+      "eventsPage": null,
+      "tried": [
+        {
+          "url": "https://www.vanzantfruitfarm.com/",
+          "result": "unreachable",
+          "detail": "robots.txt: ENOTFOUND"
+        }
+      ]
+    }
+  }
+}

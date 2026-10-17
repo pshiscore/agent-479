@@ -34,3 +34,12 @@ export const COVERAGE_PLACES: ReadonlySet<string> = new Set([...BENTON, ...WASHI
 
 /** Whether a city or town is inside the coverage area. */
 export const inCoverageArea = (city: string | null | undefined) => Boolean(city && COVERAGE_PLACES.has(city.trim().toLowerCase()));
+
+/** The county a place is in, or null when it spans both (Springdale, Elm Springs) or is outside the area. */
+export function countyOf(city: string | null | undefined): (typeof COVERAGE_COUNTIES)[number] | null {
+  const c = city?.trim().toLowerCase();
+  if (!c) return null;
+  const benton = BENTON.some((b) => b.toLowerCase() === c);
+  const washington = WASHINGTON.some((w) => w.toLowerCase() === c);
+  return benton && !washington ? "Benton" : washington && !benton ? "Washington" : null;
+}

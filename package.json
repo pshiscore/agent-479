@@ -35,7 +35,9 @@
     "check:descriptions": "tsx scripts/check-descriptions.ts",
     "dedup:export-labels": "tsx scripts/dedup-export-labels.ts",
     "eval:dedup": "tsx scripts/eval-dedup.ts",
-    "places:seed-drafts": "tsx scripts/seed-place-drafts.ts"
+    "places:seed-drafts": "tsx scripts/seed-place-drafts.ts",
+    "organizers:check": "tsx scripts/check-organizers.ts",
+    "db:seed:organizers": "tsx scripts/seed-organizers.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",
