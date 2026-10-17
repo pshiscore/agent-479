@@ -47,12 +47,13 @@ function Chevron() {
   );
 }
 
-interface Option {
+export interface Option {
   value: string;
   label: string;
 }
 
-function DropdownChip({
+/** A dropdown chip (a <details> menu; a bottom sheet on phones). Shared by event and venue filters. */
+export function DropdownChip({
   label,
   allLabel,
   options,
@@ -163,16 +164,9 @@ export function FilterChips({
           clearHref={withVenueType(base, filters, undefined, keep)}
         />
       )}
-      {QUICK_TAGS.map(([slug, label]) => {
-        const selected = filters.tags?.includes(slug) ?? false;
-        return (
-          <Link key={slug} href={toggleTag(base, filters, slug, keep)} scroll={false} aria-current={selected ? "true" : undefined} className={selected ? on : off}>
-            {selected && <Check />}
-            {label}
-            <span className="sr-only">{selected ? " (on; select to remove)" : ""}</span>
-          </Link>
-        );
-      })}
+      {QUICK_TAGS.map(([slug, label]) => (
+        <ToggleChip key={slug} href={toggleTag(base, filters, slug, keep)} selected={filters.tags?.includes(slug) ?? false} label={label} />
+      ))}
       <Link
         href={toggleRecurring(base, filters, keep)}
         scroll={false}
@@ -193,17 +187,34 @@ export function FilterChips({
     </div>
   );
 
+  return <ChipsPanel chips={chips} active={n} count={count} noun="event" clearHref={clearAll(base, keep)} />;
+}
+
+/** A toggle chip: a link that adds or removes one filter. */
+export function ToggleChip({ href, selected, label }: { href: string; selected: boolean; label: string }) {
+  return (
+    <Link href={href} scroll={false} aria-current={selected ? "true" : undefined} className={selected ? on : off}>
+      {selected && <Check />}
+      {label}
+      <span className="sr-only">{selected ? " (on; select to remove)" : ""}</span>
+    </Link>
+  );
+}
+
+/** The chips' frame: on the page on wider screens, behind a sticky "Filters" button on phones. */
+export function ChipsPanel({ chips, active: n, count, noun, clearHref }: { chips: React.ReactNode; active: number; count?: number; noun: string; clearHref: string }) {
+  const counted = (c: number) => `${c} ${noun}${c === 1 ? "" : "s"}`;
   // On phones the count already sits on the Filters button, so the panel omits it.
   const summary = (showCount: boolean) =>
     (showCount || n > 0) && (
       <div className="flex items-center gap-4 text-sm">
         {showCount && count !== undefined && (
           <span className="text-muted" aria-live="polite">
-            {count} event{count === 1 ? "" : "s"}
+            {counted(count)}
           </span>
         )}
         {n > 0 && (
-          <Link href={clearAll(base, keep)} scroll={false} className="font-semibold underline underline-offset-4">
+          <Link href={clearHref} scroll={false} className="font-semibold underline underline-offset-4">
             Clear all
           </Link>
         )}
@@ -226,11 +237,7 @@ export function FilterChips({
             Filters{n > 0 ? ` (${n})` : ""}
             <Chevron />
           </span>
-          {count !== undefined && (
-            <span className="text-sm text-muted">
-              {count} event{count === 1 ? "" : "s"}
-            </span>
-          )}
+          {count !== undefined && <span className="text-sm text-muted">{counted(count)}</span>}
         </summary>
         <div className="grid gap-3 px-4 pb-4 pt-1">
           {chips}

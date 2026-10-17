@@ -25,6 +25,10 @@ export const VENUE_TYPES = [
   "plaza",
   "campus",
   "area",
+  // Halls, centers, and rooms booked for events (owner, 2026-10-17; shown as "Event Spaces").
+  "event_space",
+  // Market halls and shopping centers that hold public events (shown under "Districts & Markets").
+  "market",
   "other",
 ] as const;
 

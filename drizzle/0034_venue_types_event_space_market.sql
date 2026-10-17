@@ -1,0 +1,2 @@
+ALTER TABLE "venues" DROP CONSTRAINT "venues_type_check";--> statement-breakpoint
+ALTER TABLE "venues" ADD CONSTRAINT "venues_type_check" CHECK (venue_type in ('arena', 'theater', 'museum', 'music_venue', 'bar', 'park', 'library', 'plaza', 'campus', 'area', 'event_space', 'market', 'other'));

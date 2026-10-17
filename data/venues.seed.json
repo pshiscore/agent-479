@@ -502,7 +502,7 @@
       "aliases": [
         "Town Center"
       ],
-      "venueType": "other",
+      "venueType": "event_space",
       "address": "15 W Mountain St",
       "city": "Fayetteville",
       "postalCode": "72701",
@@ -1152,7 +1152,7 @@
       "aliases": [
         "John Q. Hammons Center"
       ],
-      "venueType": "other",
+      "venueType": "event_space",
       "address": "3303 S Pinnacle Hills Pkwy",
       "city": "Rogers",
       "postalCode": "72758",
@@ -1181,7 +1181,7 @@
       "slug": "pinnacle-hills-promenade",
       "name": "Pinnacle Hills Promenade",
       "aliases": [],
-      "venueType": "other",
+      "venueType": "market",
       "address": "2203 Promenade Blvd",
       "city": "Rogers",
       "postalCode": "72758",
@@ -1594,7 +1594,7 @@
       "slug": "8th-street-market",
       "name": "8th Street Market",
       "aliases": [],
-      "venueType": "other",
+      "venueType": "market",
       "address": "801 SE 8th St",
       "city": "Bentonville",
       "postalCode": "72712",
@@ -1624,7 +1624,7 @@
         "The Record",
         "Record Downtown"
       ],
-      "venueType": "other",
+      "venueType": "event_space",
       "address": "104 SW A St",
       "city": "Bentonville",
       "postalCode": "72712",
@@ -1782,7 +1782,7 @@
         "Jones Center",
         "Harvey and Bernice Jones Center for Families"
       ],
-      "venueType": "other",
+      "venueType": "event_space",
       "address": "922 E Emma Ave",
       "city": "Springdale",
       "postalCode": "72764",

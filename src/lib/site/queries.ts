@@ -273,14 +273,3 @@ export async function citySlugs(db: DbExecutor): Promise<Set<string>> {
   const rows = (await db.execute(sql`select distinct v.city from venues v where ${publicVenue("v")}`)) as unknown as { city: string }[];
   return new Set(rows.map((r) => slugify(r.city)));
 }
-
-export async function venuesByCity(db: DbExecutor, now: Date) {
-  const rows = (await db.execute(sql`
-    select v.slug, v.name, v.city, v.venue_type,
-      (select count(*)::int from events e where e.venue_id = v.id and e.status = 'scheduled' and e.start_at >= ${now.toISOString()}::timestamptz) upcoming
-    from venues v where ${publicVenue("v")}
-    order by v.city, v.name`)) as unknown as { slug: string; name: string; city: string; venue_type: string; upcoming: number }[];
-  const out = new Map<string, typeof rows>();
-  for (const r of rows) out.set(r.city, [...(out.get(r.city) ?? []), r]);
-  return [...out.entries()].map(([city, venues]) => ({ city: { slug: slugify(city), name: city }, venues }));
-}

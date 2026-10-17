@@ -2,7 +2,8 @@ import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { type DbTx, getDb } from "@/lib/db/client";
 import { categories, eventSources, events, sources, venues } from "@/lib/db/schema";
-import { cityBySlug, citySlugs, filterOptions, listEvents, venueBySlug, venuesByCity } from "@/lib/site/queries";
+import { cityBySlug, citySlugs, filterOptions, listEvents, venueBySlug } from "@/lib/site/queries";
+import { venueList } from "@/lib/site/venue-list";
 import { inRollback } from "./helpers";
 
 afterAll(async () => {
@@ -31,7 +32,7 @@ describe("public venues", () => {
   it("never show an inactive or out-of-area venue, its city, or its events", async () => {
     await inRollback(async (tx) => {
       const { start } = await fixtures(tx);
-      const listed = (await venuesByCity(tx, new Date())).flatMap((g) => g.venues.map((v) => v.slug));
+      const listed = (await venueList(tx, new Date())).map((v) => v.slug);
       expect(listed).toContain("test-open-hall");
       expect(listed).not.toContain("test-closed-hall");
       expect(listed).not.toContain("test-away-theater");
