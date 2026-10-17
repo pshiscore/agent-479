@@ -101,6 +101,9 @@ imports it.
 
 - **Festivals and the review queue:** `docs/product/festivals.md` (decisions
   and build order, owner 2026-10-05).
+- **Organizer registry, feed discovery, and the benchmark:**
+  `docs/product/organizers.md` (decisions, schema, and build order, owner
+  2026-10-16).
 - **Front page and event experience:** `docs/product/front-page.md` (design
   direction, front page sections, event card and page, tags, search, and
   follows). Entity pages live under `/city`, `/venue`, `/category`, and

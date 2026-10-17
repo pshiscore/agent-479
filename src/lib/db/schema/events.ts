@@ -15,6 +15,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { createdAt, id, sqlList, updatedAt } from "./columns";
+import { organizers } from "./organizers";
 import { rawRecords } from "./raw-records";
 import { sources } from "./sources";
 import { categories, tags } from "./taxonomy";
@@ -96,6 +97,8 @@ export const events = pgTable(
       .references(() => venues.id, { onDelete: "restrict" }),
     // A room or hall inside the venue, shown as "Baum Walker Hall, Walton Arts Center".
     subSpace: text("sub_space"),
+    // Who puts it on, from the organizer registry (docs/product/organizers.md).
+    organizerId: uuid("organizer_id").references(() => organizers.id, { onDelete: "restrict" }),
     categoryId: uuid("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "restrict" }),
@@ -130,6 +133,7 @@ export const events = pgTable(
     uniqueIndex("events_slug_uniq").on(t.slug),
     index("events_scheduled_start_idx").on(t.startAt).where(sql`${t.status} = 'scheduled'`),
     index("events_venue_start_idx").on(t.venueId, t.startAt),
+    index("events_organizer_idx").on(t.organizerId),
     index("events_category_start_idx").on(t.categoryId, t.startAt),
     index("events_series_start_idx").on(t.seriesId, t.startAt),
     index("events_title_trgm_idx").using("gin", t.normalizedTitle.op("extensions.gin_trgm_ops")),

@@ -204,6 +204,13 @@
       "when": 1792204705713,
       "tag": "0028_shadow_update_reason",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792205671843,
+      "tag": "0029_registry_benchmark",
+      "breakpoints": true
     }
   ]
 }

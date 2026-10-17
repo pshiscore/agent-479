@@ -10,3 +10,5 @@ export * from "./dedup";
 export * from "./front-page";
 export * from "./places";
 export * from "./review";
+export * from "./organizers";
+export * from "./benchmark";
