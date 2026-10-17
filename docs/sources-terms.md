@@ -276,3 +276,20 @@ tool, while looking up city sites). **Possible bot challenge** (the page
 loaded, but our check matched challenge words, possibly a contact form's
 reCAPTCHA; not re-requested): Bella Vista, Gentry, Gravette, Winslow. Owner
 to check these in the browser.
+
+### Tier 1 sources: terms check (2026-10-16)
+
+Step 2 of the organizer registry build. Each was checked before its test
+fetch: robots.txt for the exact feed path (parsed with our own
+`parseRobots`/`isAllowed`, as Agent479Bot), then the site's footer links
+for terms of use.
+
+| Source | Feed | robots.txt | Terms |
+|---|---|---|---|
+| `city-fayetteville-volunteer` | CivicPlus ICS, catID 36 | allowed | same site as `city-fayetteville`: no reuse terms, "All rights reserved" footer |
+| `city-siloam-springs` | CivicPlus ICS, catIDs 14, 25, 27 | allowed | no terms of use published (accessibility and privacy pages only) |
+| `city-pea-ridge` | `/events/?ical=1` (The Events Calendar) | allowed | no terms of use published (accessibility page only) |
+
+All three: facts and links only, `commercial_use_ok = unknown`, public-meeting
+and adult-sports calendars not used. Each enters shadow through a passing
+test fetch, so nothing publishes until reviewed.

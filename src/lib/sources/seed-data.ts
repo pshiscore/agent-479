@@ -151,6 +151,57 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     termsNotes: "Public Communico subscription feed. Policies page covers building use only.",
     launch: true,
   },
+  // Tier 1 of the organizer registry (owner, 2026-10-16): each enters shadow
+  // through a test fetch, so nothing publishes until reviewed. Terms checked
+  // 2026-10-16: no terms of use published (accessibility and privacy pages
+  // only); robots.txt allows these exact feed paths for Agent479Bot.
+  {
+    slug: "city-fayetteville-volunteer",
+    name: "City of Fayetteville: Volunteer Opportunities",
+    kind: "ics",
+    fetcher: "ics",
+    baseUrl: "https://www.fayetteville-ar.gov/",
+    // 36: Volunteer Opportunities. Separate from city-fayetteville (live), so it can be reviewed in shadow.
+    config: { icsPath: CIVICPLUS_ICS, catIds: [36], eventUrl: CIVICPLUS_EVENT_URL },
+    defaultVenueSlug: null,
+    trustLevel: 4,
+    fetchIntervalMinutes: 24 * 60,
+    commercialUseOk: "unknown",
+    termsNotes: CIVICPLUS_TERMS,
+    launch: true,
+  },
+  {
+    slug: "city-siloam-springs",
+    name: "City of Siloam Springs",
+    kind: "ics",
+    fetcher: "ics",
+    baseUrl: "https://www.siloamsprings.gov/",
+    // 14: Main Calendar. 25: Parks and Recreation. 27: Library. Skipped: adult sports (33) and the meeting calendars.
+    config: { icsPath: CIVICPLUS_ICS, catIds: [14, 25, 27], eventUrl: CIVICPLUS_EVENT_URL },
+    defaultVenueSlug: null,
+    trustLevel: 4,
+    fetchIntervalMinutes: 24 * 60,
+    commercialUseOk: "unknown",
+    termsNotes:
+      "CivicPlus public ICS. No terms of use published (accessibility and privacy pages only). robots.txt allows the ICS endpoint. Facts and links only; meeting categories are never used (checked 2026-10-16).",
+    launch: true,
+  },
+  {
+    slug: "city-pea-ridge",
+    name: "City of Pea Ridge",
+    kind: "ics",
+    fetcher: "ics",
+    baseUrl: "https://cityofpearidgear.gov/",
+    // The Events Calendar (WordPress) iCal export; each event carries its own page URL.
+    config: { feedUrl: "https://cityofpearidgear.gov/events/?ical=1" },
+    defaultVenueSlug: null,
+    trustLevel: 4,
+    fetchIntervalMinutes: 24 * 60,
+    commercialUseOk: "unknown",
+    termsNotes:
+      "City site on WordPress with The Events Calendar; public iCal export. No terms of use published (accessibility page only); robots.txt allows /events/. Facts and links only (checked 2026-10-16).",
+    launch: true,
+  },
   {
     slug: "walton-arts-center",
     name: "Walton Arts Center",

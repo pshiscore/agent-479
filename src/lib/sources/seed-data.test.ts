@@ -4,12 +4,19 @@ import { LINK_POLICY_SEEDS, SOURCE_SEEDS } from "./seed-data";
 const bySlug = new Map(SOURCE_SEEDS.map((s) => [s.slug, s]));
 
 describe("source seeds", () => {
-  it("has the 9 Phase 1 sources with unique slugs, 6 marked for launch", () => {
-    expect(SOURCE_SEEDS).toHaveLength(9);
-    expect(bySlug.size).toBe(9);
+  it("has the 9 Phase 1 sources plus 3 Tier 1 sources, with unique slugs", () => {
+    expect(SOURCE_SEEDS).toHaveLength(12);
+    expect(bySlug.size).toBe(12);
     expect(SOURCE_SEEDS.filter((s) => s.launch).map((s) => s.slug).sort()).toEqual(
-      ["city-bentonville", "city-fayetteville", "city-rogers", "library-fayetteville", "library-rogers", "ticketmaster"],
+      ["city-bentonville", "city-fayetteville", "city-fayetteville-volunteer", "city-pea-ridge", "city-rogers", "city-siloam-springs", "library-fayetteville", "library-rogers", "ticketmaster"],
     );
+  });
+
+  it("Tier 1 (owner, 2026-10-16): Siloam Springs skips adult sports and meetings; Fayetteville volunteer is its own source", () => {
+    expect(bySlug.get("city-siloam-springs")!.config).toMatchObject({ catIds: [14, 25, 27] });
+    expect(bySlug.get("city-fayetteville-volunteer")!.config).toMatchObject({ catIds: [36] });
+    expect(bySlug.get("city-fayetteville")!.config).toMatchObject({ catIds: [30, 33] });
+    expect(bySlug.get("city-pea-ridge")!.config).toMatchObject({ feedUrl: "https://cityofpearidgear.gov/events/?ical=1" });
   });
 
   // docs/sources-terms.md summary table: change both together.

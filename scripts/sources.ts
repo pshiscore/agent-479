@@ -12,7 +12,9 @@
  * A block during a test fetch stops it (no retry): record it and ask the owner.
  */
 import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.local", quiet: true });
+// MIGRATE_PRODUCTION=yes targets production (.env.production.local wins over the shell).
+const production = process.env.MIGRATE_PRODUCTION === "yes";
+dotenv.config({ path: production ? ".env.production.local" : ".env.local", quiet: true, override: production });
 
 import { parseArgs } from "node:util";
 import { eq } from "drizzle-orm";
