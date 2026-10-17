@@ -28,6 +28,8 @@ export const REVIEW_REASONS = [
   "outside_coverage_area",
   // From a source in shadow mode (owner, 2026-10-16).
   "shadow_source",
+  // A changed date, time, or venue for an event already approved from a shadow source.
+  "shadow_update",
 ] as const;
 
 /** Shadow items that need a look one by one; everything else is reviewed by source. */

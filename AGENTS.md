@@ -203,8 +203,15 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   Promotion to live is the owner's; the review page recommends it after 2
   weeks, 15 reviewed events, 90%+ approved, and no wrong dates or venues.
   The maintenance job demotes a live source to shadow (logged, flagged on
-  the admin overview) after 3 failed runs in a row, over 20% of a week's
-  events rejected or hidden, or an event outside the coverage area. Shadow
+  the admin overview) after 3 failed runs in a row, or over 20% of a week's
+  events rejected or hidden (minimum 5). Out-of-area events, from any
+  source, are held in review, never published, and never count toward
+  demotion or promotion (owner, 2026-10-17). While a source is in shadow,
+  a changed date, time, or venue on an event approved from it waits as an
+  update item (the event keeps its details until approved); a cancellation
+  or removal from the feed hides it at once, logged. Filter rules are
+  previewed before approval, can be edited or removed, and removing one
+  restores what it skipped. Shadow
   items are reviewed by source (`/admin/review?view=sources`): per-source
   title filters (owner-approved, logged, skips recorded as `filter:<id>`)
   and bulk decisions; flagged items (possible duplicate, outside the area,

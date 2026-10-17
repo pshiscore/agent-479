@@ -2,8 +2,9 @@ import { and, eq } from "drizzle-orm";
 import { agentActor, recordAction } from "@/lib/actions/record";
 import type { TaxonomyEntry } from "@/lib/categories";
 import type { DbExecutor } from "@/lib/db/client";
-import { eventSources, rawRecords, sources, venues } from "@/lib/db/schema";
-import { upsertShadowItem } from "@/lib/review/shadow";
+import { events, eventSources, rawRecords, sources, venues } from "@/lib/db/schema";
+import { inCoverageArea } from "@/config/coverage";
+import { criticalChange, upsertShadowItem } from "@/lib/review/shadow";
 import { isTicketingUrl } from "@/lib/ticketing";
 import { formatInChicago } from "@/lib/time";
 import { venueDisplayName } from "@/lib/venues/display";
@@ -157,18 +158,22 @@ export async function enrichRecord(
   // Shadow mode (owner, 2026-10-16): a source that isn't live sends new events to
   // review instead of publishing. A record already tied to a published event (the
   // owner approved it) keeps updating that event.
-  if (source.publishState !== "live" && !(await linkedEventId(db, record))) {
-    const r = await upsertShadowItem(db, {
-      source,
-      record,
-      draft,
-      log,
-      venueCity: venue.city,
-      categorySlug: category.slug,
-      tagSlugs: [...tagSlugs],
-      descriptionHeld: described.status === "held",
-    });
-    return { event: null, created: false, shadow: r.action, category: category.slug, tags: [...tagSlugs], held: described.status === "held" };
+  // Out-of-area events (owner, 2026-10-17), from any source, are held in review and never publish.
+  const linked = await linkedEventId(db, record);
+  const outside = !inCoverageArea(venue.city);
+  const shadowInput = { source, record, draft, log, venueCity: venue.city, categorySlug: category.slug, tagSlugs: [...tagSlugs], descriptionHeld: described.status === "held" };
+  const result = (shadow: string) => ({ event: null, created: false, shadow, category: category.slug, tags: [...tagSlugs], held: described.status === "held" });
+  if (!linked && (outside || source.publishState !== "live")) {
+    return result((await upsertShadowItem(db, shadowInput)).action);
+  }
+  // An event already published from this record: while its source is in shadow (or
+  // when it would move out of the area), a changed date, time, or venue waits for
+  // the owner as an update item; a cancellation applies at once (it hides the event).
+  if (linked && (outside || source.publishState !== "live") && draft.facts.status === "scheduled") {
+    const [current] = await db.select().from(events).where(eq(events.id, linked));
+    if (current && (outside || criticalChange(current, draft).length)) {
+      return result((await upsertShadowItem(db, { ...shadowInput, updateOf: linked })).action);
+    }
   }
 
   const { event, created } = await writeEvent(db, record, draft, log);

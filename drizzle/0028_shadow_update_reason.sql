@@ -1,0 +1,2 @@
+ALTER TABLE "event_proposals" DROP CONSTRAINT "event_proposals_reasons_check";--> statement-breakpoint
+ALTER TABLE "event_proposals" ADD CONSTRAINT "event_proposals_reasons_check" CHECK (reasons <@ array['owner_draft', 'new_festival', 'lead_only', 'aggregator_only', 'sources_conflict', 'venue_unresolved', 'unclear_schedule', 'first_time_organizer', 'outside_coverage_area', 'shadow_source', 'shadow_update']::text[]);

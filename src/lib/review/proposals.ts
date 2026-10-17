@@ -26,7 +26,7 @@ import { chicagoDate, chicagoToUtc, formatDate, parseDate } from "@/lib/time";
 import { isTicketingUrl } from "@/lib/ticketing";
 import { normalizeVenueName } from "@/lib/venues/normalize";
 import { writeEvent } from "@/lib/pipeline/write-event";
-import { applyEditsToDraft, type ShadowDraft } from "./shadow";
+import { applyEditsToDraft, type ShadowDraft, UPDATE_SUFFIX } from "./shadow";
 
 /**
  * The review queue (AGENTS.md, "Festivals and the review queue"). Fail
@@ -347,19 +347,23 @@ export async function rejectProposal(db: DbExecutor, id: string, opts: { actor: 
 async function approveShadow(tx: DbExecutor, before: Proposal, f: ProposedEvent, opts: { actor: string; note?: string; edits?: Partial<ProposedEvent> }) {
   const stored = before.draft as unknown as ShadowDraft | null;
   if (!stored || !before.sourceId || !before.externalId || !before.rawRecordId) throw new ReviewError("this shadow item has lost its source record; reject it or add the event by hand");
+  // Out-of-area events never publish (owner, 2026-10-17).
+  if (before.flags.includes("outside_coverage")) throw new ReviewError("this event is outside the coverage area (Benton and Washington counties); it can't be published");
+  const isUpdate = before.reasons.includes("shadow_update");
   const edited = opts.edits && Object.keys(opts.edits).length > 0;
   const draft = edited ? applyEditsToDraft(stored.draft, opts.edits!) : stored.draft;
   const [src] = await tx.select({ slug: sources.slug }).from(sources).where(eq(sources.id, before.sourceId));
   const { event } = await writeEvent(
     tx,
-    { id: before.rawRecordId, sourceId: before.sourceId, externalId: before.externalId, eventId: null },
+    // An update item targets the record's own external id, so writeEvent updates the published event.
+    { id: before.rawRecordId, sourceId: before.sourceId, externalId: isUpdate ? before.externalId.slice(0, -UPDATE_SUFFIX.length) : before.externalId, eventId: isUpdate ? before.matchEventId : null },
     draft,
     {
       actor: opts.actor,
       runId: null,
       model: null,
       llmCallId: null,
-      reason: `Owner confirmed a shadow event from ${src?.slug ?? "a shadow source"}${edited ? " with edits" : ""}: ${opts.note || "no note"}`,
+      reason: `Owner confirmed ${isUpdate ? "an update" : "a shadow event"} from ${src?.slug ?? "a shadow source"}${edited ? " with edits" : ""}: ${opts.note || "no note"}`,
       meta: { ...stored.log.meta, proposalId: before.id, processedBy: { model: stored.log.model, llmCallId: stored.log.llmCallId, reason: stored.log.reason } },
     },
   );
@@ -413,7 +417,12 @@ export async function pendingProposals(db: DbExecutor) {
   return db
     .select()
     .from(eventProposals)
-    .where(and(eq(eventProposals.status, "pending"), or(ne(eventProposals.origin, "shadow"), sql`cardinality(${eventProposals.flags}) > 0`)))
+    .where(
+      and(
+        eq(eventProposals.status, "pending"),
+        or(ne(eventProposals.origin, "shadow"), sql`cardinality(${eventProposals.flags}) > 0`, sql`'shadow_update' = any(${eventProposals.reasons})`),
+      ),
+    )
     .orderBy(asc(eventProposals.createdAt));
 }
 

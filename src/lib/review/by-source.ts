@@ -16,6 +16,10 @@ import { approveProposal, rejectProposal, ReviewError } from "./proposals";
 export const PROMOTION = { minDays: 14, minReviewed: 15, minApprovalRate: 0.9 } as const;
 
 export interface SourceStats {
+  /** Held because the venue is outside the coverage area; never counted for promotion. */
+  heldOutside: number;
+  /** Date, time, or venue changes to published events, waiting for the owner. */
+  updates: number;
   pending: number;
   flagged: number;
   conflicts: number;
@@ -80,10 +84,22 @@ export async function sourcesForReview(db: DbExecutor) {
 
 export async function sourceStats(db: DbExecutor, sourceId: string): Promise<SourceStats> {
   const rows = (await db.execute(sql`
-    select status, reject_kind, cardinality(flags) > 0 flagged, 'conflict' = any(flags) conflict, count(*)::int n
-    from event_proposals where source_id = ${sourceId} group by 1, 2, 3, 4`)) as unknown as { status: string; reject_kind: string | null; flagged: boolean; conflict: boolean; n: number }[];
-  const s: SourceStats = { pending: 0, flagged: 0, conflicts: 0, approved: 0, rejected: 0, rejectedByKind: {}, filteredSkips: 0 };
+    select status, reject_kind, cardinality(flags) > 0 flagged, 'conflict' = any(flags) conflict,
+      'outside_coverage' = any(flags) outside, 'shadow_update' = any(reasons) is_update, count(*)::int n
+    from event_proposals where source_id = ${sourceId} group by 1, 2, 3, 4, 5, 6`)) as unknown as {
+    status: string; reject_kind: string | null; flagged: boolean; conflict: boolean; outside: boolean; is_update: boolean; n: number;
+  }[];
+  const s: SourceStats = { heldOutside: 0, updates: 0, pending: 0, flagged: 0, conflicts: 0, approved: 0, rejected: 0, rejectedByKind: {}, filteredSkips: 0 };
   for (const r of rows) {
+    // Out-of-area holds and update items don't count toward promotion (owner, 2026-10-17).
+    if (r.outside || r.reject_kind === "outside_area") {
+      if (r.status === "pending") s.heldOutside += r.n;
+      continue;
+    }
+    if (r.is_update) {
+      if (r.status === "pending") s.updates += r.n;
+      continue;
+    }
     if (r.status === "pending") {
       s.pending += r.n;
       if (r.flagged) s.flagged += r.n;
@@ -142,8 +158,90 @@ export async function addSourceFilter(db: DbExecutor, sourceId: string, phrase: 
     await recordAction(tx, { actor: opts.actor, action: "update", entityType: "source", entityId: sourceId, before, after, reason: `Filter rule for ${before.slug}: skip titles containing "${contains}"` });
   });
   const matched = (await pendingTitles(db, sourceId)).filter((r) => titleMatches(r.title, contains));
-  for (const r of matched) await rejectProposal(db, r.id, { actor: opts.actor, reason: `Filter rule: titles containing "${contains}"`, kind: "filtered" });
+  for (const r of matched) await rejectProposal(db, r.id, { actor: opts.actor, reason: `${filterNote(filter.id)}: titles containing "${contains}"`, kind: "filtered" });
   return { filter, rejected: matched.length };
+}
+
+/** Rejections made by a rule say which one, so removing the rule can restore exactly those. */
+const filterNote = (id: string) => `Filter rule ${id}`;
+
+/** Every waiting item of a source a phrase would catch, shown before the owner approves the rule. */
+export async function previewFilter(db: DbExecutor, sourceId: string, phrase: string) {
+  const contains = phrase.trim();
+  if (contains.length < 3) return [];
+  const rows = await db
+    .select({ id: eventProposals.id, facts: eventProposals.facts, flags: eventProposals.flags })
+    .from(eventProposals)
+    .where(and(eq(eventProposals.sourceId, sourceId), eq(eventProposals.status, "pending")))
+    .orderBy(sql`${eventProposals.facts}->>'startAt'`);
+  return rows.filter((r) => titleMatches(r.facts.title, contains));
+}
+
+/**
+ * Removes a rule (logged) and restores what it skipped: its skipped source
+ * records go back through the pipeline, and the items it rejected are
+ * waiting again (each logged).
+ */
+export async function removeSourceFilter(db: DbExecutor, sourceId: string, filterId: string, opts: { actor: string; reason?: string }) {
+  if (!opts.actor.startsWith("human:")) throw new ReviewError("only the owner removes a filter rule");
+  const [before] = await db.select().from(sources).where(eq(sources.id, sourceId));
+  if (!before) throw new ReviewError("no such source");
+  const rule = sourceFilters(before.config).find((f) => f.id === filterId);
+  if (!rule) throw new ReviewError("no such filter rule");
+  return db.transaction(async (tx) => {
+    const config = { ...(before.config as Record<string, unknown>), filters: sourceFilters(before.config).filter((f) => f.id !== filterId) };
+    const [after] = await tx.update(sources).set({ config }).where(eq(sources.id, sourceId)).returning();
+    // Skipped records go back to pending; the next process run handles them like new ones.
+    const restoredRecords = await tx
+      .update(rawRecords)
+      .set({ status: "pending", skipReason: null })
+      .where(and(eq(rawRecords.sourceId, sourceId), eq(rawRecords.status, "skipped"), eq(rawRecords.skipReason, `filter:${filterId}`)))
+      .returning({ id: rawRecords.id });
+    await recordAction(tx, {
+      actor: opts.actor,
+      action: "update",
+      entityType: "source",
+      entityId: sourceId,
+      before,
+      after,
+      reason: `Filter rule removed for ${before.slug} ("${rule.contains}")${opts.reason ? `: ${opts.reason}` : ""}; ${restoredRecords.length} skipped record(s) sent back through the pipeline`,
+    });
+    const rejected = await tx
+      .select()
+      .from(eventProposals)
+      .where(and(eq(eventProposals.sourceId, sourceId), eq(eventProposals.status, "rejected"), eq(eventProposals.rejectKind, "filtered"), like(eventProposals.decisionNote, `${filterNote(filterId)}:%`)));
+    for (const p of rejected) {
+      const [restored] = await tx
+        .update(eventProposals)
+        .set({ status: "pending", decidedAt: null, decidedBy: null, decisionNote: null, rejectKind: null, updatedAt: new Date() })
+        .where(eq(eventProposals.id, p.id))
+        .returning();
+      await recordAction(tx, { actor: opts.actor, action: "update", entityType: "event_proposal", entityId: p.id, before: p, after: restored, reason: `Back to waiting: filter rule "${rule.contains}" removed` });
+    }
+    return { records: restoredRecords.length, items: rejected.length };
+  });
+}
+
+/** Changes a rule's phrase: the old rule is removed (restoring what it caught), then the new one added. */
+export async function editSourceFilter(db: DbExecutor, sourceId: string, filterId: string, phrase: string, opts: { actor: string }) {
+  const removed = await removeSourceFilter(db, sourceId, filterId, { actor: opts.actor, reason: `edited to "${phrase.trim()}"` });
+  const added = await addSourceFilter(db, sourceId, phrase, opts);
+  return { removed, added };
+}
+
+/** Records each rule skipped in the past 7 days, per rule id. */
+export async function filterSkipsThisWeek(db: DbExecutor, sourceId: string, now = new Date()) {
+  const since = new Date(now.getTime() - 7 * 86_400_000);
+  const rows = await db
+    .select({ reason: rawRecords.skipReason, title: sql<string>`${rawRecords.facts}->>'title'`, startAt: sql<string>`${rawRecords.facts}->>'startAt'`, at: rawRecords.processedAt })
+    .from(rawRecords)
+    .where(and(eq(rawRecords.sourceId, sourceId), eq(rawRecords.status, "skipped"), like(rawRecords.skipReason, "filter:%"), sql`${rawRecords.processedAt} >= ${since.toISOString()}::timestamptz`));
+  const byRule = new Map<string, { title: string; startAt: string }[]>();
+  for (const r of rows) {
+    const id = r.reason!.slice("filter:".length);
+    (byRule.get(id) ?? byRule.set(id, []).get(id)!).push({ title: r.title, startAt: r.startAt });
+  }
+  return byRule;
 }
 
 /**

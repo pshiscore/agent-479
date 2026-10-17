@@ -5,11 +5,13 @@ import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources } from "@/lib/db/schema";
 import { FetchBlockedError, FetchNotPermittedError } from "@/lib/http/fetch";
 import { claimJob } from "@/lib/jobs";
+import { hideRemovedShadowEvents } from "@/lib/review/shadow";
 import { finishRun, withRun } from "@/lib/runs";
 import { PoliteClient } from "@/lib/sources/http";
 import { fetcherFor } from "@/lib/sources/registry";
 import { type FetchedItem, type FetchResult, SourceConfigError, type SourceRow } from "@/lib/sources/types";
 import { canonicalJson } from "@/lib/venues/seed-file";
+import { mapRecord } from "./map";
 
 /**
  * The fetch stage: read enabled sources and write raw_records, nothing else
@@ -191,7 +193,9 @@ export async function fetchSource(
         if (!fetcher) throw new SourceConfigError(`${source.slug}: no fetcher named ${JSON.stringify(source.fetcher)}`);
         const result: FetchResult = await fetcher.fetch(source, http);
         const stored = await storeItems(db, source, run.id, result.items, now);
-        return { items: result.items.length, ...result.stats, ...stored, feedUrls: result.feedUrls };
+        // Shadow sources: approved events the feed no longer lists are hidden (owner, 2026-10-17).
+        const removedHidden = source.publishState === "shadow" ? await hideRemovedShadowEvents(db, source, feedCoverage(result.items, source), { actor: agentActor("fetch"), runId: run.id, now }) : 0;
+        return { items: result.items.length, ...result.stats, ...stored, removedHidden, feedUrls: result.feedUrls };
       },
       { sourceId: source.id },
     );
@@ -255,4 +259,18 @@ export async function runFetchJob(
     await finishRun(db, claim.id, { status: "failed", error: String(err).slice(0, 2000) });
     throw err;
   }
+}
+
+/** The external ids a fetch returned, and the latest start among them (the feed's current reach). */
+export function feedCoverage(items: readonly { externalId: string; payload: Record<string, unknown> }[], source: Pick<SourceRow, "baseUrl" | "config">) {
+  let lastStart: Date | null = null;
+  for (const item of items) {
+    try {
+      const start = new Date(mapRecord(item.payload, source).startAt);
+      if (!lastStart || start > lastStart) lastStart = start;
+    } catch {
+      // Unmappable items say nothing about the feed's reach.
+    }
+  }
+  return { externalIds: items.map((i) => i.externalId), lastStart };
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { demotionReason } from "@/lib/sources/demotion";
 import { promotionCheck, suggestFilters } from "./by-source";
 
-const base = { pending: 0, flagged: 0, conflicts: 0, approved: 0, rejected: 0, rejectedByKind: {}, filteredSkips: 0 };
+const base = { heldOutside: 0, updates: 0, pending: 0, flagged: 0, conflicts: 0, approved: 0, rejected: 0, rejectedByKind: {}, filteredSkips: 0 };
 const NOW = new Date("2026-11-01T12:00:00Z");
 const days = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
 
@@ -17,13 +17,12 @@ describe("promotion", () => {
 });
 
 describe("demotion", () => {
-  const w = { slug: "s", consecutiveFailures: 0, events: 10, rejectedOrHidden: 0, outsideCities: ["Rogers"] };
-  it("demotes on 3 failures, over 20% rejected or hidden (5+ events), or an event outside the area", () => {
+  const w = { slug: "s", consecutiveFailures: 0, events: 10, rejectedOrHidden: 0 };
+  it("demotes on 3 failures or over 20% rejected or hidden (5+ events), never for out-of-area events", () => {
     expect(demotionReason(w)).toBeNull();
     expect(demotionReason({ ...w, consecutiveFailures: 3 })).toMatch(/failed 3 runs/);
     expect(demotionReason({ ...w, rejectedOrHidden: 3 })).toMatch(/3 of its 10/);
     expect(demotionReason({ ...w, events: 4, rejectedOrHidden: 2 })).toBeNull();
-    expect(demotionReason({ ...w, outsideCities: ["Rogers", "Eureka Springs"] })).toMatch(/Eureka Springs/);
   });
 });
 

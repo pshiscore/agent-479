@@ -53,7 +53,11 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
           <p className="text-zinc-500">Sources in shadow: fetched and processed, nothing publishes until you approve items or promote the source.</p>
         </div>
         {tabs("sources")}
-        <BySource db={getDb()} />
+        <BySource
+          db={getDb()}
+          preview={one(q.preview) && one(q.phrase) ? { sourceId: one(q.preview)!, phrase: one(q.phrase)! } : undefined}
+          skipped={one(q.skipped)?.includes(":") ? { sourceId: one(q.skipped)!.split(":")[0], filterId: one(q.skipped)!.split(":")[1] } : undefined}
+        />
       </div>
     );
   }

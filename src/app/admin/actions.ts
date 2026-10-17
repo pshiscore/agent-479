@@ -8,7 +8,7 @@ import { labelPair } from "@/lib/admin/dedup-review";
 import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, setGooglePlaceId, parseFacts, type PlaceInput, placeById, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
 import { changedFields, type EventFormValues, parseEventForm } from "@/lib/review/form";
-import { addSourceFilter, bulkDecide } from "@/lib/review/by-source";
+import { addSourceFilter, bulkDecide, editSourceFilter, removeSourceFilter } from "@/lib/review/by-source";
 import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal, setParentEvent } from "@/lib/review/proposals";
 import { setPublishState } from "@/lib/sources/admin";
 import { PUBLISH_STATES, REJECT_KINDS } from "@/lib/db/schema";
@@ -445,6 +445,34 @@ export async function bulkDecideAction(formData: FormData) {
     target = bySource({ msg: `${decision === "approve" ? "Approved" : "Rejected"} ${r.done} of ${r.matched} matching item(s)${r.skippedFlagged ? `; ${r.skippedFlagged} flagged item(s) left for one-by-one review` : ""}.` });
   } catch (err) {
     target = bySource({ error: `Not done: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function removeSourceFilterAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const sourceId = uuid.safeParse(formData.get("sourceId"));
+  let target: string;
+  try {
+    if (!sourceId.success) throw new Error("bad source");
+    const r = await removeSourceFilter(getDb(), sourceId.data, str(formData, "filterId"), { actor });
+    target = bySource({ msg: `Filter removed; ${r.records} skipped record(s) go back through the pipeline and ${r.items} item(s) are waiting again.` });
+  } catch (err) {
+    target = bySource({ error: `Not removed: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function editSourceFilterAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const sourceId = uuid.safeParse(formData.get("sourceId"));
+  let target: string;
+  try {
+    if (!sourceId.success) throw new Error("bad source");
+    const r = await editSourceFilter(getDb(), sourceId.data, str(formData, "filterId"), str(formData, "phrase"), { actor });
+    target = bySource({ msg: `Filter changed to "${r.added.filter.contains}": ${r.removed.items + r.removed.records} restored, ${r.added.rejected} now filtered.` });
+  } catch (err) {
+    target = bySource({ error: `Not changed: ${message(err)}` });
   }
   redirect(target);
 }
