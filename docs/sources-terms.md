@@ -322,3 +322,26 @@ certificate for another name. The Iva Jane Peek Public Library page on
 **Address didn't name the organizer:** `tontitownwinery.com` and
 `blackapplecrossing.com` (both likely addresses, not from search). They stay
 candidates.
+
+## Feed discovery: first run (2026-10-17)
+
+Step 6 (`npm run discover:feeds`): for the 50 verified organizers, the home
+page, events page, terms page, and any CivicPlus feed list or LibCal page,
+through PoliteClient (robots.txt on every request, per-host pauses). No
+blocks. Six proposals are waiting in `/admin/discoveries`; the run summary
+is `data/discovery.last-run.json` (addresses only).
+
+**robots.txt disallows the feed address (not read; ask the organizer if we
+want them):** Squarespace's `?format=ical` on Downtown Springdale, the
+Museum of Native American History, New Province Brewing, Ozark Beer
+Company, the Jones Center, and TheatreSquared; The Events Calendar's
+`?ical=1` on the Shiloh Museum (its event data on the page is allowed and
+was proposed instead).
+
+**Google Calendar:** the Pea Ridge Community Library's site embeds a public
+Google Calendar. Not fetched: whether an organizer's own Google-hosted
+calendar falls under "Google is never a source for our facts" is the
+owner's call.
+
+**Rogers Public Library:** links to LibCal, but the page has no subscribe
+link we can read; the feed URL still comes from the owner (open item 5).

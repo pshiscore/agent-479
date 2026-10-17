@@ -18,10 +18,22 @@ export class DiscoveryError extends Error {}
 type Discovery = typeof feedDiscoveries.$inferSelect;
 const COMPARED = ["label", "kind", "platform", "robotsResult", "termsUrl", "termsFlags", "sampleEvents", "suggestedFilters", "notes"] as const;
 
-/** Upserts one organizer's finds. New ones are proposals; known ones get their latest look. */
+/**
+ * Upserts one organizer's finds. New ones are proposals; known ones get their
+ * latest look. A waiting proposal this look didn't find is marked gone
+ * (logged), so the queue holds only feeds that work today.
+ */
 export async function saveFinds(db: DbExecutor, organizerId: string, finds: readonly Find[], opts: { actor: string; runId: string | null; now?: Date }) {
   const now = opts.now ?? new Date();
-  const stats = { proposed: 0, refreshed: 0 };
+  const stats = { proposed: 0, refreshed: 0, gone: 0 };
+  const waiting = await db.select().from(feedDiscoveries).where(and(eq(feedDiscoveries.organizerId, organizerId), eq(feedDiscoveries.status, "proposed")));
+  for (const w of waiting.filter((w) => !finds.some((f) => f.url === w.url))) {
+    await db.transaction(async (tx) => {
+      const [after] = await tx.update(feedDiscoveries).set({ status: "gone", updatedAt: now }).where(eq(feedDiscoveries.id, w.id)).returning();
+      await recordAction(tx, { actor: opts.actor, runId: opts.runId, action: "update", entityType: "feed_discovery", entityId: w.id, before: w, after, reason: "Not found as a working feed on the latest look" });
+    });
+    stats.gone++;
+  }
   for (const f of finds) {
     const values = { label: f.label, kind: f.kind, platform: f.platform, robotsResult: f.robotsResult, robotsCheckedAt: f.robotsCheckedAt, termsUrl: f.termsUrl, termsFlags: f.termsFlags, sampleEvents: f.sampleEvents, suggestedFilters: f.suggestedFilters, notes: f.notes };
     await db.transaction(async (tx) => {

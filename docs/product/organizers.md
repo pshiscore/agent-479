@@ -103,10 +103,24 @@ stays missed.
    into `data/organizers.check.json`; `npm run db:seed:organizers` applies
    both, logged as `agent:registry`. A candidate says why in its notes.
    `/admin/organizers` lists them.
-6. The discovery agent, producing proposals.
-7. The structured-data fetcher (event data from pages, no AI).
+6. The discovery agent, producing proposals. Done 2026-10-17
+   (`npm run discover:feeds`, `/admin/discoveries`). Only working feeds with
+   events become proposals, one per set of events (every CivicPlus calendar,
+   else iCal over page data over RSS); meeting, board, and closure calendars
+   and feeds we already read are skipped; a robots-disallowed feed is listed
+   in the run summary, not proposed. Approving creates a disabled, untested
+   source in `proposed`. Google Calendar feeds are not fetched (owner to
+   decide; `docs/OPEN_ITEMS.md`).
+7. The structured-data fetcher (event data from pages, no AI). It never
+   applies to sources awaiting permission or to blocked domains: reading
+   JSON-LD is still automated fetching, under every fetching rule
+   (robots.txt, terms, a block means stop).
 8. Monthly re-discovery in the maintenance job (first-of-month guard; each
    change logged).
 9. Terms review of specialist platforms: RunSignup's API, MarketSpread and
    similar; Macaroni KID and TV station listings as leads only.
 10. The submission form and invite email template.
+11. Later: ICS subscription feeds and a JSON feed for each filtered view
+    (`docs/product/front-page.md`, section F), after the Ticketmaster display
+    terms review. Feeds carry only our own facts plus source links, never
+    Google data, and live at their own URLs, not under `/bot`.

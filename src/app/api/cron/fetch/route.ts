@@ -3,7 +3,8 @@ import { cronDisabledResponse, cronEnabled } from "@/lib/cron-enabled";
 import { getDb } from "@/lib/db/client";
 import { runFetchJob } from "@/lib/pipeline/fetch";
 
-// The job stops starting new sources after 240 s, leaving room to finish one.
+// A literal (Next reads it statically); equal to CRON_MAX_DURATION_S. The job
+// stops starting new sources at 60% of it (src/lib/cron-budget.ts).
 export const maxDuration = 300;
 
 /** Fetches due, enabled sources. Not scheduled until build step 23 turns crons on. */

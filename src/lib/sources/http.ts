@@ -107,7 +107,13 @@ export class PoliteClient {
     if (cached && this.opts.now() - cached.fetchedAt < ROBOTS_TTL_MS) return cached.rules;
 
     // botFetch throws FetchBlockedError if robots.txt itself refuses us (401, 403, ...).
-    const res = await this.request(new URL("/robots.txt", origin), "text/plain", null);
+    // Redirects are followed, up to five, each with the same checks (RFC 9309).
+    let target = new URL("/robots.txt", origin);
+    let res = await this.request(target, "text/plain", null);
+    for (let hop = 0; hop < 5 && res.status >= 300 && res.status < 400 && res.headers.get("location"); hop++) {
+      target = new URL(res.headers.get("location")!, target);
+      res = await this.request(target, "text/plain", null);
+    }
     let rules: RobotsRules;
     if (res.ok) {
       rules = parseRobots(await readCapped(res, ROBOTS_MAX_BYTES, `${origin}/robots.txt`));

@@ -48,7 +48,8 @@ describe("discovery", () => {
     expect(feed).toMatchObject({ kind: "ics", platform: "the_events_calendar", robotsResult: "allowed", termsUrl: "https://brewery.example/terms", suggestedFilters: ["Closed"] });
     expect(feed.termsFlags).toEqual(["automated", "scrape"]);
     expect(feed.sampleEvents.map((s) => s.title)).toEqual(["Trivia Night", "Taproom Closed"]);
-    expect(r.finds.find((f) => f.url === "https://brewery.example/blocked/cal.ics")).toMatchObject({ robotsResult: "disallowed", sampleEvents: [] });
+    expect(r.skipped).toContainEqual({ label: "iCal link", url: "https://brewery.example/blocked/cal.ics", reason: "robots.txt disallows this address (not read; ask the organizer)" });
+    expect(r.finds).toHaveLength(1);
 
     const again = await discoverOrganizer(http(), { name: "Test Brewery", website: "https://brewery.example/" }, new Set([feedKey("https://brewery.example/events/?ical=1", null)]));
     expect(again.skipped).toContainEqual({ label: "Brewery Events", url: "https://brewery.example/events/?ical=1", reason: "already a source" });
@@ -58,12 +59,13 @@ describe("discovery", () => {
     await inRollback(async (tx) => {
       const [org] = await tx.insert(organizers).values({ slug: "test-brewery", name: "Test Brewery", organizerType: "business", website: "https://brewery.example/", city: "Rogers", status: "verified", lastCheckedAt: new Date() }).returning();
       const r = await discoverOrganizer(http(), { name: org.name, website: org.website! }, new Set());
-      expect(await saveFinds(tx, org.id, r.finds, { actor: agentActor("discovery"), runId: null })).toEqual({ proposed: 2, refreshed: 0 });
-      expect(await saveFinds(tx, org.id, r.finds, { actor: agentActor("discovery"), runId: null })).toEqual({ proposed: 0, refreshed: 2 });
+      expect(await saveFinds(tx, org.id, r.finds, { actor: agentActor("discovery"), runId: null })).toEqual({ proposed: 1, refreshed: 0, gone: 0 });
+      expect(await saveFinds(tx, org.id, r.finds, { actor: agentActor("discovery"), runId: null })).toEqual({ proposed: 0, refreshed: 1, gone: 0 });
+      // A disallowed feed saved by hand (or by an earlier run) can't be approved.
+      const [blocked] = await tx.insert(feedDiscoveries).values({ organizerId: org.id, url: "https://brewery.example/blocked/cal.ics", kind: "ics", robotsResult: "disallowed", robotsCheckedAt: new Date() }).returning();
 
       const rows = await tx.select().from(feedDiscoveries).where(eq(feedDiscoveries.organizerId, org.id));
       const ics = rows.find((d) => d.url.endsWith("?ical=1"))!;
-      const blocked = rows.find((d) => d.robotsResult === "disallowed")!;
       expect(oneClick(ics)).toBe(false);
       await expect(approveDiscovery(tx, ics.id, { actor: OWNER })).rejects.toThrow(/say why the terms are fine/);
       await expect(approveDiscovery(tx, blocked.id, { actor: OWNER, note: "fine" })).rejects.toThrow(/robots.txt disallows/);
@@ -79,6 +81,12 @@ describe("discovery", () => {
 
       await expect(rejectDiscovery(tx, blocked.id, { actor: OWNER, note: "" })).rejects.toThrow(/say why/);
       expect((await rejectDiscovery(tx, blocked.id, { actor: OWNER, note: "robots.txt says no" })).status).toBe("rejected");
+
+      // A waiting proposal the latest look didn't find is marked gone.
+      const [stale] = await tx.insert(feedDiscoveries).values({ organizerId: org.id, url: "https://brewery.example/old.ics", kind: "ics", robotsResult: "allowed", robotsCheckedAt: new Date() }).returning();
+      expect((await saveFinds(tx, org.id, [], { actor: agentActor("discovery"), runId: null })).gone).toBe(1);
+      const [staleAfter] = await tx.select().from(feedDiscoveries).where(eq(feedDiscoveries.id, stale.id));
+      expect(staleAfter.status).toBe("gone");
     });
   });
 

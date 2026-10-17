@@ -22,7 +22,17 @@ export interface PageSignals {
   termsLink: string | null;
 }
 
-const attr = (tag: string, name: string) => new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, "i").exec(tag)?.[1]?.replace(/&amp;/g, "&") ?? null;
+const NAMED: Record<string, string> = { amp: "&", quot: '"', apos: "'", nbsp: " ", raquo: "»", laquo: "«", ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", hellip: "…" };
+/** HTML entities in attribute values and labels: named, decimal (&#038;), and hex. */
+export const decodeEntities = (s: string) =>
+  s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) =>
+    e[0] === "#" ? String.fromCodePoint(e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : (NAMED[e.toLowerCase()] ?? m),
+  );
+
+const attr = (tag: string, name: string) => {
+  const v = new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, "i").exec(tag)?.[1];
+  return v === undefined ? null : decodeEntities(v);
+};
 
 const resolve = (href: string, base: string) => {
   try {
@@ -42,7 +52,7 @@ export function pageSignals(html: string, pageUrl: string): PageSignals {
   const alternates = [...html.matchAll(/<link\b[^>]*>/gi)]
     .map((m) => m[0])
     .filter((t) => /\brel\s*=\s*["']alternate["']/i.test(t) && /\btype\s*=\s*["'](text\/calendar|application\/(rss|atom)\+xml)["']/i.test(t))
-    .map((t) => ({ href: resolve(attr(t, "href") ?? "", pageUrl), type: attr(t, "type") ?? "", title: attr(t, "title") ?? "" }))
+    .map((t) => ({ href: resolve(attr(t, "href") ?? "", pageUrl), type: attr(t, "type") ?? "", title: (attr(t, "title") ?? "").trim() }))
     .filter((a): a is { href: string; type: string; title: string } => !!a.href);
   const hrefs = anchors.map((a) => a.href).filter((h): h is string => !!h);
   const iframes = [...html.matchAll(/<iframe\b[^>]*>/gi)].map((m) => attr(m[0], "src") ?? "");
@@ -74,13 +84,15 @@ export function pageSignals(html: string, pageUrl: string): PageSignals {
 export function civicPlusFeeds(html: string, pageUrl: string): { catId: number; name: string; url: string }[] {
   const out = new Map<number, { catId: number; name: string; url: string }>();
   const generic = /^(subscribe|download|ical|rss|notify me|calendar|view|export|\W*)$/i;
-  // Each calendar's feed link carries catID=N; its name is the nearest real text before the link.
-  for (const m of html.matchAll(/href\s*=\s*["']([^"']*iCalendar\.aspx\?[^"']*catID=(\d+)[^"']*)["']/gi)) {
+  // Each calendar's feed link carries catID=N; its name is the link text (CivicPlus lists them as
+  // <li><a href="...catID=32&feed=calendar">Holidays and Community Events</a></li>), else the nearest text before it.
+  for (const m of html.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']*iCalendar\.aspx\?[^"']*catID=(\d+)[^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
     const catId = Number(m[2]);
     if (out.has(catId)) continue;
-    const before = html.slice(Math.max(0, m.index - 1500), m.index);
-    const texts = [...before.matchAll(/>([^<>]+)</g)].map((t) => t[1].replace(/&amp;/g, "&").replace(/\s+/g, " ").trim()).filter((t) => t && !generic.test(t));
-    const name = texts.at(-1);
+    const own = decodeEntities(m[3].replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+    const before = html.slice(Math.max(0, m.index - 600), m.index);
+    const texts = [...before.matchAll(/>([^<>]{2,80})</g)].map((t) => decodeEntities(t[1]).replace(/\s+/g, " ").trim()).filter((t) => t && !generic.test(t));
+    const name = own && !generic.test(own) ? own : texts.at(-1);
     if (name) out.set(catId, { catId, name: name.slice(0, 120), url: new URL(`/common/modules/iCalendar/iCalendar.aspx?catID=${catId}&feed=calendar`, pageUrl).toString() });
   }
   return [...out.values()];

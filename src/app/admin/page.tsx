@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CRON_MAX_DURATION_S, runTiming } from "@/lib/cron-budget";
 import { sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { COMMUNITY_WARN_SHARE, dashboard } from "@/lib/admin/queries";
@@ -133,20 +134,30 @@ export default async function AdminOverview() {
 
       <section>
         <h2 className="mb-2 text-base font-semibold">Recent runs</h2>
+        {d.runs.some((r) => runTiming(r).slow) && (
+          <p className="mb-2 text-amber-700 dark:text-amber-400">A run below took more than half the {CRON_MAX_DURATION_S} s function limit. Jobs stop starting new work at 60% and pick up next run.</p>
+        )}
         <table className="w-full border-collapse">
           <tbody>
-            {d.runs.map((r) => (
+            {d.runs.map((r) => {
+              const t = runTiming(r);
+              return (
               <tr key={r.id} className="border-t border-zinc-100 align-top dark:border-zinc-800">
                 <td className="py-1 pr-3 whitespace-nowrap">{when(r.startedAt)}</td>
                 <td className="py-1 pr-3">{r.job}</td>
                 <td className={`py-1 pr-3 ${r.status === "failed" ? "text-red-700 dark:text-red-400" : ""}`}>{r.status}</td>
+                <td className={`py-1 pr-3 whitespace-nowrap ${t.slow ? "font-semibold text-amber-700 dark:text-amber-400" : "text-zinc-500"}`}>
+                  {t.durationMs === null ? "running" : `${Math.round(t.durationMs / 1000)} s`}
+                  {t.slow ? " (over half the limit)" : ""}
+                </td>
                 <td className="py-1">
                   <Link className="underline" href={`/admin/agent-log?run=${r.id}`}>
                     changes
                   </Link>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </section>

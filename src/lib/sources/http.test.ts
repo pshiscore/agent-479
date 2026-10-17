@@ -61,6 +61,17 @@ describe("PoliteClient", () => {
     expect(down.calls).toEqual(["https://b.example/robots.txt"]);
   });
 
+  it("follows robots.txt redirects (RFC 9309)", async () => {
+    const web = fakeWeb({
+      "https://g.example/robots.txt": () => new Response("", { status: 301, headers: { location: "https://www.g.example/robots.txt" } }),
+      "https://www.g.example/robots.txt": () => new Response("User-agent: *\nDisallow: /private"),
+      "https://g.example/feed.ics": () => new Response("BEGIN:VCALENDAR"),
+    });
+    await client(web.fetch).c.get("https://g.example/feed.ics");
+    await expect(client(web.fetch).c.get("https://g.example/private")).rejects.toThrow(/robots.txt disallows/);
+    expect(web.calls.slice(0, 3)).toEqual(["https://g.example/robots.txt", "https://www.g.example/robots.txt", "https://g.example/feed.ics"]);
+  });
+
   it("stops when robots.txt itself is refused", async () => {
     const web = fakeWeb({ "https://c.example/robots.txt": () => new Response("", { status: 403 }) });
     await expect(client(web.fetch).c.get("https://c.example/feed.ics")).rejects.toBeInstanceOf(FetchBlockedError);

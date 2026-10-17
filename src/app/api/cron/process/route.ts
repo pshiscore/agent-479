@@ -3,6 +3,8 @@ import { cronDisabledResponse, cronEnabled } from "@/lib/cron-enabled";
 import { getDb } from "@/lib/db/client";
 import { runProcessJob } from "@/lib/pipeline/process";
 
+// A literal (Next reads it statically); equal to CRON_MAX_DURATION_S. The job
+// stops starting new work at 60% of it (src/lib/cron-budget.ts).
 export const maxDuration = 300;
 
 /** Maps, filters, and resolves venues for a batch of raw records. Not scheduled until build step 23. */

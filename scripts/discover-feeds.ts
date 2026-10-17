@@ -35,13 +35,14 @@ async function main() {
     const stats = await withRun(db, "manual", async (run) => {
       const known = await knownFeedKeys(db);
       const orgs = (await db.select().from(organizers).where(and(eq(organizers.status, "verified"), isNotNull(organizers.website))).orderBy(asc(organizers.name))).filter((o) => !only || only.has(o.slug));
-      const totals = { organizers: orgs.length, proposed: 0, refreshed: 0, blocked: 0, withFinds: 0 };
+      const totals = { organizers: orgs.length, proposed: 0, refreshed: 0, gone: 0, blocked: 0, withFinds: 0 };
       for (const o of orgs) {
         const hint = o.verification.notes?.find((n) => n.note?.startsWith("Events link"))?.url ?? null;
         const r = await discoverOrganizer(http, { name: o.name, website: o.website!, eventsHint: hint }, known);
         const saved = await saveFinds(db, o.id, r.finds, { actor: agentActor("discovery"), runId: run.id });
         totals.proposed += saved.proposed;
         totals.refreshed += saved.refreshed;
+        totals.gone += saved.gone;
         if (r.blocked) totals.blocked++;
         if (r.finds.length) totals.withFinds++;
         summary[o.slug] = { finds: r.finds.map((f) => ({ url: f.url, label: f.label, kind: f.kind, platform: f.platform, robots: f.robotsResult, samples: f.sampleEvents.length, termsFlags: f.termsFlags })), skipped: r.skipped, googleCalendars: r.googleCalendars, blocked: r.blocked, errors: r.errors };

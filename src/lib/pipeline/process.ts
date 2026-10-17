@@ -2,6 +2,7 @@ import { and, asc, eq, isNotNull, lt, or, sql } from "drizzle-orm";
 import { agentActor } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources } from "@/lib/db/schema";
+import { Deadline } from "@/lib/cron-budget";
 import { claimJob } from "@/lib/jobs";
 import { loadActiveTaxonomy } from "@/lib/categories";
 import { generateStructured, LlmError } from "@/lib/llm";
@@ -86,9 +87,11 @@ export async function runProcessJob(
     detailBatchSize?: number;
     dedupLlmLimit?: number;
     http?: PoliteClient;
+    deadline?: Deadline;
   } = {},
 ) {
   const now = opts.now ?? new Date();
+  const deadline = opts.deadline ?? new Deadline();
   const claim = await claimJob(db, "process", { now });
   if (!claim) return null;
   const llmPick = opts.llmPick === null ? undefined : (opts.llmPick ?? llmVenuePick);
@@ -112,7 +115,15 @@ export async function runProcessJob(
       .orderBy(asc(rawRecords.fetchedAt))
       .limit(opts.batchSize ?? 50);
     let stoppedForBudget = false;
+    // Out of time: stop starting new work. Unreached records stay pending (or mapped) for the next run.
+    const phasesSkipped: string[] = [];
+    const timeLeft = (phase: string) => {
+      if (!deadline.passed) return true;
+      phasesSkipped.push(phase);
+      return false;
+    };
     for (const { record, source } of batch) {
+      if (!timeLeft("records")) break;
       try {
         const { outcome, detail } = await processRecord(db, record, source, { now, llmPick, runId: claim.id });
         bump(outcome);
@@ -138,6 +149,7 @@ export async function runProcessJob(
       if (toEnrich.length) {
         const taxonomy = await loadActiveTaxonomy(db);
         for (const record of toEnrich) {
+          if (!timeLeft("enrich")) break;
           try {
             const r = await enrichRecord(db, record, { generate, taxonomy, runId: claim.id });
             bump(r.shadow ? `shadow_${r.shadow}` : r.created ? "events_created" : "events_updated");
@@ -159,11 +171,11 @@ export async function runProcessJob(
       }
     }
     // Series (build step 14): group upcoming events into recurring programs and runs.
-    const series = await detectSeries(db, { now, actor: ACTOR, runId: claim.id });
+    const series = timeLeft("series") ? await detectSeries(db, { now, actor: ACTOR, runId: claim.id }) : null;
 
     // Dedup (build step 15): shadow mode logs decisions; only live sources merge.
     let dedup: Awaited<ReturnType<typeof runDedup>> | null = null;
-    if (!stoppedForBudget) {
+    if (!stoppedForBudget && timeLeft("dedup")) {
       try {
         dedup = await runDedup(db, { now, actor: ACTOR, generate, runId: claim.id, llmLimit: opts.dedupLlmLimit ?? 20 });
       } catch (err) {
@@ -173,7 +185,7 @@ export async function runProcessJob(
     }
 
     // The homepage feature slot (step 18): rules from config, logged when it changes.
-    const feature = await selectFeature(db, { now, actor: ACTOR, runId: claim.id, publicFilter: (slug) => sourceVisible(slug) });
+    const feature = timeLeft("feature") ? await selectFeature(db, { now, actor: ACTOR, runId: claim.id, publicFilter: (slug) => sourceVisible(slug) }) : { changed: false };
 
     // Vague locations (a bare city or ZIP, or prose): look on the event's own
     // detail page for a specific place, and propose what's found to the owner.
@@ -182,6 +194,7 @@ export async function runProcessJob(
       const http = opts.http ?? new PoliteClient();
       const blockedSources = new Set<string>();
       for (const { record, source } of await vagueRecordsDue(db, now, detailLimit)) {
+        if (!timeLeft("location detail")) break;
         if (blockedSources.has(source.id)) continue;
         try {
           const r = await checkVagueLocation(db, record, source, { http, generate, llmPick, actor: ACTOR, runId: claim.id, now });
@@ -198,7 +211,7 @@ export async function runProcessJob(
         }
       }
     }
-    const proposals = await proposeVenues(db, { actor: ACTOR, runId: claim.id });
+    const proposals = timeLeft("venue proposals") ? await proposeVenues(db, { actor: ACTOR, runId: claim.id }) : { proposed: 0 };
     const [{ remaining }] = await db
       .select({ remaining: sql<number>`count(*)::int` })
       .from(rawRecords)
@@ -207,8 +220,9 @@ export async function runProcessJob(
       .select({ toEnrichLeft: sql<number>`count(*)::int` })
       .from(rawRecords)
       .where(eq(rawRecords.status, "mapped"));
-    const stats = { batch: batch.length, ...counts, series, dedup, featureChanged: feature.changed, venueProposals: proposals.proposed, remaining, toEnrichLeft, stoppedForBudget };
-    await finishRun(db, claim.id, { status: stoppedForBudget ? "partial" : "ok", stats });
+    const stoppedForTime = phasesSkipped.length > 0;
+    const stats = { batch: batch.length, ...counts, series, dedup, featureChanged: feature.changed, venueProposals: proposals.proposed, remaining, toEnrichLeft, stoppedForBudget, stoppedForTime, phasesSkipped: [...new Set(phasesSkipped)], elapsedMs: deadline.elapsedMs };
+    await finishRun(db, claim.id, { status: stoppedForBudget || stoppedForTime ? "partial" : "ok", stats });
     return stats;
   } catch (err) {
     await finishRun(db, claim.id, { status: "failed", error: String(err).slice(0, 2000) });

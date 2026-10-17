@@ -2,6 +2,7 @@ import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { agentActor } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources } from "@/lib/db/schema";
+import { Deadline } from "@/lib/cron-budget";
 import { claimJob } from "@/lib/jobs";
 import { finishRun } from "@/lib/runs";
 import { demoteLiveSources } from "@/lib/sources/demotion";
@@ -80,22 +81,32 @@ export async function needsVenueSummary(db: DbExecutor) {
 }
 
 /** Returns null if another maintenance job holds the lease. */
-export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date } = {}) {
+export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; deadline?: Deadline } = {}) {
   const now = opts.now ?? new Date();
+  const deadline = opts.deadline ?? new Deadline();
   const claim = await claimJob(db, "maintenance", { now, staleAfterMs: 60 * 60_000 });
   if (!claim) return null;
   try {
-    const descriptionsPurged = await purgeDescriptions(db, now);
-    const payloadsPurged = await purgeStalePayloads(db, now);
+    // Each step is a self-contained batch; out of time, the rest wait for the next daily run.
+    const skipped: string[] = [];
+    const step = async <T>(name: string, fallback: T, run: () => Promise<T>): Promise<T> => {
+      if (deadline.passed) {
+        skipped.push(name);
+        return fallback;
+      }
+      return run();
+    };
+    const descriptionsPurged = await step("purge descriptions", 0, () => purgeDescriptions(db, now));
+    const payloadsPurged = await step("purge payloads", 0, () => purgeStalePayloads(db, now));
     // Proposals only: never links a Ticketmaster venue by itself.
-    const [tm] = await db.select({ id: sources.id }).from(sources).where(eq(sources.slug, "ticketmaster"));
-    const linkProposals = tm
-      ? await proposeTicketmasterLinks(db, { actor: agentActor("maintenance"), runId: claim.id })
-      : { proposed: 0, alreadyDecided: 0 };
-    const needsVenueArchived = await archiveExpiredNeedsVenue(db, now);
-    const categoryProposals = await proposeCategoriesFromHints(db, { actor: agentActor("maintenance"), now, runId: claim.id });
+    const linkProposals = await step("Ticketmaster links", { proposed: 0, alreadyDecided: 0 }, async () => {
+      const [tm] = await db.select({ id: sources.id }).from(sources).where(eq(sources.slug, "ticketmaster"));
+      return tm ? proposeTicketmasterLinks(db, { actor: agentActor("maintenance"), runId: claim.id }) : { proposed: 0, alreadyDecided: 0 };
+    });
+    const needsVenueArchived = await step("archive needs_venue", 0, () => archiveExpiredNeedsVenue(db, now));
+    const categoryProposals = await step("category proposals", { proposed: 0, themes: 0 }, () => proposeCategoriesFromHints(db, { actor: agentActor("maintenance"), now, runId: claim.id }));
     // Live sources that misbehaved this week go back to shadow (owner, 2026-10-16).
-    const demoted = await demoteLiveSources(db, now, agentActor("maintenance"));
+    const demoted = await step("demotions", [] as unknown[], () => demoteLiveSources(db, now, agentActor("maintenance")));
     const stats = {
       descriptionsPurged,
       payloadsPurged,
@@ -103,8 +114,11 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date } = {
       needsVenueArchived,
       categoryProposals: categoryProposals.proposed,
       sourcesDemoted: demoted.length,
+      stoppedForTime: skipped.length > 0,
+      stepsSkipped: skipped,
+      elapsedMs: deadline.elapsedMs,
     };
-    await finishRun(db, claim.id, { status: "ok", stats });
+    await finishRun(db, claim.id, { status: skipped.length ? "partial" : "ok", stats });
     return stats;
   } catch (err) {
     await finishRun(db, claim.id, { status: "failed", error: String(err).slice(0, 2000) });

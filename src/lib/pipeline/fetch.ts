@@ -4,6 +4,7 @@ import { agentActor, recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources } from "@/lib/db/schema";
 import { FetchBlockedError, FetchNotPermittedError } from "@/lib/http/fetch";
+import { CRON_BUDGET_MS } from "@/lib/cron-budget";
 import { claimJob } from "@/lib/jobs";
 import { hideRemovedShadowEvents } from "@/lib/review/shadow";
 import { finishRun, withRun } from "@/lib/runs";
@@ -236,7 +237,7 @@ export async function runFetchJob(
   const claim = await claimJob(db, "fetch", { now });
   if (!claim) return null;
   const started = Date.now();
-  const budgetMs = opts.budgetMs ?? 240_000;
+  const budgetMs = opts.budgetMs ?? CRON_BUDGET_MS;
   const http = opts.http ?? new PoliteClient();
   const outcomes: SourceFetchOutcome[] = [];
   let skipped = 0;
@@ -252,7 +253,8 @@ export async function runFetchJob(
     const failed = outcomes.filter((o) => !o.ok).length;
     await finishRun(db, claim.id, {
       status: failed > 0 ? "partial" : "ok",
-      stats: { due: due.length, fetched: outcomes.length, failed, skipped, outcomes },
+      // Sources it didn't reach stay due (oldest lastFetchedAt first), so the next run starts with them.
+      stats: { due: due.length, fetched: outcomes.length, failed, skipped, stoppedForTime: skipped > 0, elapsedMs: Date.now() - started, outcomes },
     });
     return { outcomes, skipped };
   } catch (err) {

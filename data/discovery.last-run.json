@@ -1,0 +1,678 @@
+{
+  "ranAt": "2026-10-17T14:44:28.948Z",
+  "stats": {
+    "organizers": 50,
+    "proposed": 0,
+    "refreshed": 6,
+    "blocked": 0,
+    "withFinds": 6
+  },
+  "organizers": {
+    "arkansas-public-theatre": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "bentonville-brewing": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "botanical-garden-of-the-ozarks": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Events calendar (iCal export)",
+          "url": "https://bgozarks.org/events/?ical=1",
+          "reason": "didn't answer as a feed (HTTP 404)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "city-of-bentonville": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Public Meetings",
+          "url": "https://www.bentonville.ar.gov/common/modules/iCalendar/iCalendar.aspx?catID=42&feed=calendar",
+          "reason": "meeting, board, or closure calendar (never a source)"
+        },
+        {
+          "label": "Holidays and Community Events",
+          "url": "https://www.bentonville.ar.gov/common/modules/iCalendar/iCalendar.aspx?catID=32&feed=calendar",
+          "reason": "already a source"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "city-of-fayetteville": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Public Meetings",
+          "url": "https://www.fayetteville-ar.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar",
+          "reason": "meeting, board, or closure calendar (never a source)"
+        },
+        {
+          "label": "City-Sponsored Events",
+          "url": "https://www.fayetteville-ar.gov/common/modules/iCalendar/iCalendar.aspx?catID=30&feed=calendar",
+          "reason": "already a source"
+        },
+        {
+          "label": "Parks and Recreation",
+          "url": "https://www.fayetteville-ar.gov/common/modules/iCalendar/iCalendar.aspx?catID=33&feed=calendar",
+          "reason": "already a source"
+        },
+        {
+          "label": "Volunteer Opportunities",
+          "url": "https://www.fayetteville-ar.gov/common/modules/iCalendar/iCalendar.aspx?catID=36&feed=calendar",
+          "reason": "already a source"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "city-of-pea-ridge": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Welcome to Pea Ridge, Arkansas » iCal Feed",
+          "url": "https://cityofpearidgear.gov/events/?ical=1",
+          "reason": "already a source"
+        },
+        {
+          "label": "Event data on the events page",
+          "url": "https://cityofpearidgear.gov/event-calendar/",
+          "reason": "same events as an existing source"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "city-of-rogers": {
+      "finds": [
+        {
+          "url": "https://www.rogersar.gov/common/modules/iCalendar/iCalendar.aspx?catID=31&feed=calendar",
+          "label": "Museum - Test",
+          "kind": "ics",
+          "platform": "civicplus",
+          "robots": "allowed",
+          "samples": 4,
+          "termsFlags": []
+        }
+      ],
+      "skipped": [
+        {
+          "label": "Boards and Commissions",
+          "url": "https://www.rogersar.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar",
+          "reason": "meeting, board, or closure calendar (never a source)"
+        },
+        {
+          "label": "City Events",
+          "url": "https://www.rogersar.gov/common/modules/iCalendar/iCalendar.aspx?catID=28&feed=calendar",
+          "reason": "already a source"
+        },
+        {
+          "label": "Test",
+          "url": "https://www.rogersar.gov/common/modules/iCalendar/iCalendar.aspx?catID=30&feed=calendar",
+          "reason": "no events in the feed when read"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "city-of-siloam-springs": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Board of Directors",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=24&feed=calendar",
+          "reason": "meeting, board, or closure calendar (never a source)"
+        },
+        {
+          "label": "City Offices Closings",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=29&feed=calendar",
+          "reason": "meeting, board, or closure calendar (never a source)"
+        },
+        {
+          "label": "Planning Commission/Board of Adjustment",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=22&feed=calendar",
+          "reason": "meeting, board, or closure calendar (never a source)"
+        },
+        {
+          "label": "Siloam Springs Parks & Rec Adult Sports Calender",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=33&feed=calendar",
+          "reason": "meeting, board, or closure calendar (never a source)"
+        },
+        {
+          "label": "Community Building Rentals",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=34&feed=calendar",
+          "reason": "no events in the feed when read"
+        },
+        {
+          "label": "Library",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=27&feed=calendar",
+          "reason": "already a source"
+        },
+        {
+          "label": "Main Calendar",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar",
+          "reason": "already a source"
+        },
+        {
+          "label": "Parks and Recreation",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=25&feed=calendar",
+          "reason": "already a source"
+        },
+        {
+          "label": "Planning",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=26&feed=calendar",
+          "reason": "no events in the feed when read"
+        },
+        {
+          "label": "Sanitation and Recycling",
+          "url": "https://www.siloamsprings.gov/common/modules/iCalendar/iCalendar.aspx?catID=28&feed=calendar",
+          "reason": "no events in the feed when read"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "clinton-house-museum": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "columbus-house-brewery": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Columbus House Brewery » iCal Feed",
+          "url": "https://columbushousebrewery.com/index.php/event-calendar/?ical=1",
+          "reason": "not a readable feed (a web page, not a calendar)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "downtown-bentonville-inc": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "downtown-springdale-alliance": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Squarespace events (iCal)",
+          "url": "https://www.downtownspringdale.org/events?format=ical",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "farmington-public-library": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "farmland-adventures": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "faulkner-performing-arts-center": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "fayetteville-chamber": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "fayetteville-public-library": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "fayetteville-town-center": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "fossil-cove-brewing": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "gentry-chamber": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "georges-majestic-lounge": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "go-downtown-rogers": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "gravette-public-library": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "greater-bentonville-area-chamber": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "main-street-siloam-springs": {
+      "finds": [
+        {
+          "url": "https://mainstreetsiloam.org/events/?ical=1",
+          "label": "Main Street Siloam Springs » iCal Feed",
+          "kind": "ics",
+          "platform": "the_events_calendar",
+          "robots": "allowed",
+          "samples": 2,
+          "termsFlags": []
+        }
+      ],
+      "skipped": [
+        {
+          "label": "iCal link",
+          "url": "https://mainstreetsiloam.org/events/list/?ical=1",
+          "reason": "same events as https://mainstreetsiloam.org/events/?ical=1"
+        },
+        {
+          "label": "iCal link",
+          "url": "https://mainstreetsiloam.org/?post_type=tribe_events&ical=1&eventDisplay=list",
+          "reason": "same events as https://mainstreetsiloam.org/events/?ical=1"
+        },
+        {
+          "label": "Event data on the events page",
+          "url": "https://mainstreetsiloam.org/events/",
+          "reason": "same events as https://mainstreetsiloam.org/events/?ical=1"
+        },
+        {
+          "label": "Main Street Siloam Springs » Events Feed",
+          "url": "https://mainstreetsiloam.org/events/feed/",
+          "reason": "same events as https://mainstreetsiloam.org/events/?ical=1"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "mcgarrah-farms": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "museum-of-native-american-history": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Squarespace events (iCal)",
+          "url": "https://www.monah.org/events?format=ical",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "new-province-brewing": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Squarespace events (iCal)",
+          "url": "https://www.newprovincebrewing.com/events?format=ical",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "ozark-beer-company": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Squarespace events (iCal)",
+          "url": "https://www.ozarkbeercompany.com/calendar?format=ical",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "ozark-music-hall": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "pea-ridge-community-library": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [
+        "pearidgecommunitylibrary@gmail.com"
+      ],
+      "blocked": null,
+      "errors": []
+    },
+    "pea-ridge-national-military-park": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "peel-compton-foundation": {
+      "finds": [
+        {
+          "url": "https://peelcompton.org/events/?ical=1",
+          "label": "Peel Compton Foundation » iCal Feed",
+          "kind": "ics",
+          "platform": "the_events_calendar",
+          "robots": "allowed",
+          "samples": 5,
+          "termsFlags": []
+        }
+      ],
+      "skipped": [
+        {
+          "label": "iCal link",
+          "url": "https://peelcompton.org/events/month/?shortcode=0141f0e4&ical=1",
+          "reason": "same events as https://peelcompton.org/events/?ical=1"
+        },
+        {
+          "label": "iCal link",
+          "url": "https://peelcompton.org/events/photo/?shortcode=a9240f4c&ical=1",
+          "reason": "same events as https://peelcompton.org/events/?ical=1"
+        },
+        {
+          "label": "iCal link",
+          "url": "https://peelcompton.org/?post_type=tribe_events&ical=1&eventDisplay=list",
+          "reason": "same events as https://peelcompton.org/events/?ical=1"
+        },
+        {
+          "label": "Event data on the events page",
+          "url": "https://peelcompton.org/calendar/",
+          "reason": "same events as https://peelcompton.org/events/?ical=1"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "pinnacle-hills-promenade": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "prairie-grove-battlefield-state-park": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "railyard-live": {
+      "finds": [
+        {
+          "url": "https://railyardlive.com/live-events/",
+          "label": "Event data on the events page",
+          "kind": "page_data",
+          "platform": null,
+          "robots": "allowed",
+          "samples": 1,
+          "termsFlags": []
+        }
+      ],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "record": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "rivercrest-orchard": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "rogers-historical-museum": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "rogers-public-library": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "LibCal calendar",
+          "url": "https://rogerspubliclibrary.libcal.com/calendar?cid=17940&t=g&d=0000-00-00&cal=17940&inc=0",
+          "reason": "no subscribe link found on the page"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "rogers-lowell-area-chamber": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "sassafras-springs-vineyard": {
+      "finds": [
+        {
+          "url": "https://www.sassafrasspringsvineyard.com/events-calendar/",
+          "label": "Event data on the events page",
+          "kind": "page_data",
+          "platform": null,
+          "robots": "allowed",
+          "samples": 5,
+          "termsFlags": []
+        }
+      ],
+      "skipped": [
+        {
+          "label": "Sassafras Springs Vineyard & Winery » iCal Feed",
+          "url": "https://www.sassafrasspringsvineyard.com/events-calendar/?ical=1",
+          "reason": "didn't answer as a feed (HTTP 410)"
+        },
+        {
+          "label": "iCal link",
+          "url": "https://www.sassafrasspringsvineyard.com/?post_type=tribe_events&ical=1&eventDisplay=list",
+          "reason": "didn't answer as a feed (HTTP 410)"
+        },
+        {
+          "label": "iCal link",
+          "url": "https://www.sassafrasspringsvineyard.com/events-calendar/list/?ical=1",
+          "reason": "didn't answer as a feed (HTTP 410)"
+        },
+        {
+          "label": "Sassafras Springs Vineyard & Winery » Events Feed",
+          "url": "https://www.sassafrasspringsvineyard.com/events-calendar/feed/",
+          "reason": "same events as https://www.sassafrasspringsvineyard.com/events-calendar/"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "scott-family-amazeum": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "shiloh-museum": {
+      "finds": [
+        {
+          "url": "https://shilohmuseum.org/events/",
+          "label": "Event data on the events page",
+          "kind": "page_data",
+          "platform": null,
+          "robots": "allowed",
+          "samples": 5,
+          "termsFlags": []
+        }
+      ],
+      "skipped": [
+        {
+          "label": "Shiloh Museum of Ozark History » iCal Feed",
+          "url": "https://shilohmuseum.org/events/?ical=1",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        },
+        {
+          "label": "iCal link",
+          "url": "https://shilohmuseum.org/?post_type=tribe_events&ical=1&eventDisplay=list",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        },
+        {
+          "label": "iCal link",
+          "url": "https://shilohmuseum.org/events/list/?hide_subsequent_recurrences=1&ical=1",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        },
+        {
+          "label": "Shiloh Museum of Ozark History » Events Feed",
+          "url": "https://shilohmuseum.org/events/feed/",
+          "reason": "same events as https://shilohmuseum.org/events/"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "siloam-springs-chamber": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "springdale-chamber": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Springdale Chamber » iCal Feed",
+          "url": "https://springdale.com/events-calendar/?ical=1",
+          "reason": "not a readable feed (a web page, not a calendar)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "springdale-public-library": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "jones-center": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Squarespace events (iCal)",
+          "url": "https://thejonescenter.org/events?format=ical",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "theatresquared": {
+      "finds": [],
+      "skipped": [
+        {
+          "label": "Squarespace events (iCal)",
+          "url": "https://www.theatre2.org/community-events?format=ical",
+          "reason": "robots.txt disallows this address (not read; ask the organizer)"
+        }
+      ],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    },
+    "walmart-museum": {
+      "finds": [],
+      "skipped": [],
+      "googleCalendars": [],
+      "blocked": null,
+      "errors": []
+    }
+  }
+}

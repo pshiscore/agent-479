@@ -3,7 +3,7 @@ import { type DISCOVERY_KINDS, type DiscoverySample, type ROBOTS_RESULTS, source
 import { FetchBlockedError, FetchNotPermittedError } from "@/lib/http/fetch";
 import { eventsLink, pageText } from "@/lib/organizers/check";
 import { FetchFailedError, type PoliteClient, type PoliteResponse } from "@/lib/sources/http";
-import { civicPlusFeeds, feedSamples, icsSamples, jsonLdEvents, libcalIcsUrl, NOT_EVENTS_CALENDAR, pageSignals, suggestFilters, termsFlags } from "./detect";
+import { civicPlusFeeds, decodeEntities, feedSamples, icsSamples, jsonLdEvents, libcalIcsUrl, NOT_EVENTS_CALENDAR, pageSignals, suggestFilters, termsFlags } from "./detect";
 
 /**
  * Feed discovery for one organizer (docs/product/organizers.md, step 6). Reads
@@ -97,7 +97,7 @@ export async function discoverOrganizer(
 
     const candidates: Omit<Find, "robotsResult" | "robotsCheckedAt" | "termsUrl" | "termsFlags" | "sampleEvents" | "suggestedFilters" | "key">[] = [];
     const add = (c: (typeof candidates)[number]) => {
-      if (!candidates.some((x) => x.url === c.url)) candidates.push(c);
+      if (!candidates.some((x) => x.url === c.url)) candidates.push({ ...c, label: decodeEntities(c.label).replace(/\s+/g, " ").trim().slice(0, 160) });
     };
 
     if (signals.some((s) => s.civicplus)) {
@@ -136,40 +136,70 @@ export async function discoverOrganizer(
     if (ld.count > 0) add({ url: page.url, label: "Event data on the events page", kind: "page_data", platform: null, notes: `${ld.count} schema.org events on the page.` });
     if (signals.some((s) => s.revize) && candidates.length === 0) result.skipped.push({ label: "Revize calendar", url: page.url, reason: "no feed found on a Revize site" });
 
+    // An organizer whose events we already read through a source gets only new CivicPlus calendars:
+    // its other feeds and page data carry the same events.
+    const hasSource = candidates.some((c) => known.has(feedKey(c.url, c.platform)));
+    const usable: { find: Find; count: number }[] = [];
     for (const c of candidates) {
       const key = feedKey(c.url, c.platform);
+      const skip = (reason: string) => result.skipped.push({ label: c.label, url: c.url, reason });
       if (known.has(key)) {
-        result.skipped.push({ label: c.label, url: c.url, reason: "already a source" });
+        skip("already a source");
         continue;
       }
-      if (result.finds.length >= MAX_FINDS) {
-        result.skipped.push({ label: c.label, url: c.url, reason: `over ${MAX_FINDS} feeds for one organizer; next run` });
+      if (hasSource && c.platform !== "civicplus") {
+        skip("same events as an existing source");
         continue;
       }
-      const find: Find = { ...c, key, robotsResult: "allowed", robotsCheckedAt: new Date(), termsUrl, termsFlags: flags, sampleEvents: [], suggestedFilters: [] };
+      if (usable.length >= MAX_FINDS) {
+        skip(`over ${MAX_FINDS} feeds for one organizer; next run`);
+        continue;
+      }
       if (!(await http.allows(c.url))) {
-        result.finds.push({ ...find, robotsResult: "disallowed", notes: `${c.notes ?? ""} robots.txt disallows this address, so it was not read and can't be approved.`.trim() });
+        skip("robots.txt disallows this address (not read; ask the organizer)");
         continue;
       }
       let samples: { samples: DiscoverySample[]; count: number } | null = null;
       if (c.kind === "page_data") samples = ld;
       else {
+        const before = result.errors.length;
         const feed = await get(c.url, c.label);
-        if (feed) {
-          try {
-            samples = c.kind === "ics" ? icsSamples(feed.text, today) : feedSamples(feed.text);
-          } catch (err) {
-            result.errors.push(`${c.label}: not a readable feed (${(err as Error).message.slice(0, 80)})`);
-          }
+        if (!feed) {
+          skip(`didn't answer as a feed (${result.errors.splice(before).join("; ").replace(`${c.label}: `, "")})`);
+          continue;
+        }
+        try {
+          samples = c.kind === "ics" ? icsSamples(feed.text, today) : feedSamples(feed.text);
+        } catch {
+          skip("not a readable feed (a web page, not a calendar)");
+          continue;
         }
       }
-      result.finds.push({
-        ...find,
-        sampleEvents: samples?.samples ?? [],
-        suggestedFilters: suggestFilters((samples?.samples ?? []).map((s) => s.title)),
-        notes: [c.notes, samples ? `${samples.count} events in the feed when read.` : "The feed didn't answer when read; no samples."].filter(Boolean).join(" "),
+      if (samples.count === 0 || samples.samples.length === 0) {
+        skip("no events in the feed when read");
+        continue;
+      }
+      usable.push({
+        count: samples.count,
+        find: {
+          ...c,
+          key,
+          robotsResult: "allowed",
+          robotsCheckedAt: new Date(),
+          termsUrl,
+          termsFlags: flags,
+          sampleEvents: samples.samples,
+          suggestedFilters: suggestFilters(samples.samples.map((s) => s.title)),
+          notes: [c.notes, `${samples.count} events when read.`].filter(Boolean).join(" "),
+        },
       });
     }
+    // One proposal per set of events: every CivicPlus calendar, plus the best other way in
+    // (iCal over event data on a page over RSS; then the feed with more events).
+    const rank = { ics: 0, events_api: 1, page_data: 2, rss: 3, html: 4 } as const;
+    const others = usable.filter((u) => u.find.platform !== "civicplus").sort((a, b) => rank[a.find.kind] - rank[b.find.kind] || b.count - a.count || a.find.url.length - b.find.url.length);
+    for (const [i, u] of others.entries()) if (i > 0) result.skipped.push({ label: u.find.label, url: u.find.url, reason: `same events as ${others[0].find.url}` });
+    result.finds = [...usable.filter((u) => u.find.platform === "civicplus").map((u) => u.find), ...others.slice(0, 1).map((u) => u.find)];
   } catch (err) {
     if (!stopping(err)) throw err;
     result.blocked = (err as Error).message.slice(0, 300);

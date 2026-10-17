@@ -17,6 +17,7 @@ describe("pageSignals", () => {
     expect(s.alternates.map((a) => a.href)).toEqual(["https://example.org/events/?ical=1", "https://example.org/feed/"]);
     expect(s.icsLinks).toEqual(["https://example.org/cal.ics"]);
     expect(s.libcalLinks).toEqual(["https://examplelib.libcal.com/calendar"]);
+    expect(pageSignals(`<a href="/?post_type=tribe_events&#038;ical=1">iCal</a>`, "https://example.org/").icsLinks).toEqual(["https://example.org/?post_type=tribe_events&ical=1"]);
     expect(s.googleCalendarIds).toEqual(["abc@group.calendar.google.com"]);
     expect(s.termsLink).toBe("https://example.org/site/terms-of-use");
   });
@@ -32,6 +33,16 @@ describe("civicPlusFeeds", () => {
       { catId: 42, name: "Public Meetings", url: "https://www.city.example/common/modules/iCalendar/iCalendar.aspx?catID=42&feed=calendar" },
     ]);
     expect(feeds.filter((f) => NOT_EVENTS_CALENDAR.test(f.name)).map((f) => f.catId)).toEqual([42]);
+  });
+
+  it("uses the link text, as CivicPlus lists them", () => {
+    const html = `<span class="normal"><ol><li>Paste the link into the appropriate area of your calendar program.</li></ol></span>
+      <h2><a name="iCalendar">Calendar</a></h2><ol><li><a href="https://www.city.example/common/modules/iCalendar/iCalendar.aspx?catID=32&feed=calendar">Holidays and Community Events</a></li></ol>
+      <ol><li><a href="https://www.city.example/common/modules/iCalendar/iCalendar.aspx?catID=42&feed=calendar">Public Meetings</a></li></ol>`;
+    expect(civicPlusFeeds(html, "https://www.city.example/iCalendar.aspx").map((f) => [f.catId, f.name])).toEqual([
+      [32, "Holidays and Community Events"],
+      [42, "Public Meetings"],
+    ]);
   });
 
   it("keeps the calendars that are events", () => {
