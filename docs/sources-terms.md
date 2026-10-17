@@ -376,3 +376,13 @@ page), Stripe's and Payrix's payment terms, and a hearst.com page that
 returned **403** (Hearst Television's advertising terms; stopped there, not
 retried). None of those pages are used here. Later research scripts follow
 legal links on the same site only.
+
+## Peel Compton Foundation: blocked in production (2026-10-17)
+
+`peel-compton-foundation-ics` (`https://peelcompton.org/events/?ical=1`,
+approved from discovery) passed its test fetch from the owner's network at
+about 19:25 UTC, then the first scheduled fetch from Vercel at 19:30 UTC got
+**HTTP 403**. The pipeline disabled the source as `blocked` (logged) and
+won't retry it. Likely a firewall that refuses data-center addresses; we
+don't get around it. Path forward: ask the foundation to allow
+Agent479Bot, or for permission (open item 32).
