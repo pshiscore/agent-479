@@ -1,3 +1,4 @@
+import { publicVenue } from "@/lib/site/queries";
 import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import type { DbExecutor } from "@/lib/db/client";
 import { PLACE_CATEGORIES, places } from "@/lib/db/schema";
@@ -46,6 +47,6 @@ export async function placeBySlug(db: DbExecutor, slug: string): Promise<PublicP
 /** The venue a place is linked to (owner-confirmed), for a link to its events. */
 export async function linkedVenueSlug(db: DbExecutor, venueId: string | null): Promise<string | null> {
   if (!venueId) return null;
-  const [v] = (await db.execute(sql`select slug from venues where id = ${venueId} and active`)) as unknown as { slug: string }[];
+  const [v] = (await db.execute(sql`select v.slug from venues v where v.id = ${venueId} and ${publicVenue("v")}`)) as unknown as { slug: string }[];
   return v?.slug ?? null;
 }

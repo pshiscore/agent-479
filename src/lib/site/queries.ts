@@ -1,3 +1,4 @@
+import { COVERAGE_PLACE_NAMES } from "@/config/coverage";
 import { sql } from "drizzle-orm";
 import { TAG_ORDER } from "@/config/front-page";
 import type { DbExecutor } from "@/lib/db/client";
@@ -5,6 +6,14 @@ import { applyLinkPolicy, type LinkPolicy, loadLinkPolicies } from "@/lib/links"
 import { slugify } from "@/lib/slug";
 import { chicagoDate, chicagoToUtc, formatDate, parseDate } from "@/lib/time";
 import { sourceVisible } from "./visibility";
+
+/**
+ * What a public page may show of a venue (owner, 2026-10-17): active, and in
+ * the coverage area. Inactive or out-of-area venues never appear, even when the
+ * database is behind the venue seed (The Auditorium in Eureka Springs was).
+ */
+const AREA = COVERAGE_PLACE_NAMES.map((c) => `'${c.toLowerCase().replaceAll("'", "''")}'`).join(", ");
+export const publicVenue = (alias: string) => sql.raw(`(${alias}.active and lower(${alias}.city) in (${AREA}))`);
 
 /**
  * Read-only queries behind the public pages (docs/product/front-page.md).
@@ -145,7 +154,7 @@ export async function listEvents(db: DbExecutor, range: { from: Date; to: Date }
     join sources s on s.id = es.source_id
     left join event_series ser on ser.id = e.series_id
     left join events pe on pe.id = e.parent_event_id and pe.status in ('scheduled', 'postponed')
-    where e.status = 'scheduled'
+    where e.status = 'scheduled' and ${publicVenue("v")}
       and e.start_at < ${range.to.toISOString()}::timestamptz and coalesce(e.end_at, e.start_at) >= ${range.from.toISOString()}::timestamptz
       ${f.id ? sql`and e.id = ${f.id}::uuid` : sql``}
       ${f.category ? sql`and c.slug = ${f.category}` : sql``}
@@ -231,7 +240,7 @@ export async function eventById(db: DbExecutor, id: string, now: Date): Promise<
 /** Filter options: cities and categories with upcoming events, and venue types in use. */
 export async function filterOptions(db: DbExecutor) {
   const cities = (await db.execute(sql`
-    select distinct v.city from events e join venues v on v.id = e.venue_id where e.status = 'scheduled' and e.start_at >= now() order by 1`)) as unknown as { city: string }[];
+    select distinct v.city from events e join venues v on v.id = e.venue_id where e.status = 'scheduled' and e.start_at >= now() and ${publicVenue("v")} order by 1`)) as unknown as { city: string }[];
   const categories = (await db.execute(sql`select slug, name from categories where active order by sort`)) as unknown as { slug: string; name: string }[];
   const tags = (await db.execute(sql`select slug, name from tags where active`)) as unknown as { slug: string; name: string }[];
   return {
@@ -242,7 +251,7 @@ export async function filterOptions(db: DbExecutor) {
 }
 
 export async function venueBySlug(db: DbExecutor, slug: string) {
-  const [v] = (await db.execute(sql`select slug, name, venue_type, address, city, postal_code, website from venues where slug = ${slug} and active`)) as unknown as {
+  const [v] = (await db.execute(sql`select v.slug, v.name, v.venue_type, v.address, v.city, v.postal_code, v.website from venues v where v.slug = ${slug} and ${publicVenue("v")}`)) as unknown as {
     slug: string; name: string; venue_type: string; address: string | null; city: string; postal_code: string | null; website: string | null;
   }[];
   return v ?? null;
@@ -254,14 +263,14 @@ export async function categoryBySlug(db: DbExecutor, slug: string) {
 }
 
 export async function cityBySlug(db: DbExecutor, slug: string) {
-  const rows = (await db.execute(sql`select distinct city from venues where active`)) as unknown as { city: string }[];
+  const rows = (await db.execute(sql`select distinct v.city from venues v where ${publicVenue("v")}`)) as unknown as { city: string }[];
   const c = rows.find((r) => slugify(r.city) === slug);
   return c ? { slug, name: c.city } : null;
 }
 
 /** Slugs of cities with a city page (cities that have venues), so other pages link only to ones that exist. */
 export async function citySlugs(db: DbExecutor): Promise<Set<string>> {
-  const rows = (await db.execute(sql`select distinct city from venues where active`)) as unknown as { city: string }[];
+  const rows = (await db.execute(sql`select distinct v.city from venues v where ${publicVenue("v")}`)) as unknown as { city: string }[];
   return new Set(rows.map((r) => slugify(r.city)));
 }
 
@@ -269,7 +278,7 @@ export async function venuesByCity(db: DbExecutor, now: Date) {
   const rows = (await db.execute(sql`
     select v.slug, v.name, v.city, v.venue_type,
       (select count(*)::int from events e where e.venue_id = v.id and e.status = 'scheduled' and e.start_at >= ${now.toISOString()}::timestamptz) upcoming
-    from venues v where v.active
+    from venues v where ${publicVenue("v")}
     order by v.city, v.name`)) as unknown as { slug: string; name: string; city: string; venue_type: string; upcoming: number }[];
   const out = new Map<string, typeof rows>();
   for (const r of rows) out.set(r.city, [...(out.get(r.city) ?? []), r]);
