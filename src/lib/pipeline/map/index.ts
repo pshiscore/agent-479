@@ -1,6 +1,7 @@
 import type { SourceRow } from "@/lib/sources/types";
 import { type Facts, factsSchema, MapError } from "./facts";
 import { mapIcs } from "./ics";
+import { mapJsonLd } from "./jsonld";
 import { mapTicketmaster } from "./ticketmaster";
 
 export { type Facts, factsSchema, MapError, SkipRecord } from "./facts";
@@ -11,6 +12,9 @@ export function mapRecord(payload: Record<string, unknown>, source: Pick<SourceR
   switch (payload.format) {
     case "ics":
       facts = mapIcs(payload as unknown as Parameters<typeof mapIcs>[0], source);
+      break;
+    case "jsonld":
+      facts = mapJsonLd(payload as unknown as Parameters<typeof mapJsonLd>[0]);
       break;
     case "ticketmaster":
       facts = mapTicketmaster(payload as unknown as Parameters<typeof mapTicketmaster>[0]);

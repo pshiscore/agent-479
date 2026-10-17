@@ -1,3 +1,4 @@
+import { mapRecord } from "@/lib/pipeline/map";
 import { chicagoParts } from "@/lib/time";
 import { assertTestFetchAllowed } from "./admin";
 import type { IcsEvent } from "./ics";
@@ -47,8 +48,23 @@ interface TmPayloadEvent {
   venues?: unknown[];
 }
 
-/** The few facts the test summary needs, from either payload format. */
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** The few facts the test summary needs, from any payload format. */
 function itemFacts(payload: Record<string, unknown>): ItemFacts | null {
+  if (payload.format === "jsonld") {
+    const e = payload.event as { name?: string; location?: unknown } | undefined;
+    if (!e) return null;
+    let start: string | null = null;
+    try {
+      const f = mapRecord(payload, { baseUrl: "https://example.invalid/", config: {} });
+      const p = chicagoParts(new Date(f.startAt));
+      start = f.allDay ? `${p.year}${pad(p.month)}${pad(p.day)}` : `${p.year}${pad(p.month)}${pad(p.day)}T${pad(p.hour)}${pad(p.minute)}00`;
+    } catch {
+      // Unmappable: no usable start, reported as a problem.
+    }
+    return { start, title: e.name ?? null, hasLocation: !!e.location, recurring: false };
+  }
   if (payload.format === "ticketmaster") {
     const e = payload.event as TmPayloadEvent | undefined;
     if (!e) return null;

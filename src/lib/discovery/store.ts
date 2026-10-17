@@ -97,8 +97,8 @@ export async function approveDiscovery(db: DbExecutor, id: string, opts: { actor
         slug,
         name: `${org.name}: ${d.label ?? d.kind}`.slice(0, 200),
         kind: SOURCE_KIND[d.kind],
-        // Only iCal has a fetcher today; the structured-data fetcher is step 7.
-        fetcher: d.kind === "ics" ? "ics" : null,
+        // iCal and event data on a page (JSON-LD, step 7) have fetchers; RSS and the rest don't yet.
+        fetcher: d.kind === "ics" ? "ics" : d.kind === "page_data" ? "jsonld" : null,
         baseUrl: org.website ?? `${url.origin}/`,
         config,
         trustLevel: 3,

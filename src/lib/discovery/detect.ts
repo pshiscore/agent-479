@@ -1,5 +1,7 @@
 import type { DiscoverySample } from "@/lib/db/schema";
+import { jsonLdEventObjects } from "@/lib/sources/jsonld";
 import { parseIcs } from "@/lib/sources/ics";
+import { decodeEntities } from "@/lib/text/entities";
 
 /**
  * Pure helpers for feed discovery (docs/product/organizers.md, step 6): what
@@ -22,12 +24,7 @@ export interface PageSignals {
   termsLink: string | null;
 }
 
-const NAMED: Record<string, string> = { amp: "&", quot: '"', apos: "'", nbsp: " ", raquo: "»", laquo: "«", ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", hellip: "…" };
-/** HTML entities in attribute values and labels: named, decimal (&#038;), and hex. */
-export const decodeEntities = (s: string) =>
-  s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) =>
-    e[0] === "#" ? String.fromCodePoint(e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : (NAMED[e.toLowerCase()] ?? m),
-  );
+export { decodeEntities } from "@/lib/text/entities";
 
 const attr = (tag: string, name: string) => {
   const v = new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, "i").exec(tag)?.[1];
@@ -129,29 +126,12 @@ export function icsSamples(text: string, today: Date): { samples: DiscoverySampl
   };
 }
 
-const EVENT_TYPE = /(^|[^a-z])(Event|[A-Za-z]+Event)$/;
-
 /** Schema.org Event objects in a page's JSON-LD: up to 5 samples, facts only. */
 export function jsonLdEvents(html: string): { samples: DiscoverySample[]; count: number } {
-  const found: DiscoverySample[] = [];
-  const visit = (node: unknown) => {
-    if (Array.isArray(node)) return node.forEach(visit);
-    if (!node || typeof node !== "object") return;
-    const o = node as Record<string, unknown>;
-    const types = ([] as unknown[]).concat(o["@type"] ?? []).map(String);
-    if (types.some((t) => EVENT_TYPE.test(t)) && typeof o.name === "string" && typeof o.startDate === "string") {
-      const loc = o.location as Record<string, unknown> | undefined;
-      found.push({ title: o.name.slice(0, 200), startAt: o.startDate.slice(0, 25), location: typeof loc?.name === "string" ? loc.name.slice(0, 200) : null, url: typeof o.url === "string" ? o.url : null });
-    }
-    if (o["@graph"]) visit(o["@graph"]);
-  };
-  for (const m of html.matchAll(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
-    try {
-      visit(JSON.parse(m[1]));
-    } catch {
-      // Malformed JSON-LD says nothing.
-    }
-  }
+  const found = jsonLdEventObjects(html).map((o) => {
+    const loc = o.location as Record<string, unknown> | undefined;
+    return { title: decodeEntities(String(o.name)).slice(0, 200), startAt: String(o.startDate).slice(0, 25), location: typeof loc?.name === "string" ? decodeEntities(loc.name).slice(0, 200) : null, url: typeof o.url === "string" ? o.url : null };
+  });
   return { samples: found.slice(0, 5), count: found.length };
 }
 

@@ -1,10 +1,12 @@
 import { icsFetcher } from "./fetchers/ics";
+import { jsonLdFetcher } from "./fetchers/jsonld";
 import { ticketmasterFetcher } from "./fetchers/ticketmaster";
 import type { Fetcher } from "./types";
 
 /** sources.fetcher → code. */
 const FETCHERS: Record<string, Fetcher> = {
   [icsFetcher.name]: icsFetcher,
+  [jsonLdFetcher.name]: jsonLdFetcher,
   [ticketmasterFetcher.name]: ticketmasterFetcher,
 };
 

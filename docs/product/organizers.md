@@ -114,7 +114,14 @@ stays missed.
 7. The structured-data fetcher (event data from pages, no AI). It never
    applies to sources awaiting permission or to blocked domains: reading
    JSON-LD is still automated fetching, under every fetching rule
-   (robots.txt, terms, a block means stop).
+   (robots.txt, terms, a block means stop). Done 2026-10-17: the `jsonld`
+   fetcher (`src/lib/sources/fetchers/jsonld.ts`) reads schema.org events
+   from one page (or up to 5, following the page's own same-site "next"
+   link), keeps whitelisted facts, stages the description internally, and
+   refuses sources awaiting permission or blocked and pages on another site.
+   Times are strict: an offset must be Chicago's actual offset on that date,
+   or the record fails. Approving a page-data discovery makes a `jsonld`
+   source, tested and enabled like any other.
 8. Monthly re-discovery in the maintenance job (first-of-month guard; each
    change logged).
 9. Terms review of specialist platforms: RunSignup's API, MarketSpread and

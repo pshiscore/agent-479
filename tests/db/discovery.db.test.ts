@@ -90,6 +90,15 @@ describe("discovery", () => {
     });
   });
 
+  it("event data on a page becomes a jsonld source the pipeline can fetch (step 7)", async () => {
+    await inRollback(async (tx) => {
+      const [org] = await tx.insert(organizers).values({ slug: "test-garden", name: "Test Garden", organizerType: "nonprofit", website: "https://garden.example/", city: "Fayetteville" }).returning();
+      const [d] = await tx.insert(feedDiscoveries).values({ organizerId: org.id, url: "https://garden.example/calendar/", label: "Event data on the events page", kind: "page_data", robotsResult: "allowed", robotsCheckedAt: new Date() }).returning();
+      const { source } = await approveDiscovery(tx, d.id, { actor: OWNER, note: "No terms page; robots allows the calendar." });
+      expect(source).toMatchObject({ slug: "test-garden-page-data", kind: "html", fetcher: "jsonld", config: { pageUrl: "https://garden.example/calendar/" }, enabled: false, disabledReason: "untested", publishState: "proposed" });
+    });
+  });
+
   it("a public .gov feed with no flagged terms is one click; CivicPlus calendars get their own config", async () => {
     await inRollback(async (tx) => {
       const [org] = await tx.insert(organizers).values({ slug: "test-town", name: "Town of Test", organizerType: "government", website: "https://www.test.gov/", city: "Gentry" }).returning();
