@@ -190,6 +190,13 @@
       "when": 1791756980750,
       "tag": "0026_place_menu",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792203751771,
+      "tag": "0027_shadow_sources",
+      "breakpoints": true
     }
   ]
 }

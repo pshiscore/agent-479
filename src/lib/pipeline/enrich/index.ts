@@ -1,8 +1,9 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { agentActor, recordAction } from "@/lib/actions/record";
 import type { TaxonomyEntry } from "@/lib/categories";
 import type { DbExecutor } from "@/lib/db/client";
-import { rawRecords, sources, venues } from "@/lib/db/schema";
+import { eventSources, rawRecords, sources, venues } from "@/lib/db/schema";
+import { upsertShadowItem } from "@/lib/review/shadow";
 import { isTicketingUrl } from "@/lib/ticketing";
 import { formatInChicago } from "@/lib/time";
 import { venueDisplayName } from "@/lib/venues/display";
@@ -46,7 +47,10 @@ export async function enrichRecord(
 ) {
   const facts = record.facts as unknown as Facts;
   const [venue] = await db.select().from(venues).where(eq(venues.id, record.venueId!));
-  const [source] = await db.select({ defaultPriceNote: sources.defaultPriceNote }).from(sources).where(eq(sources.id, record.sourceId));
+  const [source] = await db
+    .select({ id: sources.id, slug: sources.slug, baseUrl: sources.baseUrl, defaultPriceNote: sources.defaultPriceNote, publishState: sources.publishState })
+    .from(sources)
+    .where(eq(sources.id, record.sourceId));
   const description = record.descriptionText;
 
   // 1. Extract (only when there's a description to read).
@@ -124,10 +128,7 @@ export async function enrichRecord(
     descriptionFacts: described.status === "ok" ? described.usedFacts : null,
     descriptionNoneReason: described.status === "none" ? described.reason : null,
   };
-  const { event, created } = await writeEvent(
-    db,
-    record,
-    {
+  const draft = {
       facts,
       venueId: venue.id,
       subSpace: record.subSpace,
@@ -143,16 +144,34 @@ export async function enrichRecord(
       priceMin,
       priceMax,
       shortDescription: described.status === "ok" ? described.description : null,
-    },
-    {
+    };
+  const log = {
       actor: ACTOR,
       runId: deps.runId,
       model: classified.model,
       llmCallId: classified.callId,
       reason: `Event from source record ${record.externalId}: ${category.slug}${tagSlugs.size ? ` [${[...tagSlugs].join(", ")}]` : ""}`,
       meta,
-    },
-  );
+    };
+
+  // Shadow mode (owner, 2026-10-16): a source that isn't live sends new events to
+  // review instead of publishing. A record already tied to a published event (the
+  // owner approved it) keeps updating that event.
+  if (source.publishState !== "live" && !(await linkedEventId(db, record))) {
+    const r = await upsertShadowItem(db, {
+      source,
+      record,
+      draft,
+      log,
+      venueCity: venue.city,
+      categorySlug: category.slug,
+      tagSlugs: [...tagSlugs],
+      descriptionHeld: described.status === "held",
+    });
+    return { event: null, created: false, shadow: r.action, category: category.slug, tags: [...tagSlugs], held: described.status === "held" };
+  }
+
+  const { event, created } = await writeEvent(db, record, draft, log);
   if (described.status !== "none" && described.glossaryCandidates.length) {
     await proposeGlossaryEntries(db, described.glossaryCandidates, { actor: ACTOR, runId: deps.runId, eventTitle: facts.title });
   }
@@ -169,5 +188,15 @@ export async function enrichRecord(
       llmCallId: described.callId,
     });
   }
-  return { event, created, category: category.slug, tags: [...tagSlugs], held: described.status === "held" };
+  return { event, created, shadow: null, category: category.slug, tags: [...tagSlugs], held: described.status === "held" };
+}
+
+/** The published event a source record already belongs to, if any. */
+async function linkedEventId(db: DbExecutor, record: Pick<typeof rawRecords.$inferSelect, "eventId" | "sourceId" | "externalId">): Promise<string | null> {
+  if (record.eventId) return record.eventId;
+  const [link] = await db
+    .select({ eventId: eventSources.eventId })
+    .from(eventSources)
+    .where(and(eq(eventSources.sourceId, record.sourceId), eq(eventSources.externalId, record.externalId)));
+  return link?.eventId ?? null;
 }

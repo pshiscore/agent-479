@@ -1,7 +1,7 @@
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
-import { agentActions, sources } from "@/lib/db/schema";
+import { agentActions, PUBLISH_STATES, sources } from "@/lib/db/schema";
 import type { TestFetchReport } from "./test-fetch";
 import type { SourceRow } from "./types";
 
@@ -52,7 +52,7 @@ async function loadBySlug(db: DbExecutor, slug: string): Promise<SourceRow> {
 async function change(
   db: DbExecutor,
   source: SourceRow,
-  set: Partial<Pick<SourceRow, "enabled" | "disabledReason">>,
+  set: Partial<Pick<SourceRow, "enabled" | "disabledReason" | "publishState" | "publishStateSince">>,
   log: { actor: string; action: "enable" | "disable" | "update"; reason: string },
 ): Promise<SourceRow> {
   return db.transaction(async (tx) => {
@@ -75,11 +75,12 @@ export async function enableAfterTest(db: DbExecutor, slug: string, report: Test
   const source = await loadBySlug(db, slug);
   assertTestFetchAllowed(source);
   if (!report.pass || report.slug !== slug) throw new SourceStateError(`${slug}: not enabling without a passing test fetch`);
-  return change(db, source, { enabled: true, disabledReason: null }, {
+  // New sources start in shadow (owner, 2026-10-16): fetched and processed, nothing publishes until promoted.
+  return change(db, source, { enabled: true, disabledReason: null, publishState: "shadow", publishStateSince: new Date() }, {
     actor,
     action: "enable",
     reason:
-      `Test fetch passed: ${report.items} events, ${report.upcoming} upcoming, ` +
+      `Test fetch passed; in shadow (events go to review, none publish): ${report.items} events, ${report.upcoming} upcoming, ` +
       `${report.firstDate} to ${report.lastDate}; feeds ${report.feedUrls.join(", ")}.`,
   });
 }
@@ -209,4 +210,27 @@ export async function blockedSources(db: DbExecutor) {
     out.push({ source, disabledAt: action?.at ?? null, reason: action?.reason ?? source.lastError });
   }
   return out;
+}
+
+/** Allowed publish-state moves. Promotion to live and leaving pause are the owner's; the agent may only demote to shadow. */
+const MOVES: Record<string, string[]> = {
+  proposed: ["shadow"],
+  shadow: ["live", "paused"],
+  live: ["shadow", "paused"],
+  paused: ["shadow", "live"],
+};
+
+/**
+ * Moves a source between proposed, shadow, live, and paused (owner,
+ * 2026-10-16), logged with before and after. Only a person promotes to live,
+ * pauses, or resumes; the agent may demote a live source to shadow.
+ */
+export async function setPublishState(db: DbExecutor, slug: string, to: (typeof PUBLISH_STATES)[number], reason: string, actor: string) {
+  const r = requireReason(reason);
+  const source = await loadBySlug(db, slug);
+  if (source.publishState === to) throw new SourceStateError(`${slug} is already ${to}`);
+  if (!MOVES[source.publishState]?.includes(to)) throw new SourceStateError(`${slug} can't go from ${source.publishState} to ${to}`);
+  const agentDemotion = actor.startsWith("agent:") && source.publishState === "live" && to === "shadow";
+  if (!actor.startsWith("human:") && !agentDemotion) throw new SourceStateError(`only the owner moves a source to ${to}`);
+  return change(db, source, { publishState: to, publishStateSince: new Date() }, { actor, action: "update", reason: `${source.publishState} → ${to}: ${r}` });
 }

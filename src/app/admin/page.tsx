@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { COMMUNITY_WARN_SHARE, dashboard } from "@/lib/admin/queries";
 import { getDb } from "@/lib/db/client";
@@ -6,7 +7,14 @@ import { when } from "./ui";
 
 export default async function AdminOverview() {
   await requireAdmin();
-  const d = await dashboard(getDb(), new Date());
+  const db = getDb();
+  const d = await dashboard(db, new Date());
+  // Shadow mode (owner, 2026-10-16): sources in shadow, and automatic demotions in the last 14 days.
+  const [{ shadow }] = (await db.execute(sql`select count(*)::int shadow from sources where publish_state = 'shadow'`)) as unknown as { shadow: number }[];
+  const demotions = (await db.execute(sql`
+    select a.created_at, s.slug, a.reason from agent_actions a join sources s on s.id = a.entity_id
+    where a.entity_type = 'source' and a.actor like 'agent:%' and a.reason like 'live → shadow:%' and a.created_at > now() - interval '14 days'
+    order by a.created_at desc`)) as unknown as { created_at: string; slug: string; reason: string }[];
   const pct = (x: number) => `${Math.round(x * 100)}%`;
   const pendingTotal = d.pending.reduce((n, p) => n + p.n, 0);
 
@@ -25,6 +33,27 @@ export default async function AdminOverview() {
           </div>
         ))}
       </section>
+
+      {demotions.length > 0 && (
+        <section className="rounded border border-red-300 bg-red-50 p-3 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+          <h2 className="font-semibold">Sources sent back to shadow</h2>
+          <ul>
+            {demotions.map((x) => (
+              <li key={`${x.slug}-${x.created_at}`}>
+                {when(x.created_at)} · {x.slug}: {x.reason.replace(/^live → shadow: /, "")}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {shadow > 0 && (
+        <p>
+          <Link href="/admin/review?view=sources" className="underline">
+            {shadow} source{shadow === 1 ? "" : "s"} in shadow
+          </Link>{" "}
+          (their events wait for you in Review, by source)
+        </p>
+      )}
 
       {pendingTotal > 0 && (
         <p>

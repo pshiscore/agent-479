@@ -140,7 +140,7 @@ export async function runProcessJob(
         for (const record of toEnrich) {
           try {
             const r = await enrichRecord(db, record, { generate, taxonomy, runId: claim.id });
-            bump(r.created ? "events_created" : "events_updated");
+            bump(r.shadow ? `shadow_${r.shadow}` : r.created ? "events_created" : "events_updated");
             if (r.held) bump("descriptions_held");
           } catch (err) {
             if (err instanceof LlmError) {

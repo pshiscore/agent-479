@@ -71,7 +71,8 @@ describe("source state rules", () => {
       const after = await enableAfterTest(tx, s.slug, passing(s.slug), OWNER);
       expect(after).toMatchObject({ enabled: true, disabledReason: null });
       const [a] = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, s.id), eq(agentActions.action, "enable")));
-      expect(a.reason).toMatch(/Test fetch passed: 3 events/);
+      expect(a.reason).toMatch(/Test fetch passed; in shadow \(events go to review, none publish\): 3 events/);
+      expect((a.after as { publishState: string }).publishState).toBe("shadow");
     });
   });
 

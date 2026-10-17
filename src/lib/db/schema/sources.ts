@@ -16,6 +16,13 @@ import { venues } from "./venues";
 export const SOURCE_KINDS = ["api", "ics", "rss", "jsonld_sitemap", "html"] as const;
 export const COMMERCIAL_USE = ["yes", "no", "unknown"] as const;
 export const DEDUP_MODES = ["shadow", "live"] as const;
+/**
+ * Whether a source's events publish (owner, 2026-10-16): proposed (not fetched
+ * yet), shadow (fetched and processed, events only go to /admin/review), live
+ * (publishes through the normal gate), paused (not fetched). Every transition
+ * is logged; promotion to live is the owner's.
+ */
+export const PUBLISH_STATES = ["proposed", "shadow", "live", "paused"] as const;
 export const LINK_MODES = ["deep", "homepage_only"] as const;
 /**
  * Why a source is off. untested: never fetched yet; only these may be test
@@ -44,6 +51,10 @@ export const sources = pgTable(
     defaultVenueId: uuid("default_venue_id").references(() => venues.id, { onDelete: "set null" }),
     trustLevel: integer("trust_level").notNull(),
     enabled: boolean("enabled").notNull().default(false),
+    // Existing sources were live before shadow mode existed; new ones enter through
+    // a test fetch, which puts them in shadow (src/lib/sources/admin.ts).
+    publishState: text("publish_state", { enum: PUBLISH_STATES }).notNull().default("live"),
+    publishStateSince: timestamp("publish_state_since", { withTimezone: true }).notNull().defaultNow(),
     disabledReason: text("disabled_reason", { enum: DISABLED_REASONS }).default("untested"),
     fetchIntervalMinutes: integer("fetch_interval_minutes").notNull(),
     commercialUseOk: text("commercial_use_ok", { enum: COMMERCIAL_USE }).notNull().default("unknown"),
@@ -86,6 +97,7 @@ export const sources = pgTable(
       "sources_price_note_check",
       sql.raw(`(default_price_note is null) = (default_price_note_source is null)`),
     ),
+    check("sources_publish_state_check", sql.raw(`publish_state in ${sqlList(PUBLISH_STATES)}`)),
     check("sources_trust_check", sql.raw(`trust_level between 1 and 5`)),
     check("sources_interval_check", sql.raw(`fetch_interval_minutes >= 15`)),
     check("sources_commercial_check", sql.raw(`commercial_use_ok in ${sqlList(COMMERCIAL_USE)}`)),

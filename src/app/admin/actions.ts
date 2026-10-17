@@ -8,7 +8,10 @@ import { labelPair } from "@/lib/admin/dedup-review";
 import { confirmSource, createPlace, hidePlace, linkVenue, markOpen, setGooglePlaceId, parseFacts, type PlaceInput, placeById, publishPlace, removePlaceDescription, updatePlace, writePlaceDescription } from "@/lib/admin/places";
 import { decideProposal } from "@/lib/admin/proposals";
 import { changedFields, type EventFormValues, parseEventForm } from "@/lib/review/form";
+import { addSourceFilter, bulkDecide } from "@/lib/review/by-source";
 import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal, setParentEvent } from "@/lib/review/proposals";
+import { setPublishState } from "@/lib/sources/admin";
+import { PUBLISH_STATES, REJECT_KINDS } from "@/lib/db/schema";
 import { getDb } from "@/lib/db/client";
 import { generateStructured } from "@/lib/llm";
 import type { Generate } from "@/lib/pipeline/enrich/types";
@@ -325,7 +328,8 @@ export async function rejectProposalAction(formData: FormData) {
   let target: string;
   try {
     if (!id.success) throw new Error("bad item id");
-    await rejectProposal(getDb(), id.data, { actor, reason: str(formData, "reason") });
+    const kind = REJECT_KINDS.find((k) => k === str(formData, "kind")) ?? "other";
+    await rejectProposal(getDb(), id.data, { actor, reason: str(formData, "reason"), kind });
     target = reviewBack({ msg: "Rejected." });
   } catch (err) {
     target = reviewBack({ error: `Not rejected: ${message(err)}` });
@@ -392,6 +396,55 @@ export async function setGooglePlaceAction(formData: FormData) {
     target = back(`/admin/places/${id.data}`, { msg: remove ? "Google match removed." : `Matched to Google place ${p.googlePlaceId}.` });
   } catch (err) {
     target = back(`/admin/places/${id.success ? id.data : ""}`, { error: `Not matched: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+// ---- Review by source (shadow mode) ----
+
+const bySource = (params: Record<string, string>) => back("/admin/review", { view: "sources", ...params });
+
+/** Promote, pause, resume, or send back to shadow (owner; logged). */
+export async function setPublishStateAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const slug = str(formData, "slug");
+  const to = PUBLISH_STATES.find((p) => p === str(formData, "to"));
+  let target: string;
+  try {
+    if (!to) throw new Error("bad state");
+    await setPublishState(getDb(), slug, to, str(formData, "note") || `Owner moved ${slug} to ${to}`, actor);
+    target = bySource({ msg: `${slug} is now ${to}.` });
+  } catch (err) {
+    target = bySource({ error: `Not changed: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function addSourceFilterAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const sourceId = uuid.safeParse(formData.get("sourceId"));
+  let target: string;
+  try {
+    if (!sourceId.success) throw new Error("bad source");
+    const r = await addSourceFilter(getDb(), sourceId.data, str(formData, "phrase"), { actor });
+    target = bySource({ msg: `Filter saved ("${r.filter.contains}"); ${r.rejected} pending item(s) it matched were rejected as filtered.` });
+  } catch (err) {
+    target = bySource({ error: `Not saved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function bulkDecideAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const sourceId = uuid.safeParse(formData.get("sourceId"));
+  const decision = str(formData, "decision") === "approve" ? "approve" : "reject";
+  let target: string;
+  try {
+    if (!sourceId.success) throw new Error("bad source");
+    const r = await bulkDecide(getDb(), sourceId.data, str(formData, "phrase"), decision, { actor, note: str(formData, "note") });
+    target = bySource({ msg: `${decision === "approve" ? "Approved" : "Rejected"} ${r.done} of ${r.matched} matching item(s)${r.skippedFlagged ? `; ${r.skippedFlagged} flagged item(s) left for one-by-one review` : ""}.` });
+  } catch (err) {
+    target = bySource({ error: `Not done: ${message(err)}` });
   }
   redirect(target);
 }

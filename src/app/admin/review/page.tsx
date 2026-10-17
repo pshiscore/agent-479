@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { inArray } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getDb } from "@/lib/db/client";
 import { categories, events, type ProposedEvent, venues } from "@/lib/db/schema";
 import { likelyMatches, pendingProposals, recentDecisions, webSearchUrl } from "@/lib/review/proposals";
 import { formatInChicago } from "@/lib/time";
 import { eventsDuring, festivalOptions } from "@/lib/review/options";
+import { BySource } from "./by-source";
 import { addProposalSourceAction, approveProposalAction, mergeProposalAction, rejectProposalAction, setParentAction } from "../actions";
 import { button, Diff, input, Notice, when } from "../ui";
 
@@ -33,8 +34,33 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
   await requireAdmin();
   const q = await searchParams;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+  const tabs = (active: "items" | "sources") => (
+    <nav className="flex gap-4 text-sm">
+      <Link href="/admin/review" className={active === "items" ? "font-semibold" : "text-zinc-500 underline"}>
+        One by one
+      </Link>
+      <Link href="/admin/review?view=sources" className={active === "sources" ? "font-semibold" : "text-zinc-500 underline"}>
+        By source
+      </Link>
+    </nav>
+  );
+  if (one(q.view) === "sources") {
+    return (
+      <div className="grid gap-6">
+        <Notice msg={one(q.msg)} error={one(q.error)} />
+        <div>
+          <h1 className="text-lg font-semibold">Review by source</h1>
+          <p className="text-zinc-500">Sources in shadow: fetched and processed, nothing publishes until you approve items or promote the source.</p>
+        </div>
+        {tabs("sources")}
+        <BySource db={getDb()} />
+      </div>
+    );
+  }
   const db = getDb();
   const [pending, decided, festivals] = await Promise.all([pendingProposals(db), recentDecisions(db, 15), festivalOptions(db)]);
+  const [{ n: allPending }] = (await db.execute(sql`select count(*)::int n from event_proposals where status = 'pending'`)) as unknown as { n: number }[];
+  const shadowWaiting = allPending - pending.length;
   const festivalId = one(q.festival);
   const festival = festivals.find((f) => f.id === festivalId) ?? null;
   const during = festival ? await eventsDuring(db, festival.id) : [];
@@ -67,7 +93,11 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold">Review</h1>
-          <p className="text-zinc-500">{pending.length} waiting. Nothing here is public until you approve it.</p>
+          <p className="text-zinc-500">
+            {pending.length} waiting. Nothing here is public until you approve it.
+            {shadowWaiting > 0 ? ` ${shadowWaiting} more from shadow sources are reviewed by source.` : ""}
+          </p>
+          {tabs("items")}
         </div>
         <Link href="/admin/review/new" className={button}>
           Add event
@@ -175,6 +205,14 @@ export default async function ReviewPage({ searchParams }: PageProps<"/admin/rev
               </Link>
               <form action={rejectProposalAction} className="flex flex-wrap gap-2">
                 <input type="hidden" name="id" value={p.id} />
+                <select name="kind" defaultValue="other" className={input} aria-label="Reason kind">
+                  <option value="wrong_date">Wrong date</option>
+                  <option value="wrong_venue">Wrong venue</option>
+                  <option value="not_public">Not public</option>
+                  <option value="duplicate">Duplicate</option>
+                  <option value="outside_area">Outside area</option>
+                  <option value="other">Other</option>
+                </select>
                 <input name="reason" required minLength={3} placeholder="Why reject?" className={`${input} min-w-48`} />
                 <button className="rounded border border-zinc-400 px-3 py-1">Reject</button>
               </form>

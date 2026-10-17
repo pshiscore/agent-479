@@ -26,6 +26,29 @@ export interface ExcludedLocation {
   note: string;
 }
 
+/**
+ * A per-source title rule the owner approved in /admin/review (owner,
+ * 2026-10-16), e.g. skip titles containing "adult league". Applies to every
+ * later fetch; a skipped record keeps the reason "filter:<id>".
+ */
+export interface SourceFilter {
+  id: string;
+  contains: string;
+  approvedBy: string;
+  approvedAt: string;
+}
+
+export function sourceFilters(config: unknown): SourceFilter[] {
+  const list = (config as { filters?: unknown } | null)?.filters;
+  return Array.isArray(list) ? (list as SourceFilter[]) : [];
+}
+
+/** Case-insensitive whole-word match of a filter phrase in a title. */
+export function titleMatches(title: string, phrase: string): boolean {
+  const p = phrase.trim().toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return p.length > 0 && new RegExp(`(^|[^a-z0-9])${p}($|[^a-z0-9])`, "i").test(title);
+}
+
 export function sourceExclusions(config: unknown): ExcludedLocation[] {
   const list = (config as { excludeLocations?: unknown } | null)?.excludeLocations;
   return Array.isArray(list) ? (list as ExcludedLocation[]) : [];
@@ -35,6 +58,9 @@ export function exclusionReason(facts: Facts, now: Date, sourceConfig: unknown =
   const name = facts.location.name ? normalizeVenueName(facts.location.name) : null;
   for (const rule of sourceExclusions(sourceConfig)) {
     if (name && name === normalizeVenueName(rule.name)) return rule.reason;
+  }
+  for (const f of sourceFilters(sourceConfig)) {
+    if (titleMatches(facts.title, f.contains)) return `filter:${f.id}`;
   }
   if (OFFICE_CLOSURE.test(facts.title)) return "office_closure";
   if (GOVERNMENT_MEETING.test(facts.title)) return "government_meeting";

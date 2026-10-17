@@ -70,7 +70,7 @@ describe("enrichRecord", () => {
       expect(r).toMatchObject({ created: true, category: "community", held: false });
       expect(r.tags.sort()).toEqual(["en-espanol", "family-friendly", "free"]);
 
-      const [ev] = await tx.select().from(events).where(eq(events.id, r.event.id));
+      const [ev] = await tx.select().from(events).where(eq(events.id, r.event!.id));
       expect(ev).toMatchObject({
         title: "Preschool Story Time",
         startAt: new Date("2026-10-13T14:30:00.000Z"),
@@ -110,15 +110,15 @@ describe("enrichRecord", () => {
       const second = fakeModel(tx, { classify: [{ category: "family-kids", tags: ["outdoor"], closestMissingCategory: null }], describe: [{ description: "Stories and songs for young children, outdoors this week." }] });
       const b = await enrichRecord(tx, again, { generate: second, taxonomy, runId: run.id });
       expect(b).toMatchObject({ created: false });
-      expect(b.event.id).toBe(a.event.id);
+      expect(b.event!.id).toBe(a.event!.id);
       // No description to read and nothing beyond the title: no describe call, no description.
       expect(first).not.toHaveBeenCalledWith(expect.objectContaining({ task: "describe" }));
-      expect(b.event.shortDescription).toBeNull();
-      expect(await tx.select().from(events).where(eq(events.id, a.event.id))).toHaveLength(1);
-      const [upd] = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, a.event.id), eq(agentActions.action, "update")));
+      expect(b.event!.shortDescription).toBeNull();
+      expect(await tx.select().from(events).where(eq(events.id, a.event!.id))).toHaveLength(1);
+      const [upd] = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, a.event!.id), eq(agentActions.action, "update")));
       expect((upd.before as { tagIds: string[] }).tagIds).toEqual([]);
       expect((upd.after as { tagIds: string[] }).tagIds).toHaveLength(1);
-      expect(await tx.select().from(eventSources).where(eq(eventSources.eventId, a.event.id))).toHaveLength(1);
+      expect(await tx.select().from(eventSources).where(eq(eventSources.eventId, a.event!.id))).toHaveLength(1);
     });
   });
 
@@ -133,7 +133,7 @@ describe("enrichRecord", () => {
       });
       const r = await enrichRecord(tx, rec, { generate, taxonomy: await loadActiveTaxonomy(tx), runId: run.id });
       expect(r.held).toBe(true);
-      const [ev] = await tx.select().from(events).where(eq(events.id, r.event.id));
+      const [ev] = await tx.select().from(events).where(eq(events.id, r.event!.id));
       expect(ev.shortDescription).toBeNull();
       const [hold] = await tx.select().from(agentActions).where(and(eq(agentActions.entityId, ev.id), eq(agentActions.action, "hold")));
       expect(hold.reason).toMatch(/held for review/);

@@ -1,7 +1,9 @@
 import { sql } from "drizzle-orm";
-import { check, index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { check, index, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { createdAt, id, sqlList, updatedAt } from "./columns";
 import { events } from "./events";
+import { rawRecords } from "./raw-records";
+import { sources } from "./sources";
 import { runs } from "./runs";
 
 /**
@@ -12,7 +14,7 @@ import { runs } from "./runs";
  */
 
 export const PROPOSAL_STATUSES = ["pending", "approved", "rejected", "merged"] as const;
-export const PROPOSAL_ORIGINS = ["owner_form", "registry", "calendar", "lead"] as const;
+export const PROPOSAL_ORIGINS = ["owner_form", "registry", "calendar", "lead", "shadow"] as const;
 // Why an item is in review (plan section 5, owner decisions 2026-10-05).
 export const REVIEW_REASONS = [
   "owner_draft",
@@ -24,7 +26,14 @@ export const REVIEW_REASONS = [
   "unclear_schedule",
   "first_time_organizer",
   "outside_coverage_area",
+  // From a source in shadow mode (owner, 2026-10-16).
+  "shadow_source",
 ] as const;
+
+/** Shadow items that need a look one by one; everything else is reviewed by source. */
+export const SHADOW_FLAGS = ["conflict", "outside_coverage", "community_fallback", "description_held"] as const;
+/** Why the owner rejected an item; wrong dates or venues block a source's promotion. */
+export const REJECT_KINDS = ["wrong_date", "wrong_venue", "not_public", "duplicate", "filtered", "outside_area", "other"] as const;
 
 /** The proposed event, as the owner (or later, the agent) states it. Times are UTC ISO strings. */
 export interface ProposedEvent {
@@ -78,6 +87,14 @@ export const eventProposals = pgTable(
     origin: text("origin", { enum: PROPOSAL_ORIGINS }).notNull(),
     reasons: text("reasons").array().notNull().default(sql`'{}'::text[]`),
     facts: jsonb("facts").$type<ProposedEvent>().notNull(),
+    // Shadow items: the source record they came from, and the processed event
+    // (venue, category, tags, description) that approval publishes unchanged.
+    sourceId: uuid("source_id").references(() => sources.id, { onDelete: "restrict" }),
+    rawRecordId: uuid("raw_record_id").references(() => rawRecords.id, { onDelete: "set null" }),
+    externalId: text("external_id"),
+    draft: jsonb("draft").$type<Record<string, unknown>>(),
+    flags: text("flags").array().notNull().default(sql`'{}'::text[]`),
+    rejectKind: text("reject_kind", { enum: REJECT_KINDS }),
     sources: jsonb("sources").$type<ProposalSource[]>().notNull().default([]),
     // A likely existing event, for the diff (set when the proposal is made).
     matchEventId: uuid("match_event_id").references(() => events.id, { onDelete: "set null" }),
@@ -92,6 +109,11 @@ export const eventProposals = pgTable(
   },
   (t) => [
     index("event_proposals_pending_idx").on(t.createdAt).where(sql`${t.status} = 'pending'`),
+    // One item per source record: refetches update it instead of adding another.
+    uniqueIndex("event_proposals_source_record_uniq").on(t.sourceId, t.externalId).where(sql`${t.sourceId} is not null`),
+    check("event_proposals_shadow_check", sql.raw(`(origin = 'shadow') = (source_id is not null and external_id is not null and draft is not null)`)),
+    check("event_proposals_flags_check", sql.raw(`flags <@ array[${sqlList(SHADOW_FLAGS).slice(1, -1)}]::text[]`)),
+    check("event_proposals_reject_kind_check", sql.raw(`(reject_kind is null) or (status = 'rejected' and reject_kind in ${sqlList(REJECT_KINDS)})`)),
     check("event_proposals_status_check", sql.raw(`status in ${sqlList(PROPOSAL_STATUSES)}`)),
     check("event_proposals_origin_check", sql.raw(`origin in ${sqlList(PROPOSAL_ORIGINS)}`)),
     check("event_proposals_reasons_check", sql.raw(`reasons <@ array[${sqlList(REVIEW_REASONS).slice(1, -1)}]::text[]`)),

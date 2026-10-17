@@ -4,6 +4,7 @@ import type { DbExecutor } from "@/lib/db/client";
 import { rawRecords, sources } from "@/lib/db/schema";
 import { claimJob } from "@/lib/jobs";
 import { finishRun } from "@/lib/runs";
+import { demoteLiveSources } from "@/lib/sources/demotion";
 import { proposeTicketmasterLinks } from "@/lib/sources/ticketmaster-venues";
 import { proposeCategoriesFromHints } from "./category-themes";
 
@@ -93,12 +94,15 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date } = {
       : { proposed: 0, alreadyDecided: 0 };
     const needsVenueArchived = await archiveExpiredNeedsVenue(db, now);
     const categoryProposals = await proposeCategoriesFromHints(db, { actor: agentActor("maintenance"), now, runId: claim.id });
+    // Live sources that misbehaved this week go back to shadow (owner, 2026-10-16).
+    const demoted = await demoteLiveSources(db, now, agentActor("maintenance"));
     const stats = {
       descriptionsPurged,
       payloadsPurged,
       linkProposals: linkProposals.proposed,
       needsVenueArchived,
       categoryProposals: categoryProposals.proposed,
+      sourcesDemoted: demoted.length,
     };
     await finishRun(db, claim.id, { status: "ok", stats });
     return stats;

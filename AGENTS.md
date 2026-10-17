@@ -194,6 +194,21 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   (`sources -- enable <slug> --reason`). An `awaiting_permission` source first
   needs the permission recorded (`sources -- permission`), which makes it
   `untested`. Every change is logged.
+- **Shadow mode** (owner, 2026-10-16). A source is `proposed`, `shadow`,
+  `live`, or `paused` (`sources.publish_state`); every move is logged
+  (`setPublishState`). A source enabled by a test fetch starts in **shadow**:
+  it's fetched and processed like any other, but its new events only become
+  review items (origin `shadow`) and never publish, not even behind the site
+  lock. Approving one publishes it through `writeEvent` as the owner.
+  Promotion to live is the owner's; the review page recommends it after 2
+  weeks, 15 reviewed events, 90%+ approved, and no wrong dates or venues.
+  The maintenance job demotes a live source to shadow (logged, flagged on
+  the admin overview) after 3 failed runs in a row, over 20% of a week's
+  events rejected or hidden, or an event outside the coverage area. Shadow
+  items are reviewed by source (`/admin/review?view=sources`): per-source
+  title filters (owner-approved, logged, skips recorded as `filter:<id>`)
+  and bulk decisions; flagged items (possible duplicate, outside the area,
+  Community fallback, held description) are reviewed one by one.
 - **Opt-outs:** a site owner who asks us to stop (via `/bot` or
   bot@479.guide) gets `npm run sources -- opt-out <slug> --reason "..."`: a
   logged disable. Re-enabling needs a reason starting "Permission" (their

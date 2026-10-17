@@ -44,6 +44,8 @@ export async function dueSources(db: DbExecutor, now: Date): Promise<SourceRow[]
     .where(
       and(
         eq(sources.enabled, true),
+        // Shadow sources fetch on the normal schedule; paused and proposed ones don't.
+        inArray(sources.publishState, ["shadow", "live"]),
         or(
           isNull(sources.lastFetchedAt),
           lte(sources.lastFetchedAt, sql`${now.toISOString()}::timestamptz - make_interval(mins => ${sources.fetchIntervalMinutes})`),

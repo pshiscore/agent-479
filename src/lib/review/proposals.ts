@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, like, lte, ne } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, like, lte, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { recordAction } from "@/lib/actions/record";
 import type { DbExecutor } from "@/lib/db/client";
@@ -8,6 +8,7 @@ import {
   type ProposalSource,
   type ProposedEvent,
   PROPOSAL_ORIGINS,
+  REJECT_KINDS,
   REVIEW_REASONS,
   eventDays,
   eventSources,
@@ -24,6 +25,8 @@ import { slugify } from "@/lib/slug";
 import { chicagoDate, chicagoToUtc, formatDate, parseDate } from "@/lib/time";
 import { isTicketingUrl } from "@/lib/ticketing";
 import { normalizeVenueName } from "@/lib/venues/normalize";
+import { writeEvent } from "@/lib/pipeline/write-event";
+import { applyEditsToDraft, type ShadowDraft } from "./shadow";
 
 /**
  * The review queue (AGENTS.md, "Festivals and the review queue"). Fail
@@ -269,6 +272,7 @@ export async function approveProposal(db: DbExecutor, id: string, opts: { actor:
     if (!venue) throw new ReviewError("that venue is inactive or unknown");
     const [category] = await tx.select().from(categories).where(and(eq(categories.id, f.categoryId), eq(categories.active, true)));
     if (!category) throw new ReviewError("that category is retired or unknown");
+    if (before.origin === "shadow") return approveShadow(tx, before, f, opts);
 
     if (f.parentEventId) await checkParent(tx, f.parentEventId, { startAt: new Date(f.startAt) });
     const now = opts.now ?? new Date();
@@ -326,10 +330,44 @@ export async function approveProposal(db: DbExecutor, id: string, opts: { actor:
   });
 }
 
-export async function rejectProposal(db: DbExecutor, id: string, opts: { actor: string; reason: string }) {
+export async function rejectProposal(db: DbExecutor, id: string, opts: { actor: string; reason: string; kind?: (typeof REJECT_KINDS)[number] }) {
   ownerOnly(opts.actor, "reject a proposal");
   const reason = z.string().trim().min(3, "give a reason").max(500).parse(opts.reason);
-  return db.transaction(async (tx) => decide(tx, await loadPending(tx, id), { status: "rejected", decisionNote: reason }, { actor: opts.actor, reason: `Rejected: ${reason}` }));
+  const kind = z.enum(REJECT_KINDS).default("other").parse(opts.kind);
+  return db.transaction(async (tx) =>
+    decide(tx, await loadPending(tx, id), { status: "rejected", decisionNote: reason, rejectKind: kind }, { actor: opts.actor, reason: `Rejected (${kind.replace("_", " ")}): ${reason}` }),
+  );
+}
+
+/**
+ * Publishes a shadow item: the processed draft goes through writeEvent, the
+ * same writer the pipeline uses, with the owner as the actor ("owner-
+ * confirmed"), so the event keeps its source link and later fetches update it.
+ */
+async function approveShadow(tx: DbExecutor, before: Proposal, f: ProposedEvent, opts: { actor: string; note?: string; edits?: Partial<ProposedEvent> }) {
+  const stored = before.draft as unknown as ShadowDraft | null;
+  if (!stored || !before.sourceId || !before.externalId || !before.rawRecordId) throw new ReviewError("this shadow item has lost its source record; reject it or add the event by hand");
+  const edited = opts.edits && Object.keys(opts.edits).length > 0;
+  const draft = edited ? applyEditsToDraft(stored.draft, opts.edits!) : stored.draft;
+  const [src] = await tx.select({ slug: sources.slug }).from(sources).where(eq(sources.id, before.sourceId));
+  const { event } = await writeEvent(
+    tx,
+    { id: before.rawRecordId, sourceId: before.sourceId, externalId: before.externalId, eventId: null },
+    draft,
+    {
+      actor: opts.actor,
+      runId: null,
+      model: null,
+      llmCallId: null,
+      reason: `Owner confirmed a shadow event from ${src?.slug ?? "a shadow source"}${edited ? " with edits" : ""}: ${opts.note || "no note"}`,
+      meta: { ...stored.log.meta, proposalId: before.id, processedBy: { model: stored.log.model, llmCallId: stored.log.llmCallId, reason: stored.log.reason } },
+    },
+  );
+  const proposal = await decide(tx, before, { status: "approved", eventId: event.id, facts: f, decisionNote: opts.note || null }, {
+    actor: opts.actor,
+    reason: `Approved shadow item${edited ? ` with edits to ${Object.keys(opts.edits!).join(", ")}` : ""}: ${opts.note || "no note"}`,
+  });
+  return { event, proposal };
 }
 
 /**
@@ -367,8 +405,16 @@ export async function addCheckedSource(db: DbExecutor, id: string, opts: { actor
   });
 }
 
+/**
+ * The one-by-one queue: everything pending except shadow items with no flags,
+ * which are reviewed by source (owner, 2026-10-16).
+ */
 export async function pendingProposals(db: DbExecutor) {
-  return db.select().from(eventProposals).where(eq(eventProposals.status, "pending")).orderBy(asc(eventProposals.createdAt));
+  return db
+    .select()
+    .from(eventProposals)
+    .where(and(eq(eventProposals.status, "pending"), or(ne(eventProposals.origin, "shadow"), sql`cardinality(${eventProposals.flags}) > 0`)))
+    .orderBy(asc(eventProposals.createdAt));
 }
 
 export async function recentDecisions(db: DbExecutor, limit = 20) {
