@@ -239,3 +239,40 @@ stop): no retry with another tool, user agent, or route.
 | Fayetteville Flyer (`fayettevilleflyer.com`) | robots.txt allows (200), but **every page returned 403** to our user agent, including the terms, privacy, and calendar URLs. | Blocked. Stopped; ask for permission. |
 | Eventbrite | Public event search was removed in February 2020; only organizer, venue, and event-by-ID endpoints remain (OAuth token, 1,000 calls an hour). API Terms of Use: show the event title and a direct, crawlable Eventbrite link (no `nofollow`); say we aren't affiliated with Eventbrite; store content for future events only (delete it once the event has passed); no use "in a product or service that competes with" Eventbrite. The site terms bar commercial use of site content. | Not approved. Organizer-level only, and only if the owner accepts the "competes" risk. |
 | Facebook | Meta's terms prohibit automated collection. | Excluded. Owner-verified entries only. |
+
+---
+
+## City and town sites: platform and feed check (2026-10-16)
+
+Research for the organizer registry plan; nothing enabled. Official sites
+from each town's Wikipedia infobox (Rogers, Fayetteville, and Springdale
+from our own records). Each site: robots.txt, then the home page, then for
+CivicPlus the `/iCalendar.aspx` list, one site at a time, 2 s apart, honest
+user agent. Springdale was not fetched (bot challenge, 2026-10-02).
+
+| Town | Site | Platform | Event feeds found |
+|---|---|---|---|
+| Bentonville | bentonville.ar.gov | CivicPlus | Holidays and Community Events (32, our source), Public Meetings (42) |
+| Rogers | rogersar.gov | CivicPlus | City Events (28, our source); "Museum - Test" (31) looks unused |
+| Fayetteville | fayetteville-ar.gov | CivicPlus | City-Sponsored Events (30) and Parks and Recreation (33), our source; **Volunteer Opportunities (36) not used yet**; Public Meetings (14) |
+| Siloam Springs | siloamsprings.gov | CivicPlus | **Main Calendar (14), Parks and Recreation (25), Library (27)**, adult sports (33), plus meeting and closing calendars; not a source yet |
+| Pea Ridge | cityofpearidgear.gov | WordPress + The Events Calendar | **iCal export (`/events/?ical=1`) and REST API, both answer**; not a source yet |
+| Centerton | centertonar.us | Revize (Revize calendar plugin) | calendar page; feed not identified |
+| Decatur | decaturar.gov (from decaturarkansas.com) | Squarespace | `/events`; Squarespace's `?format=ical` not checked |
+| Highfill | highfillarkansas.gov | WordPress | `/city-events/` page |
+| Goshen | goshenar.gov | WordPress | `/community/events-calendar/` |
+| Greenland | greenlandar.gov | WordPress | `/calendar/` |
+| Farmington | cityoffarmington-ar.gov | custom CMS | `/city-calendar`, mostly meetings |
+| Avoca | avocaarkansas.gov | other | farmers market page |
+| Garfield, Gateway | garfieldar.gov, townofgatewayar.com | unknown | `/calendar-of-events` pages |
+| Cave Springs, Elm Springs, Elkins, Johnson, West Fork, Little Flock | own sites | various | no events page found on the home page |
+| Prairie Grove | prairiegrovearkansas.org | — | no response (not a block; site may have moved) |
+| Sulphur Springs, Springtown | — | — | no website listed |
+
+**Blocks (stopped, not retried):** Lowell (`lowellarkansas.gov`, 403),
+Lincoln (`lincolnarkansas.com`, 403), Tontitown (`tontitown.com`, 406 on
+robots.txt), Washington County (`washingtoncountyar.gov`, 403 to the fetch
+tool, while looking up city sites). **Possible bot challenge** (the page
+loaded, but our check matched challenge words, possibly a contact form's
+reCAPTCHA; not re-requested): Bella Vista, Gentry, Gravette, Winslow. Owner
+to check these in the browser.
