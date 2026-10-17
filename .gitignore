@@ -44,3 +44,6 @@ next-env.d.ts
 # Local-only eval inputs that contain source text (never commit)
 *.local.csv
 backups/
+map-build/
+public/map-dev/
+public/maplibre/

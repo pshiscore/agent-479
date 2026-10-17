@@ -1,0 +1,24 @@
+{
+  "fetchedAt": "2026-10-17T19:59:24.091Z",
+  "source": "https://build.protomaps.com/20261016.pmtiles",
+  "sourceVersion": "4.15.2",
+  "robots": "allowed",
+  "requests": 33,
+  "bytesRead": 34272801,
+  "statuses": [
+    206
+  ],
+  "bounds": {
+    "minLon": -94.7,
+    "minLat": 35.7,
+    "maxLon": -93.75,
+    "maxLat": 36.55
+  },
+  "maxZoom": 15,
+  "tiles": 11373,
+  "distinctTiles": 11215,
+  "file": "map-build/nwa-20261016.pmtiles",
+  "bytes": 28700397,
+  "sha256": "33f96af2526b26b94ac268f0d8d115e37ce677bf1094b86863af4dca32cdba67",
+  "headerBytes": 127
+}

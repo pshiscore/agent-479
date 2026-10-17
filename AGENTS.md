@@ -104,6 +104,7 @@ imports it.
 - **Organizer registry, feed discovery, and the benchmark:**
   `docs/product/organizers.md` (decisions, schema, and build order, owner
   2026-10-16).
+- **Venues page and map:** `docs/product/venues.md` (owner, 2026-10-17).
 - **Front page and event experience:** `docs/product/front-page.md` (design
   direction, front page sections, event card and page, tags, search, and
   follows). Entity pages live under `/city`, `/venue`, `/category`, and

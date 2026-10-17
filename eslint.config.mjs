@@ -42,6 +42,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated, gitignored copies: MapLibre's worker, and local map files for development.
+    "public/maplibre/**",
+    "public/map-dev/**",
+    "map-build/**",
   ]),
 ]);
 

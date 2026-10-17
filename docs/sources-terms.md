@@ -386,3 +386,45 @@ about 19:25 UTC, then the first scheduled fetch from Vercel at 19:30 UTC got
 won't retry it. Likely a firewall that refuses data-center addresses; we
 don't get around it. Path forward: ask the foundation to allow
 Agent479Bot, or for permission (open item 32).
+
+## Map tiles: Protomaps basemap and OpenStreetMap (2026-10-17)
+
+For the /venues map (Phase B). Read with our bot through PoliteClient:
+[Protomaps basemap downloads](https://docs.protomaps.com/basemaps/downloads),
+the [basemaps](https://github.com/protomaps/basemaps) and
+[basemaps-assets](https://github.com/protomaps/basemaps-assets) READMEs,
+OSMF's [attribution guidelines](https://osmfoundation.org/wiki/Licence/Attribution_Guidelines),
+and [openstreetmap.org/copyright](https://www.openstreetmap.org/copyright).
+
+**Terms, in our words:**
+- The basemap is distributed as a Produced Work of OpenStreetMap under the
+  ODbL. Maps using it must visibly credit OpenStreetMap; Protomaps asks for
+  (but doesn't require) a credit too. Hotlinking their downloads is
+  discouraged, so we self-host. A modified copy or a tiles API built on it
+  must not be named "Protomaps"; we host an unmodified extract for our own
+  map and don't use the name.
+- OSMF: the credit must be visible without interacting with the map, near
+  it, and legible; and we must make clear the data is available under the
+  ODbL (linking OSM's copyright page does that).
+- Map styling (@protomaps/basemaps) is CC0, the package BSD-3. Fonts are
+  under the SIL Open Font License; the sprites derive from MIT-licensed
+  Tangram icons (© 2017 Mapzen). Both license texts ship with our copies.
+
+**How we meet them:** the map's corner credit reads "Protomaps © OpenStreetMap"
+and links OSM's copyright page; it's never collapsed. The extract's own
+metadata carries the same credit, and a `NOTICE.txt` beside the files in our
+map bucket states the source, the ODbL, and the font and icon licenses.
+
+**The fetches (logged):**
+- `build-metadata.protomaps.dev/builds.json` (the build list) and
+  robots.txt on `build.protomaps.com` (allowed).
+- `npm run map:extract -- --build 20261016.pmtiles`: 33 HTTP range
+  requests (all 206) reading 34 MB of the 139 GB planet build (basemap
+  4.15.2): header, directories, and tile data for Benton and Washington
+  counties plus a margin, zoom 0 to 15. Result: 11,373 tiles, 28.7 MB.
+  Summary in `data/map-extract.log.json`; a run record in production.
+- `npm run map:assets`: 46 requests to `protomaps.github.io/basemaps-assets`
+  (robots allowed) for the light and dark sprites, three Noto Sans fonts
+  (Latin and Cherokee glyph ranges), and the font license; the Tangram
+  icons' MIT license from its own repository. Summary in
+  `data/map-assets.log.json`.

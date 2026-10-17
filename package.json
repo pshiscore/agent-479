@@ -38,12 +38,20 @@
     "places:seed-drafts": "tsx scripts/seed-place-drafts.ts",
     "organizers:check": "tsx scripts/check-organizers.ts",
     "db:seed:organizers": "tsx scripts/seed-organizers.ts",
-    "discover:feeds": "tsx scripts/discover-feeds.ts"
+    "discover:feeds": "tsx scripts/discover-feeds.ts",
+    "map:extract": "tsx scripts/map-extract.ts",
+    "map:assets": "tsx scripts/map-assets.ts",
+    "predev": "node scripts/copy-maplibre-worker.mjs",
+    "prebuild": "node scripts/copy-maplibre-worker.mjs",
+    "map:upload": "tsx scripts/map-upload.ts"
   },
   "dependencies": {
+    "@protomaps/basemaps": "5.7.2",
     "drizzle-orm": "^0.45.3",
+    "maplibre-gl": "6.11.2",
     "next": "16.3.8",
     "openai": "^7.27.0",
+    "pmtiles": "4.5.0",
     "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8",

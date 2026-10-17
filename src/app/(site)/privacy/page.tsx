@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { publicBotIdentity } from "@/lib/bot-identity";
 import { googleWidgetEnabled } from "@/lib/google/places";
 import { SUBMITTER_EMAIL_DAYS } from "@/lib/submissions/purge";
+import { mapBaseUrl } from "@/config/map";
 
 export const metadata: Metadata = {
   title: "Privacy",
@@ -20,6 +21,8 @@ export default async function PrivacyPage() {
   await connection();
   // The Google paragraph shows only while the widget it describes is switched on.
   const googleWidget = googleWidgetEnabled();
+  // The map sentence shows only while the venues map is switched on (its files are hosted).
+  const venuesMap = mapBaseUrl() !== "";
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-12 leading-relaxed">
       <h1 className="font-display text-4xl font-extrabold text-brand">Privacy</h1>
@@ -63,7 +66,9 @@ export default async function PrivacyPage() {
       <p className="mt-2">
         The site is served by Vercel. Like any web host, Vercel keeps standard request logs (for example your IP address,
         the page you asked for, your browser type, and the time) to run and protect the service. Cloudflare runs our
-        domain&apos;s DNS and our email routing, and keeps its own standard logs of those services.
+        domain&apos;s DNS and our email routing
+        {venuesMap ? ", and stores and serves the venues map's files (map tiles, fonts, and icons) from our own map address" : ""}, and keeps
+        its own standard logs of those services.
       </p>
       <p className="mt-2">
         If you email <a className="underline" href={`mailto:${CONTACT}`}>{CONTACT}</a>, Cloudflare routes your message to the

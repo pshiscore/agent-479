@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { groupOf } from "@/config/venue-groups";
 import { filterVenues, parseVenueFilters, venueHref, type VenueListItem } from "./venue-list";
 
-const v = (slug: string, city: string, type: string, upcoming: number): VenueListItem => ({ slug, name: slug, city: { slug: city.toLowerCase(), name: city }, type, group: groupOf(type)!, upcoming });
+const v = (slug: string, city: string, type: string, upcoming: number): VenueListItem => ({ slug, name: slug, city: { slug: city.toLowerCase(), name: city }, type, group: groupOf(type)!, upcoming, lat: 36.3, lng: -94.1 });
 const ALL = [v("Zoo Park", "Rogers", "park", 0), v("art hall", "Bentonville", "museum", 4), v("Band Barn", "Rogers", "music_venue", 9), v("Arena", "Fayetteville", "arena", 4)];
 
 describe("venue list filters", () => {

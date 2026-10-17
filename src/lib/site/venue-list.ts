@@ -21,11 +21,14 @@ export interface VenueListItem {
   type: string;
   group: VenueGroup;
   upcoming: number;
+  // Our signed-off venue coordinates (never re-geocoded, never Google's).
+  lat: number;
+  lng: number;
 }
 
 export async function venueList(db: DbExecutor, now: Date): Promise<VenueListItem[]> {
   const rows = (await db.execute(sql`
-    select v.slug, v.name, v.city, v.venue_type from venues v where ${publicVenue("v")} order by v.name`)) as unknown as { slug: string; name: string; city: string; venue_type: string }[];
+    select v.slug, v.name, v.city, v.venue_type, v.lat::float lat, v.lng::float lng from venues v where ${publicVenue("v")} order by v.name`)) as unknown as { slug: string; name: string; city: string; venue_type: string; lat: number; lng: number }[];
   const items = await listEvents(db, { from: now, to: new Date(now.getTime() + COUNT_DAYS * 86_400_000) });
   const { events, series } = foldRecurring(items, false);
   const counts = new Map<string, number>();
@@ -39,6 +42,8 @@ export async function venueList(db: DbExecutor, now: Date): Promise<VenueListIte
     // Every type has a group (src/config/venue-groups.test.ts); "Other" is the last resort.
     group: groupOf(r.venue_type) ?? groupOf("other")!,
     upcoming: counts.get(r.slug) ?? 0,
+    lat: r.lat,
+    lng: r.lng,
   }));
 }
 

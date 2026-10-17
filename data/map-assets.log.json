@@ -1,0 +1,257 @@
+{
+  "fetchedAt": "2026-10-17T20:06:12.318Z",
+  "base": "https://protomaps.github.io/basemaps-assets/",
+  "sprites": "sprites/v4",
+  "fonts": [
+    "Noto Sans Regular",
+    "Noto Sans Medium",
+    "Noto Sans Italic"
+  ],
+  "ranges": [
+    0,
+    256,
+    512,
+    768,
+    4864,
+    7680,
+    8192,
+    8448
+  ],
+  "licenses": [
+    "fonts/OFL.txt"
+  ],
+  "requests": 46,
+  "bytes": 2296574,
+  "log": [
+    {
+      "path": "sprites/v4/light.json",
+      "status": 200,
+      "bytes": 3549
+    },
+    {
+      "path": "sprites/v4/light.png",
+      "status": 200,
+      "bytes": 16174
+    },
+    {
+      "path": "sprites/v4/light@2x.json",
+      "status": 200,
+      "bytes": 3579
+    },
+    {
+      "path": "sprites/v4/light@2x.png",
+      "status": 200,
+      "bytes": 28852
+    },
+    {
+      "path": "sprites/v4/dark.json",
+      "status": 200,
+      "bytes": 3549
+    },
+    {
+      "path": "sprites/v4/dark.png",
+      "status": 200,
+      "bytes": 16054
+    },
+    {
+      "path": "sprites/v4/dark@2x.json",
+      "status": 200,
+      "bytes": 3579
+    },
+    {
+      "path": "sprites/v4/dark@2x.png",
+      "status": 200,
+      "bytes": 28407
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/0-255.pbf",
+      "status": 200,
+      "bytes": 76044
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/256-511.pbf",
+      "status": 200,
+      "bytes": 127726
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/512-767.pbf",
+      "status": 200,
+      "bytes": 94728
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/768-1023.pbf",
+      "status": 200,
+      "bytes": 77034
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/4864-5119.pbf",
+      "status": 200,
+      "bytes": 124982
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/7680-7935.pbf",
+      "status": 200,
+      "bytes": 135449
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/8192-8447.pbf",
+      "status": 200,
+      "bytes": 64220
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Regular/8448-8703.pbf",
+      "status": 200,
+      "bytes": 82014
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/0-255.pbf",
+      "status": 200,
+      "bytes": 77628
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/256-511.pbf",
+      "status": 200,
+      "bytes": 129635
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/512-767.pbf",
+      "status": 200,
+      "bytes": 96169
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/768-1023.pbf",
+      "status": 200,
+      "bytes": 71160
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/4864-5119.pbf",
+      "status": 200,
+      "bytes": 127330
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/7680-7935.pbf",
+      "status": 200,
+      "bytes": 138316
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/8192-8447.pbf",
+      "status": 200,
+      "bytes": 65101
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Medium/8448-8703.pbf",
+      "status": 200,
+      "bytes": 77027
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "status": 200,
+      "bytes": 79344
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/256-511.pbf",
+      "status": 200,
+      "bytes": 132976
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/512-767.pbf",
+      "status": 200,
+      "bytes": 96460
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/768-1023.pbf",
+      "status": 200,
+      "bytes": 71308
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/4864-5119.pbf",
+      "status": 200,
+      "bytes": 26
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/7680-7935.pbf",
+      "status": 200,
+      "bytes": 141117
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/8192-8447.pbf",
+      "status": 200,
+      "bytes": 52891
+    },
+    {
+      "path": "fonts/Noto%20Sans%20Italic/8448-8703.pbf",
+      "status": 200,
+      "bytes": 49772
+    },
+    {
+      "path": "fonts/LICENSE",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "fonts/LICENSE.txt",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "fonts/LICENSE.md",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "fonts/OFL.txt",
+      "status": 200,
+      "bytes": 4374
+    },
+    {
+      "path": "sprites/v4/LICENSE",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/v4/LICENSE.txt",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/v4/LICENSE.md",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/v4/OFL.txt",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/v4/OFL-1.1.txt",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/LICENSE",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/LICENSE.txt",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/LICENSE.md",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/OFL.txt",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "path": "sprites/OFL-1.1.txt",
+      "status": 404,
+      "bytes": 0
+    }
+  ]
+}
