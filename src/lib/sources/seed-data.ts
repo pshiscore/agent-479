@@ -27,10 +27,10 @@ export interface SourceSeed {
 const AWAITING = "Awaiting permission.";
 const FAYLIB_ICAL_30_DAYS =
   "https://faylib.org/feeds?data=eyJmZWVkVHlwZSI6ImljYWwiLCJmaWx0ZXJzIjp7ImxvY2F0aW9uIjpbImFsbCJdLCJhZ2VzIjpbImFsbCJdLCJ0eXBlcyI6WyJhbGwiXSwidGFncyI6W10sInRlcm0iOiIiLCJkYXlzIjozMH19";
-const CIVICPLUS_ICS = "/common/modules/iCalendar/iCalendar.aspx";
+export const CIVICPLUS_ICS = "/common/modules/iCalendar/iCalendar.aspx";
 // Event page for a numeric UID. Checked 2026-10-04 against one real event on
 // each city's site (Bentonville EID 3241, Rogers 4397, Fayetteville 11868).
-const CIVICPLUS_EVENT_URL = "Calendar.aspx?EID={uid}";
+export const CIVICPLUS_EVENT_URL = "Calendar.aspx?EID={uid}";
 const CIVICPLUS_TERMS =
   'CivicPlus public ICS. Footer says "All rights reserved", no reuse terms. Facts and links only. ' +
   "robots.txt allows the ICS endpoint. Public-meeting categories are never used.";

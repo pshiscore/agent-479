@@ -64,6 +64,12 @@ export class PoliteClient {
     };
   }
 
+  /** Whether robots.txt allows a URL, without fetching it. Throws FetchBlockedError if robots.txt itself refuses us. */
+  async allows(url: string): Promise<boolean> {
+    const u = new URL(url);
+    return isAllowed(await this.robotsFor(u.origin), u.pathname + u.search);
+  }
+
   /** When robots.txt for `origin` was last fetched in this client, or null. */
   robotsCheckedAt(origin: string): Date | null {
     const r = this.robots.get(origin);

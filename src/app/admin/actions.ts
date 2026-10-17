@@ -12,6 +12,7 @@ import { addSourceFilter, bulkDecide, editSourceFilter, removeSourceFilter } fro
 import { addCheckedSource, approveProposal, createProposal, mergeProposal, proposalById, rejectProposal, setParentEvent } from "@/lib/review/proposals";
 import { setPublishState } from "@/lib/sources/admin";
 import { addLines, markWrongMatch, recheckWeek, setMissReason, setTaskStatus } from "@/lib/benchmark/service";
+import { approveDiscovery, rejectDiscovery } from "@/lib/discovery/store";
 import { MISS_REASONS, PUBLISH_STATES, REJECT_KINDS, TASK_STATUSES } from "@/lib/db/schema";
 import { getDb } from "@/lib/db/client";
 import { generateStructured } from "@/lib/llm";
@@ -556,6 +557,38 @@ export async function recheckWeekAction(formData: FormData) {
     target = benchmark({ week: id.data, msg: `Re-checked ${r.checked} item(s); ${r.changed} changed.` });
   } catch (err) {
     target = benchmark({ week: id.success ? id.data : "", error: `Not re-checked: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+// ---- Feed discoveries ----
+
+const discoveries = (params: Record<string, string>) => back("/admin/discoveries", params);
+
+export async function approveDiscoveryAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("discoveryId"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad discovery");
+    const r = await approveDiscovery(getDb(), id.data, { actor, note: str(formData, "note") });
+    target = discoveries({ msg: `Approved. Source ${r.source.slug} created, disabled until its test fetch passes; then it starts in shadow.` });
+  } catch (err) {
+    target = discoveries({ error: `Not approved: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+export async function rejectDiscoveryAction(formData: FormData) {
+  const actor = await requireAdmin();
+  const id = uuid.safeParse(formData.get("discoveryId"));
+  let target: string;
+  try {
+    if (!id.success) throw new Error("bad discovery");
+    await rejectDiscovery(getDb(), id.data, { actor, note: str(formData, "note") });
+    target = discoveries({ msg: "Rejected." });
+  } catch (err) {
+    target = discoveries({ error: `Not rejected: ${message(err)}` });
   }
   redirect(target);
 }

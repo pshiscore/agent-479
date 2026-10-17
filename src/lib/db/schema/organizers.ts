@@ -112,6 +112,8 @@ export const feedDiscoveries = pgTable(
       .notNull()
       .references(() => organizers.id, { onDelete: "restrict" }),
     url: text("url").notNull(),
+    // The feed's own name where it has one (a CivicPlus calendar's title), else what it is.
+    label: text("label"),
     kind: text("kind", { enum: DISCOVERY_KINDS }).notNull(),
     // What served it, when recognized: "civicplus", "the_events_calendar", "google_calendar", ...
     platform: text("platform"),
@@ -123,6 +125,8 @@ export const feedDiscoveries = pgTable(
     sampleEvents: jsonb("sample_events").$type<DiscoverySample[]>().notNull().default([]),
     // Suggested title filters, e.g. "City Council"; applied only once the owner approves them on the source.
     suggestedFilters: text("suggested_filters").array().notNull().default(sql`'{}'::text[]`),
+    // What the agent saw, in our words (where the link was found, why samples are missing).
+    notes: text("notes"),
     status: text("status", { enum: DISCOVERY_STATUSES }).notNull().default("proposed"),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
