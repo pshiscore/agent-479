@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { CRON_MAX_DURATION_S, runTiming } from "@/lib/cron-budget";
-import { isNotNull, sql } from "drizzle-orm";
+import { eq, isNotNull, sql } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { COMMUNITY_WARN_SHARE, dashboard } from "@/lib/admin/queries";
 import { getDb } from "@/lib/db/client";
-import { organizers } from "@/lib/db/schema";
+import { organizers, weatherState } from "@/lib/db/schema";
+import { clearWeatherBlockAction } from "./actions";
 import { when } from "./ui";
 
 export default async function AdminOverview() {
@@ -23,6 +24,7 @@ export default async function AdminOverview() {
       (select count(*)::int from organizers where status = 'verified' and website is not null and discovery_blocked is null
          and (discovery_checked_at is null or discovery_checked_at < date_trunc('month', now() at time zone 'America/Chicago') at time zone 'America/Chicago')) as due`)) as unknown as { waiting: number; due: number }[];
   const discoveryBlocked = await db.select({ name: organizers.name, why: organizers.discoveryBlocked }).from(organizers).where(isNotNull(organizers.discoveryBlocked));
+  const [weather] = await db.select().from(weatherState).where(eq(weatherState.id, 1));
   const pct = (x: number) => `${Math.round(x * 100)}%`;
   const pendingTotal = d.pending.reduce((n, p) => n + p.n, 0);
 
@@ -52,6 +54,18 @@ export default async function AdminOverview() {
               </li>
             ))}
           </ul>
+        </section>
+      )}
+      {weather?.blockedAt && (
+        <section className="rounded border border-red-300 bg-red-50 p-3 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+          <h2 className="font-semibold">Weather is stopped: the National Weather Service refused a request</h2>
+          <p>
+            {when(weather.blockedAt)}: {weather.blockedReason}. No weather run fetches until you clear this.
+          </p>
+          <form action={clearWeatherBlockAction} className="mt-2 flex flex-wrap gap-2">
+            <input name="note" required minLength={3} placeholder="Why it's safe to resume" className="rounded border border-red-300 bg-transparent px-2 py-1" />
+            <button className="rounded bg-red-800 px-3 py-1 text-white">Clear and resume</button>
+          </form>
         </section>
       )}
       {discoveryBlocked.length > 0 && (

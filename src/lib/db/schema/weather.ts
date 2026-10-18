@@ -105,3 +105,24 @@ export const weatherCities = pgTable(
     check("weather_cities_grid_check", sql.raw(`(nws_office is null) = (nws_grid_x is null) and (nws_office is null) = (nws_grid_y is null)`)),
   ],
 ).enableRLS();
+
+/**
+ * The weather job's own state (one row, id 1): when Arkansas alerts were last
+ * fetched, and a stop flag if NWS ever blocks us (a block means stop: no later
+ * run retries until the owner clears it on the admin overview, logged).
+ */
+export const weatherState = pgTable(
+  "weather_state",
+  {
+    id: integer("id").primaryKey().default(1),
+    alertsFetchedAt: timestamp("alerts_fetched_at", { withTimezone: true }),
+    blockedAt: timestamp("blocked_at", { withTimezone: true }),
+    blockedReason: text("blocked_reason"),
+    runId: uuid("run_id").references(() => runs.id, { onDelete: "set null" }),
+    updatedAt: updatedAt(),
+  },
+  () => [
+    check("weather_state_single_check", sql.raw(`id = 1`)),
+    check("weather_state_blocked_check", sql.raw(`(blocked_at is null) = (blocked_reason is null)`)),
+  ],
+).enableRLS();

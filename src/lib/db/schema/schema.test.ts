@@ -41,6 +41,7 @@ describe("schema", () => {
         "weather_alerts",
         "weather_cities",
         "weather_grids",
+        "weather_state",
       ].sort(),
     );
   });

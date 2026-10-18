@@ -13,6 +13,7 @@ import { addCheckedSource, approveProposal, createProposal, mergeProposal, propo
 import { setPublishState } from "@/lib/sources/admin";
 import { addLines, markWrongMatch, recheckWeek, setMissReason, setTaskStatus } from "@/lib/benchmark/service";
 import { approveDiscovery, rejectDiscovery } from "@/lib/discovery/store";
+import { clearWeatherBlock } from "@/lib/weather/job";
 import { MISS_REASONS, PUBLISH_STATES, REJECT_KINDS, TASK_STATUSES } from "@/lib/db/schema";
 import { getDb } from "@/lib/db/client";
 import { generateStructured } from "@/lib/llm";
@@ -589,6 +590,20 @@ export async function rejectDiscoveryAction(formData: FormData) {
     target = discoveries({ msg: "Rejected." });
   } catch (err) {
     target = discoveries({ error: `Not rejected: ${message(err)}` });
+  }
+  redirect(target);
+}
+
+// ---- Weather ----
+
+export async function clearWeatherBlockAction(formData: FormData) {
+  const actor = await requireAdmin();
+  let target: string;
+  try {
+    await clearWeatherBlock(getDb(), { actor, note: str(formData, "note") });
+    target = back("/admin", { msg: "Weather block cleared; the next run fetches again." });
+  } catch (err) {
+    target = back("/admin", { error: `Not cleared: ${message(err)}` });
   }
   redirect(target);
 }

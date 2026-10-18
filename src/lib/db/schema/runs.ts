@@ -21,6 +21,8 @@ export const RUN_JOBS = [
   "publish",
   "seed",
   "manual",
+  // Event weather from the National Weather Service (every 30 minutes).
+  "weather",
 ] as const;
 export const RUN_STATUSES = ["running", "ok", "partial", "failed"] as const;
 

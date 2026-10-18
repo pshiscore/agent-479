@@ -253,6 +253,13 @@
       "when": 1792283616754,
       "tag": "0035_weather",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792289715906,
+      "tag": "0036_weather_job",
+      "breakpoints": true
     }
   ]
 }
