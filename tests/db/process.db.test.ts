@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { agentActor } from "@/lib/actions/record";
 import { type DbTx, getDb } from "@/lib/db/client";
@@ -117,6 +117,9 @@ describe("resolveVenue (against the seeded venues)", () => {
 
   it("never matches names that differ only by a qualifier word (Upper/Lower Ramble)", async () => {
     await inRollback(async (tx) => {
+      // Test against our own tagged Rambles only: the seeded real ones (2026-10-17) differ from the
+      // tagged "Lower Ramble <tag>" by more than a qualifier, so they're set aside inside this rollback.
+      await tx.update(venues).set({ active: false }).where(inArray(venues.slug, ["the-ramble", "upper-ramble"]));
       const [parent] = await tx
         .insert(venues)
         .values({ slug: `ramble-${tag}`, name: `The Ramble ${tag}`, address: null, city: "Fayetteville", lat: 36.0658, lng: -94.1659, venueType: "area" })
