@@ -1,11 +1,11 @@
 # Venue verification report
 
-Generated 2026-10-17T19:47:49.458Z from `data/venues.seed.json`.
+Generated 2026-10-18T00:33:37.689Z from `data/venues.seed.json`.
 
 - Venues: 56
 - Errors: 0, warnings: 1
 - Geocoder cross-check: **not run** (use --geocode)
-- Contents sha256: `06cd45558e7ceb7866ae11d8b1dfaf21d239f9b2ebadd3bb4c2416ef953f432f`
+- Contents sha256: `e138d5b14fd58a07f42dfd7b9e95bc4d757768beb56c716a8c043e1d0d8c66b3`
 - **Changed since sign-off** by Vlad on 2026-10-04. Review again.
 
 ## Issues
@@ -79,5 +79,5 @@ Generated 2026-10-17T19:47:49.458Z from `data/venues.seed.json`.
 After reviewing, set this in the seed file, then run `npm run venues:seed`:
 
 ```json
-"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "06cd45558e7ceb7866ae11d8b1dfaf21d239f9b2ebadd3bb4c2416ef953f432f" }
+"reviewed": { "by": "<your name>", "at": "<YYYY-MM-DD>", "sha256": "e138d5b14fd58a07f42dfd7b9e95bc4d757768beb56c716a8c043e1d0d8c66b3" }
 ```

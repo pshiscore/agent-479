@@ -83,6 +83,8 @@ export const seedVenueSchema = z
     // Inactive venues stay in the file (and the database) but are never matched;
     // deactivating one is an explicit, signed-off change with a reason.
     active: z.boolean().optional(),
+    // Outdoor despite its type (an amphitheater, a ballpark). Parks, areas, and plazas are outdoor by type.
+    outdoor: z.boolean().optional(),
     inactiveReason: z.string().min(3).optional(),
     // What a person checked to accept a warning, shown next to it in the report.
     // Hand checks explain warnings; they never clear an error.
@@ -106,6 +108,7 @@ export const seedVenueSchema = z
     if (v.parent === v.slug) issue(["parent"], "a venue can't be its own parent");
     if (v.active === false && !v.inactiveReason) issue(["inactiveReason"], "an inactive venue needs a reason");
     if (v.active !== false && v.inactiveReason) issue(["inactiveReason"], "only inactive venues have an inactive reason");
+    if (v.outdoor && ["park", "area", "plaza"].includes(v.venueType)) issue(["outdoor"], "parks, areas, and plazas are outdoor by type; no flag needed");
   });
 
 export const seedFileSchema = z.strictObject({

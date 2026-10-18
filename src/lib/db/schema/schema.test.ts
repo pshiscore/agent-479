@@ -38,6 +38,9 @@ describe("schema", () => {
         "tags",
         "venue_external_ids",
         "venues",
+        "weather_alerts",
+        "weather_cities",
+        "weather_grids",
       ].sort(),
     );
   });

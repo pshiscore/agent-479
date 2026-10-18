@@ -22,6 +22,7 @@ const COMPARED = [
   "parentVenueId",
   "verification",
   "active",
+  "outdoor",
 ] as const;
 
 export class SeedRefusedError extends Error {}
@@ -98,6 +99,7 @@ export async function seedVenues(
       parentVenueId: v.parent ? ids.get(v.parent) : null,
       verification,
       active: v.active ?? true,
+      outdoor: v.outdoor ?? false,
     };
     const existing = existingBySlug.get(v.slug);
 

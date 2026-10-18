@@ -254,6 +254,7 @@
     },
     {
       "slug": "razorback-stadium",
+      "outdoor": true,
       "name": "Donald W. Reynolds Razorback Stadium",
       "aliases": [
         "Razorback Stadium",
@@ -293,6 +294,7 @@
     },
     {
       "slug": "baum-walker-stadium",
+      "outdoor": true,
       "name": "Baum-Walker Stadium at George Cole Field",
       "aliases": [
         "Baum-Walker Stadium",
@@ -409,6 +411,7 @@
     },
     {
       "slug": "razorback-field",
+      "outdoor": true,
       "name": "Razorback Field",
       "aliases": [
         "Razorback Soccer Field"
@@ -897,6 +900,7 @@
     },
     {
       "slug": "walmart-amp",
+      "outdoor": true,
       "name": "Walmart AMP",
       "aliases": [
         "Walmart Arkansas Music Pavilion",
@@ -1073,6 +1077,7 @@
     },
     {
       "slug": "butterfield-stage",
+      "outdoor": true,
       "name": "Butterfield Stage at Railyard Park",
       "aliases": [
         "Butterfield Stage",
@@ -1732,6 +1737,7 @@
     },
     {
       "slug": "arvest-ballpark",
+      "outdoor": true,
       "name": "Arvest Ballpark",
       "aliases": [],
       "venueType": "arena",

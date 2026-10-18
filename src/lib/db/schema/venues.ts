@@ -4,10 +4,12 @@ import {
   boolean,
   check,
   index,
+  integer,
   jsonb,
   numeric,
   pgTable,
   text,
+  timestamp,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -85,6 +87,17 @@ export const venues = pgTable(
       onDelete: "restrict",
     }),
     active: boolean("active").notNull().default(true),
+    // Outdoor despite its type (an amphitheater, a ballpark); parks, areas, and plazas are
+    // outdoor by type (src/lib/weather/outdoor.ts). From the venue seed, with the owner's sign-off.
+    outdoor: boolean("outdoor").notNull().default(false),
+    // The National Weather Service forecast grid and zones for our coordinates, from
+    // /points (refreshed monthly; NWS can move them). Venue data, so changes are logged.
+    nwsOffice: text("nws_office"),
+    nwsGridX: integer("nws_grid_x"),
+    nwsGridY: integer("nws_grid_y"),
+    nwsForecastZone: text("nws_forecast_zone"),
+    nwsCountyZone: text("nws_county_zone"),
+    nwsPointsCheckedAt: timestamp("nws_points_checked_at", { withTimezone: true }),
     verification: jsonb("verification").$type<VenueVerification>().notNull().default({}),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -102,6 +115,8 @@ export const venues = pgTable(
     check("venues_state_check", sql.raw(`state ~ '^[A-Z]{2}$'`)),
     check("venues_slug_check", sql.raw(`slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`)),
     check("venues_parent_check", sql.raw(`parent_venue_id is null or parent_venue_id <> id`)),
+    // A grid is all three parts or none.
+    check("venues_nws_grid_check", sql.raw(`(nws_office is null) = (nws_grid_x is null) and (nws_office is null) = (nws_grid_y is null)`)),
   ],
 ).enableRLS();
 
