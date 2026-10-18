@@ -1,0 +1,462 @@
+{
+  "fetchedAt": "2026-10-18T00:28:51.489Z",
+  "venues": 55,
+  "failed": 0,
+  "squares": 21,
+  "offices": [
+    "TSA"
+  ],
+  "forecastZones": [
+    "ARZ001",
+    "ARZ010"
+  ],
+  "countyZones": [
+    "ARC007",
+    "ARC143"
+  ],
+  "timeZones": [
+    "America/Chicago"
+  ],
+  "byVenue": {
+    "walton-arts-center": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "georges-majestic-lounge": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "ozark-music-hall": {
+      "office": "TSA",
+      "x": 107,
+      "y": 103,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "theatresquared": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "university-of-arkansas": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "bud-walton-arena": {
+      "office": "TSA",
+      "x": 107,
+      "y": 100,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "razorback-stadium": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "baum-walker-stadium": {
+      "office": "TSA",
+      "x": 106,
+      "y": 100,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "faulkner-performing-arts-center": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "barnhill-arena": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "razorback-field": {
+      "office": "TSA",
+      "x": 107,
+      "y": 100,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "fayetteville-public-library": {
+      "office": "TSA",
+      "x": 107,
+      "y": 100,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "fayetteville-town-center": {
+      "office": "TSA",
+      "x": 107,
+      "y": 100,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "fayetteville-downtown-square": {
+      "office": "TSA",
+      "x": 107,
+      "y": 100,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "dickson-street": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "the-ramble": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "upper-ramble": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "gulley-park": {
+      "office": "TSA",
+      "x": 108,
+      "y": 102,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "wilson-park": {
+      "office": "TSA",
+      "x": 107,
+      "y": 101,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "kessler-mountain-regional-park": {
+      "office": "TSA",
+      "x": 105,
+      "y": 99,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "lake-fayetteville-park": {
+      "office": "TSA",
+      "x": 109,
+      "y": 104,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "botanical-garden-of-the-ozarks": {
+      "office": "TSA",
+      "x": 109,
+      "y": 104,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "clinton-house-museum": {
+      "office": "TSA",
+      "x": 107,
+      "y": 100,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "walmart-amp": {
+      "office": "TSA",
+      "x": 106,
+      "y": 111,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "victory-theater": {
+      "office": "TSA",
+      "x": 109,
+      "y": 112,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "rogers-public-library": {
+      "office": "TSA",
+      "x": 108,
+      "y": 112,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "rogers-historical-museum": {
+      "office": "TSA",
+      "x": 109,
+      "y": 112,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "railyard-bike-park": {
+      "office": "TSA",
+      "x": 109,
+      "y": 112,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "butterfield-stage": {
+      "office": "TSA",
+      "x": 109,
+      "y": 112,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "lake-atalanta-park": {
+      "office": "TSA",
+      "x": 109,
+      "y": 112,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "rogers-convention-center": {
+      "office": "TSA",
+      "x": 106,
+      "y": 111,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "pinnacle-hills-promenade": {
+      "office": "TSA",
+      "x": 107,
+      "y": 111,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "ozark-beer-company": {
+      "office": "TSA",
+      "x": 109,
+      "y": 113,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "downtown-rogers": {
+      "office": "TSA",
+      "x": 109,
+      "y": 113,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "crystal-bridges": {
+      "office": "TSA",
+      "x": 106,
+      "y": 115,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "the-momentary": {
+      "office": "TSA",
+      "x": 106,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "bentonville-square": {
+      "office": "TSA",
+      "x": 105,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "bentonville-public-library": {
+      "office": "TSA",
+      "x": 105,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "scott-family-amazeum": {
+      "office": "TSA",
+      "x": 106,
+      "y": 115,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "museum-of-native-american-history": {
+      "office": "TSA",
+      "x": 105,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "walmart-museum": {
+      "office": "TSA",
+      "x": 105,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "lawrence-plaza": {
+      "office": "TSA",
+      "x": 106,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "compton-gardens": {
+      "office": "TSA",
+      "x": 106,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "8th-street-market": {
+      "office": "TSA",
+      "x": 106,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "record": {
+      "office": "TSA",
+      "x": 105,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "orchards-park": {
+      "office": "TSA",
+      "x": 106,
+      "y": 114,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "slaughter-pen-trail": {
+      "office": "TSA",
+      "x": 106,
+      "y": 115,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "arvest-ballpark": {
+      "office": "TSA",
+      "x": 106,
+      "y": 105,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "jones-center": {
+      "office": "TSA",
+      "x": 109,
+      "y": 106,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "shiloh-museum": {
+      "office": "TSA",
+      "x": 108,
+      "y": 106,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "springdale-public-library": {
+      "office": "TSA",
+      "x": 108,
+      "y": 106,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "luther-george-park": {
+      "office": "TSA",
+      "x": 109,
+      "y": 106,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    },
+    "bella-vista-public-library": {
+      "office": "TSA",
+      "x": 104,
+      "y": 119,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "pea-ridge-national-military-park": {
+      "office": "TSA",
+      "x": 112,
+      "y": 117,
+      "forecastZone": "ARZ001",
+      "countyZone": "ARC007",
+      "timeZone": "America/Chicago"
+    },
+    "prairie-grove-battlefield-state-park": {
+      "office": "TSA",
+      "x": 102,
+      "y": 97,
+      "forecastZone": "ARZ010",
+      "countyZone": "ARC143",
+      "timeZone": "America/Chicago"
+    }
+  }
+}

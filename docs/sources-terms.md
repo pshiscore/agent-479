@@ -459,3 +459,14 @@ say which material is NWS and not subject to copyright.
 robots.txt refuses all automated clients. Under our rules (the stricter of
 robots.txt and terms wins; a robots.txt disallow is a block), we don't use
 it until the owner decides. Open item 34.
+
+**Owner exception (2026-10-17).** The owner treats the NWS
+[API documentation](https://www.weather.gov/documentation/services-web-api)
+as the operator's written permission and grants a narrow exception to the
+robots.txt block: api.weather.gov only, and only `/points/{lat},{lon}`,
+`/gridpoints/{office}/{x},{y}/forecast/hourly`,
+`/stations/{id}/observations/latest`, and `/alerts/active?area=AR`. Not a
+general rule that documentation overrides robots.txt. Enforced in
+`src/lib/http/robots-exceptions.ts` (robots.txt is still read; anything else
+on the host stays blocked). Recorded in AGENTS.md, Fetching. No email to NWS
+(owner).

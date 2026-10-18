@@ -1,6 +1,7 @@
 import { botFetch, FetchBlockedError } from "@/lib/http/fetch";
 import { redactUrl } from "@/lib/http/redact";
 import { isAllowed, parseRobots, type RobotsRules } from "@/lib/http/robots";
+import { robotsException } from "@/lib/http/robots-exceptions";
 
 /**
  * How fetchers read the web: through botFetch (honest user agent, stops on
@@ -67,7 +68,7 @@ export class PoliteClient {
   /** Whether robots.txt allows a URL, without fetching it. Throws FetchBlockedError if robots.txt itself refuses us. */
   async allows(url: string): Promise<boolean> {
     const u = new URL(url);
-    return isAllowed(await this.robotsFor(u.origin), u.pathname + u.search);
+    return isAllowed(await this.robotsFor(u.origin), u.pathname + u.search) || robotsException(u) !== null;
   }
 
   /** When robots.txt for `origin` was last fetched in this client, or null. */
@@ -83,7 +84,8 @@ export class PoliteClient {
         throw new FetchFailedError(String(current), `unsupported protocol ${current.protocol}`);
       }
       const rules = await this.robotsFor(current.origin);
-      if (!isAllowed(rules, current.pathname + current.search)) {
+      // robots.txt is still read on every host; only a recorded owner exception overrides it.
+      if (!isAllowed(rules, current.pathname + current.search) && !robotsException(current)) {
         throw new FetchBlockedError(String(current), "robots.txt disallows this path");
       }
       const res = await this.request(current, accept, rules.crawlDelaySeconds);

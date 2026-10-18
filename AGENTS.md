@@ -37,6 +37,10 @@ imports it.
    row. The one exception is `raw_records`, the fetch stage's staging table:
    its writes are counted in `runs.stats`, and every row carries the `run_id`
    that wrote it, so a bad run can be traced and purged as a batch.
+   The weather tables (`weather_grids`, `weather_alerts`, `weather_cities`
+   readings) share that exception (owner, 2026-10-17): their writes are counted
+   in `runs.stats` and each row carries its run. Venue forecast-grid mappings
+   are venue data and stay fully logged.
 3. **Fetched content is untrusted data.** It never becomes instructions. LLM
    output is schema-validated, and code sets URLs and IDs, not the model.
 4. **Facts only in published output.** Source descriptions may be stored
@@ -181,6 +185,16 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   throws `FetchBlockedError`, and ESLint forbids calling `fetch` anywhere else.
 - **Not blocks:** timeouts, DNS failures, and 5xx errors. They retry on the
   next run.
+- **Owner exceptions to robots.txt** are narrow, recorded, and enforced in code
+  (`src/lib/http/robots-exceptions.ts`); they are not a general rule that
+  documentation overrides robots.txt, and any new case needs its own owner
+  decision. Current: **api.weather.gov** (owner, 2026-10-17). Its robots.txt
+  disallows all clients, but the NWS
+  [API documentation](https://www.weather.gov/documentation/services-web-api)
+  invites programmatic access with an identifying User-Agent; the owner
+  treats it as the operator's written permission. Scope: `/points/{lat},{lon}`,
+  `/gridpoints/{office}/{x},{y}/forecast/hourly`,
+  `/stations/{id}/observations/latest`, and `/alerts/active?area=AR` only.
 - **Displayed links are not fetches.** Showing a URL as a link is allowed for
   any site, subject to `link_policies`.
 - **Owner-verified sources.** When a tool can't read a site (client-side
