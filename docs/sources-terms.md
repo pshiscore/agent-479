@@ -428,3 +428,34 @@ map bucket states the source, the ODbL, and the font and icon licenses.
   (Latin and Cherokee glyph ranges), and the font license; the Tangram
   icons' MIT license from its own repository. Summary in
   `data/map-assets.log.json`.
+
+## National Weather Service API: terms review (2026-10-17)
+
+For the planned event weather and header widget (owner, 2026-10-17; plan
+only). Read with our bot through PoliteClient:
+[API documentation](https://www.weather.gov/documentation/services-web-api),
+[disclaimer and use of NWS data](https://www.weather.gov/disclaimer), and the
+[privacy policy](https://www.weather.gov/privacy).
+
+**Blocked by robots.txt.** `https://api.weather.gov/robots.txt` is
+`User-agent: *` / `Disallow: /`: every path, every automated client. Our
+client stopped at robots.txt (a block means stop); no API endpoint was
+requested. The 55 `/points` lookups the plan needs were not made.
+
+**What the documentation says (our words):** the API is open data, free for
+any purpose; a User-Agent identifying the application, with contact details,
+is required (an API key may replace it later); rate limits exist but aren't
+published and allow generous typical use, with a short wait after an error;
+the API is built to be cached; grid assignments for a point can change
+occasionally, so cached grids need refreshing.
+
+**Reuse (disclaimer page):** NWS web content is public domain unless noted,
+usable for any lawful purpose, provided we don't claim it as our own or
+imply NWS endorsement or affiliation; the NWS name and logo need permission
+for that kind of use. A copyrighted work made mostly of NWS material must
+say which material is NWS and not subject to copyright.
+
+**The conflict:** the documentation invites programs to use the API, while
+robots.txt refuses all automated clients. Under our rules (the stricter of
+robots.txt and terms wins; a robots.txt disallow is a block), we don't use
+it until the owner decides. Open item 34.
