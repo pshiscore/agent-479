@@ -47,7 +47,7 @@ export async function venueList(db: DbExecutor, now: Date): Promise<VenueListIte
   }));
 }
 
-export type VenueSort = "az" | "upcoming";
+export type VenueSort = "az";
 export interface VenueFilters {
   city?: string;
   type?: string;
@@ -57,9 +57,13 @@ export interface VenueFilters {
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-/** The URL is the state: ?city=&type=&upcoming=1&sort=upcoming. Unknown values are ignored. */
+/**
+ * The URL is the state: ?city=&type=&upcoming=1&sort=az. Most upcoming is the
+ * default (owner, 2026-10-17), so it has no parameter; an old ?sort=upcoming
+ * link lands on the same order. Unknown values are ignored.
+ */
 export function parseVenueFilters(q: Record<string, string | string[] | undefined>): VenueFilters {
-  const sort = one(q.sort) === "upcoming" ? "upcoming" : undefined;
+  const sort = one(q.sort) === "az" ? "az" : undefined;
   return { city: one(q.city) || undefined, type: one(q.type) || undefined, upcoming: one(q.upcoming) === "1" || undefined, sort };
 }
 
@@ -69,13 +73,13 @@ export function venueHref(f: VenueFilters, change: Partial<Record<keyof VenueFil
   if (next.city) p.set("city", String(next.city));
   if (next.type) p.set("type", String(next.type));
   if (next.upcoming) p.set("upcoming", "1");
-  if (next.sort === "upcoming") p.set("sort", "upcoming");
+  if (next.sort === "az") p.set("sort", "az");
   const s = p.toString();
   return s ? `/venues?${s}` : "/venues";
 }
 
-/** Pure: applies the filters and the sort (A–Z by default, or most upcoming, then A–Z). */
+/** Pure: applies the filters and the sort (most upcoming first by default, ties A–Z; or A–Z). */
 export function filterVenues(items: readonly VenueListItem[], f: VenueFilters): VenueListItem[] {
   const out = items.filter((v) => (!f.city || v.city.slug === f.city) && (!f.type || v.group.slug === f.type) && (!f.upcoming || v.upcoming > 0));
-  return out.sort((a, b) => (f.sort === "upcoming" ? b.upcoming - a.upcoming : 0) || a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+  return out.sort((a, b) => (f.sort === "az" ? 0 : b.upcoming - a.upcoming) || a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
 }

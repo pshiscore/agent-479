@@ -23,6 +23,8 @@ Owner decisions, 2026-10-17 (design spec reviewed by the owner).
 Single-column cards (name, type badge and city, the count or "View venue";
 the exact count in the link's accessible label), the shared filter chips
 (City, Venue type, Has upcoming events, Sort), and the URL as the state.
+The list is ordered by upcoming events, most first (ties A–Z; owner,
+2026-10-17); A–Z is the other sort (`?sort=az`).
 
 ## Phase B: the map (built 2026-10-17)
 

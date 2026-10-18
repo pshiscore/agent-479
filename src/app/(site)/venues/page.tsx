@@ -37,10 +37,10 @@ export default async function Venues({ searchParams }: PageProps<"/venues">) {
       <div className="ml-auto">
         <DropdownChip
           label="Sort"
-          allLabel="A–Z"
-          options={[{ value: "upcoming", label: "Most upcoming" }]}
+          allLabel="Most upcoming"
+          options={[{ value: "az", label: "A–Z" }]}
           selected={f.sort}
-          hrefFor={(v) => venueHref(f, { sort: v === "upcoming" ? "upcoming" : undefined })}
+          hrefFor={(v) => venueHref(f, { sort: v === "az" ? "az" : undefined })}
           clearHref={venueHref(f, { sort: undefined })}
         />
       </div>
