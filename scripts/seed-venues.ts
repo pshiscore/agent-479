@@ -7,7 +7,9 @@
  * Usage: npm run venues:seed
  */
 import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.local", quiet: true });
+// MIGRATE_PRODUCTION=yes targets production (.env.production.local wins over the shell).
+const production = process.env.MIGRATE_PRODUCTION === "yes";
+dotenv.config({ path: production ? ".env.production.local" : ".env.local", quiet: true, override: production });
 
 import { humanActor } from "@/lib/actions/record";
 import { getDb } from "@/lib/db/client";

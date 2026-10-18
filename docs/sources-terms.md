@@ -465,7 +465,10 @@ it until the owner decides. Open item 34.
 as the operator's written permission and grants a narrow exception to the
 robots.txt block: api.weather.gov only, and only `/points/{lat},{lon}`,
 `/gridpoints/{office}/{x},{y}/forecast/hourly`,
-`/stations/{id}/observations/latest`, and `/alerts/active?area=AR`. Not a
+`/stations/{id}/observations/latest`, and `/alerts/active?area=AR`. The
+owner added `/gridpoints/{office}/{x},{y}/stations` the same day, on the same
+basis (the documentation directs clients there for observation stations),
+to find each header city's nearest station, refreshed monthly. Not a
 general rule that documentation overrides robots.txt. Enforced in
 `src/lib/http/robots-exceptions.ts` (robots.txt is still read; anything else
 on the host stays blocked). Recorded in AGENTS.md, Fetching. No email to NWS

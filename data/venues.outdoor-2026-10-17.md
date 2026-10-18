@@ -2,7 +2,7 @@
 
 For event weather (owner, 2026-10-17): outdoor events show the chance of
 rain and NWS warning badges. Parks, areas, and plazas are outdoor by their
-type (20 venues, no change to them). Six more get an explicit `"outdoor": true`
+type (20 venues, no change to them). Seven more get an explicit `"outdoor": true`
 in `data/venues.seed.json`:
 
 | Venue | City | Type | Why outdoor |
@@ -13,9 +13,10 @@ in `data/venues.seed.json`:
 | Baum-Walker Stadium | Fayetteville | arena | Open-air ballpark (owner) |
 | Razorback Stadium | Fayetteville | arena | Open-air football stadium (owner) |
 | Razorback Field | Fayetteville | arena | Open-air soccer field (owner) |
+| Pinnacle Hills Promenade | Rogers | market (proposed; now other) | Open-air shopping center (owner, added 2026-10-17) |
 
 Not outdoor: Bud Walton Arena and Barnhill Arena (indoor). The full list of
-26 is pinned by `src/lib/weather/outdoor.test.ts`.
+27 is pinned by `src/lib/weather/outdoor.test.ts`.
 
 **What signing covers.** `data/venues.report.md` was regenerated after these
 edits (offline: 56 venues, 0 errors, 1 warning, the existing Upper Ramble

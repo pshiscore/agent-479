@@ -7,6 +7,7 @@ import { rediscoverDue } from "@/lib/discovery/rediscover";
 import { claimJob } from "@/lib/jobs";
 import { PoliteClient } from "@/lib/sources/http";
 import { purgeSubmitterEmails } from "@/lib/submissions/purge";
+import { refreshVenueGrids } from "@/lib/weather/grid";
 import { finishRun } from "@/lib/runs";
 import { demoteLiveSources } from "@/lib/sources/demotion";
 import { proposeTicketmasterLinks } from "@/lib/sources/ticketmaster-venues";
@@ -113,10 +114,11 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; dead
     const categoryProposals = await step("category proposals", { proposed: 0, themes: 0 }, () => proposeCategoriesFromHints(db, { actor: agentActor("maintenance"), now, runId: claim.id }));
     // Live sources that misbehaved this week go back to shadow (owner, 2026-10-16).
     const demoted = await step("demotions", [] as unknown[], () => demoteLiveSources(db, now, agentActor("maintenance")));
+    const http = opts.http ?? new PoliteClient({ timeoutMs: 15_000, maxBytes: 5 * 1024 * 1024 });
+    // Monthly NWS forecast grids for venues (event weather): due ones only, in the time left.
+    const weatherGrids = await step("weather grids", null, () => refreshVenueGrids(db, { http, actor: agentActor("weather"), runId: claim.id, now, deadline }));
     // Monthly feed re-discovery (step 8): organizers due this Chicago month, in the time left.
-    const rediscovery = await step("rediscovery", null, () =>
-      rediscoverDue(db, { deadline, http: opts.http ?? new PoliteClient({ timeoutMs: 15_000, maxBytes: 5 * 1024 * 1024 }), actor: agentActor("discovery"), runId: claim.id, now }),
-    );
+    const rediscovery = await step("rediscovery", null, () => rediscoverDue(db, { deadline, http, actor: agentActor("discovery"), runId: claim.id, now }));
     const stats = {
       descriptionsPurged,
       payloadsPurged,
@@ -125,6 +127,7 @@ export async function runMaintenanceJob(db: DbExecutor, opts: { now?: Date; dead
       needsVenueArchived,
       categoryProposals: categoryProposals.proposed,
       sourcesDemoted: demoted.length,
+      weatherGrids,
       rediscovery,
       stoppedForTime: skipped.length > 0,
       stepsSkipped: skipped,

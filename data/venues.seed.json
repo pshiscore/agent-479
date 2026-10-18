@@ -2,8 +2,8 @@
   "$comment": "Hand-verified venues with per-field provenance. Rules for editing this file are in CLAUDE.md. Check with npm run venues:verify -- --geocode; only the owner sets reviewed; then npm run venues:seed.",
   "reviewed": {
     "by": "Vlad",
-    "at": "2026-10-04",
-    "sha256": "0879d72160ad972ee92e7ffd322485e7aed2f46ba2601068614a30c9ed2e16b2"
+    "at": "2026-10-17",
+    "sha256": "0137c74827642c865a852724efd043fa0e1c577cdb7c50ebfaebbe3446464ab4"
   },
   "venues": [
     {
@@ -1184,6 +1184,7 @@
     },
     {
       "slug": "pinnacle-hills-promenade",
+      "outdoor": true,
       "name": "Pinnacle Hills Promenade",
       "aliases": [],
       "venueType": "market",

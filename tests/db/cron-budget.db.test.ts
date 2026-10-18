@@ -32,7 +32,7 @@ describe("cron time budget", () => {
     await inRollback(async (tx) => {
       const stats = await runMaintenanceJob(tx, { deadline: spent() });
       expect(stats).toMatchObject({ stoppedForTime: true, descriptionsPurged: 0, sourcesDemoted: 0 });
-      expect(stats!.stepsSkipped).toHaveLength(8);
+      expect(stats!.stepsSkipped).toHaveLength(9);
       expect(stats!.stepsSkipped).toContain("rediscovery");
     });
   });

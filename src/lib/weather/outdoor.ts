@@ -1,7 +1,8 @@
 /**
  * Which venues are outdoor (owner, 2026-10-17): parks, areas, and plazas by
  * type, plus venues the venue seed marks outdoor (the AMP, Butterfield Stage,
- * and the ballparks and stadiums), signed off like any venue fact. An event is
+ * the ballparks and stadiums, and Pinnacle Hills Promenade), signed off like
+ * any venue fact. An event is
  * also outdoor when it carries the Outdoor tag. Outdoor events show the chance
  * of rain and NWS warning badges.
  */

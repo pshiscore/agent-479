@@ -194,6 +194,8 @@ These apply to research and one-off scripts as well as to the app and pipeline.
   invites programmatic access with an identifying User-Agent; the owner
   treats it as the operator's written permission. Scope: `/points/{lat},{lon}`,
   `/gridpoints/{office}/{x},{y}/forecast/hourly`,
+  `/gridpoints/{office}/{x},{y}/stations` (added by the owner the same day,
+  for the header cities' nearest stations, refreshed monthly),
   `/stations/{id}/observations/latest`, and `/alerts/active?area=AR` only.
 - **Displayed links are not fetches.** Showing a URL as a link is allowed for
   any site, subject to `link_policies`.

@@ -20,6 +20,8 @@ export const ROBOTS_EXCEPTIONS: readonly RobotsException[] = [
     paths: [
       /^\/points\/-?\d{1,2}(\.\d{1,4})?,-?\d{1,3}(\.\d{1,4})?$/,
       /^\/gridpoints\/[A-Z]{3}\/\d{1,3},\d{1,3}\/forecast\/hourly$/,
+      // Added by the owner, 2026-10-17: the documentation directs clients here for observation stations.
+      /^\/gridpoints\/[A-Z]{3}\/\d{1,3},\d{1,3}\/stations$/,
       /^\/stations\/[A-Z0-9]{3,5}\/observations\/latest$/,
       /^\/alerts\/active\?area=AR$/,
     ],

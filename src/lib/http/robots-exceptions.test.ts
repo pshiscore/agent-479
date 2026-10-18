@@ -9,12 +9,14 @@ describe("owner robots.txt exceptions", () => {
       "https://api.weather.gov/gridpoints/TSA/68,120/forecast/hourly",
       "https://api.weather.gov/stations/KXNA/observations/latest",
       "https://api.weather.gov/alerts/active?area=AR",
+      "https://api.weather.gov/gridpoints/TSA/68,120/stations",
     ])
       expect(robotsException(u), u).not.toBeNull();
     for (const u of [
       "https://api.weather.gov/",
       "https://api.weather.gov/gridpoints/TSA/68,120/forecast",
-      "https://api.weather.gov/gridpoints/TSA/68,120/stations",
+      "https://api.weather.gov/gridpoints/TSA/68,120/stations?limit=500",
+      "https://api.weather.gov/stations",
       "https://api.weather.gov/alerts/active?area=OK",
       "https://api.weather.gov/alerts/active",
       "https://api.weather.gov/points/36.37291234,-94.2088",

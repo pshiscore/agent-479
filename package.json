@@ -43,7 +43,8 @@
     "map:assets": "tsx scripts/map-assets.ts",
     "predev": "node scripts/copy-maplibre-worker.mjs",
     "prebuild": "node scripts/copy-maplibre-worker.mjs",
-    "map:upload": "tsx scripts/map-upload.ts"
+    "map:upload": "tsx scripts/map-upload.ts",
+    "weather:grids": "tsx scripts/weather-grids.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "5.7.2",
